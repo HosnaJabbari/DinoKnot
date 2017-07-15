@@ -20,7 +20,7 @@ set(HFold_interacting_multimodel_SOURCE
     h_common.h h_common.cpp 
     hfold_validation.h hfold_validation.cpp 
     hfold.h HFold.cpp
-    hfold_iteracting.h HFold_iteracting.cpp
+    hfold_interacting.h HFold_iteracting.cpp
 )
 
 # get pthread library
