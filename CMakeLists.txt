@@ -18,8 +18,7 @@ set(HFold_interacting_multimodel_SOURCE
     V_final.h V_final.cpp 
     VM_final.h VM_final.cpp
     h_common.h h_common.cpp 
-    hfold_validation.h hfold_validation.cpp 
-    hfold.h HFold.cpp
+    hfold_validation.h hfold_validation.cpp
     hfold_interacting.h HFold_interacting.cpp
 )
 
