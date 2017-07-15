@@ -24,42 +24,53 @@ static boost::regex structureRegex;
 
 //change all {} [] to () in structure
 void replaceBrackets(char* structure){
-	std::string temp = structure;
-	std::string replace = "(";
-	structureRegex = "[[{]";
-	temp = boost::regex_replace(temp, structureRegex, replace);
-	replace = ")";
-	structureRegex = "[\]}]";
-	temp = boost::regex_replace(temp, structureRegex, replace);
-	//std::cout <<  temp << '\n' << std::flush;
-	temp.copy(structure,temp.length(),0);
+	for(char* it = structure; *it; ++it) {
+    char curr = *it;
+    // if open bracket
+    if (curr == '{' || curr == '[') {
+      *it = '(';
+    } else
+    // if closed bracket
+    if (curr == '}' || curr == ']') {
+      *it = ')';
+    }
+  }
 }
+
 
 //check if structure is valid
 //check if length match with sequence
 //check if any characters other than ._(){}[]
 //check if pk-free
 bool validateStructure(char* structure, char* sequence){
-	int    status;
-    regex_t    re;
-
 	if(strlen(structure) > MAXSLEN){
-		printf("Invalid length\n");
+		printf("Structure length greater than max length\n");
 		return false;
 	}
+
+	if(strlen(structure) <= 0){
+                printf("length of structure is <= 0. This shouldn't even be able to happen.\n");
+		return false;
+	}
+
 	//printf("strlen: %d %d\n",strlen(structure), strlen(sequence));
 	if(strlen(structure) != strlen(sequence)){
 		printf("Length of sequence and corresponding structure must have same length\n");
 		return false;
 	}
 	
-	boost::regex expr{"([^\\[\\]._{}()])"};
-	//std::cout << boost::regex_search(s, expr) << '\n';
-
-    if (boost::regex_search(structure, expr) != 0) {
-		printf("Structure must only contain ._(){}[] \n");
-        return false;      
-    }
+	//check if any characters other than ._(){}[]
+	for(char* it = structure; *it; ++it) {
+		char curr = *it;
+		// Structure must only contain ._(){}[
+		if (!(curr == '.' || curr == '_'
+		      || curr == '(' || curr == '{' || curr == '['
+		      || curr == ')' || curr == '}' || curr == ']'))
+		{
+			printf("Structure must only contain ._(){}[] \n");
+			return false;
+		}
+	}
   
 	std::string openBracketArray ("({[");
 	std::string closeBracketArray (")}]");
@@ -70,18 +81,24 @@ bool validateStructure(char* structure, char* sequence){
 		if(openBracketArray.find_first_of(structure[i]) != -1){ //is open bracket
 			mystack.push(structure[i]);
 		}else if(closeBracketArray.find_first_of(structure[i]) != -1){ //is close bracket
+
+        // if stack is empty that means there are more right brackets than left brackets
+             if (mystack.empty() == true ) {
+                 printf("Structure is invalid: more right parentheses than left parentheses\n");
+                 return false;
+             }
 			if(closeBracketArray.find_first_of(structure[i]) != openBracketArray.find_first_of(mystack.top())){ //if current bracket is not corresponding bracket of what we popped
-				printf("Brackets must match and is pseudoknot free\n");
+				printf("Structure bracket types must match and be pseudoknot free\n");
 				return false;
 			}
 			mystack.pop();
 		}
 	}
 	if(mystack.empty() == false){
-		//printf("fail isempty\n");
+		printf("Structure is invalid: more left parentheses than right parentheses\n");
 		return false;
 	}
-	return true;      
+	return true;        
     
 	
 }
@@ -89,22 +106,24 @@ bool validateStructure(char* structure, char* sequence){
 //check if sequence is valid with regular expression
 //check length and if any characters other than GCAUT
 bool validateSequence(const char* string){
-    int    status;
-    regex_t    re;
-
 	if(strlen(string) > MAXSLEN){
 		return false;
 	}
 
-    if (regcomp(&re, "[^GCAUT]", REG_EXTENDED|REG_NOSUB) != 0) {
-        return false;     
+	if(strlen(string) <= 0){
+		return false;
+	}
+
+  // return false if any characters other than GCAUT
+  for(const char* it = string; *it; ++it) {
+    const char curr = *it;
+    if (!(curr == 'G' || curr == 'C' || curr == 'A' || curr == 'U' || curr == 'T')) {
+        printf("Sequence contains character '%c' that is not G,C,A,U, or T.\n",curr);
+        return false;
     }
-    status = regexec(&re, string, (size_t) 0, NULL, 0);
-    regfree(&re);
-    if (status != 0) {
-        return true;      
-    }
-    return false;
+  }
+
+  return true;  
 }
 
 
