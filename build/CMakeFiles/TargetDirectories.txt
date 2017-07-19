@@ -1,0 +1,7 @@
+/home/hiufungk/Desktop/HFold_interacting/build/CMakeFiles/rebuild_cache.dir
+/home/hiufungk/Desktop/HFold_interacting/build/CMakeFiles/edit_cache.dir
+/home/hiufungk/Desktop/HFold_interacting/build/CMakeFiles/HFold_interacting_multimodel.dir
+/home/hiufungk/Desktop/HFold_interacting/build/simfold/CMakeFiles/rebuild_cache.dir
+/home/hiufungk/Desktop/HFold_interacting/build/simfold/CMakeFiles/edit_cache.dir
+/home/hiufungk/Desktop/HFold_interacting/build/simfold/CMakeFiles/simfold_exec.dir
+/home/hiufungk/Desktop/HFold_interacting/build/simfold/CMakeFiles/simfold.dir

@@ -86,7 +86,10 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 double method3_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models);
 void obtainRelaxedStems(char* G1, char* G2, char* Gresult);
 int paired_structure(int i, int j, int* pair_index);
-
 double hfold_pkonly_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models);
+//kevin 19 july
+void find_disjoint_substructure(char* structure, std::vector< std::pair<int,int> > &pair_vector);
+void simfold_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models);
+double method4_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models);
 
 #endif /*H_COMMON_H_*/

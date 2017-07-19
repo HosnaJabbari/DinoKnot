@@ -18,6 +18,9 @@
 // Hosna, November 16, 2015
 #include "hfold_interacting.h"
 
+//kevin
+#include <vector>
+#include <utility>
 
 /*
  * This function is just the same as detect_original_pairs
@@ -922,6 +925,36 @@ double hfold_emodel(char *sequence, char *restricted, char *structure, std::vect
 }
 */
 
+//kevin 19 july (verified by Mahyar 19 july 2017)
+//count+1 when open bracket, count-1 when close bracket
+//whgen count is 0, we have a substructure
+//assume valid structure
+void find_disjoint_substructure(char* structure, std::vector< std::pair<int,int> > &pair_vector){
+	int length = strlen(structure);
+	int count = 0;
+	int first_time = 1; //flag for first time getting a open bracket for substructure
+	int i = 0;
+	int j = 0;
+	for(int k=0; k<length;k++){	
+		if(structure[k] == '(' || structure[k] == '['){
+			if(first_time && count == 0){
+				first_time = 0;
+				i = k;
+			}
+			count += 1;
+			
+		}else if(structure[k] == ')' || structure[k] == ']'){
+			count -= 1;
+			j = k;
+			if(count == 0){
+				std::pair <int,int> ij_pair (i,j);
+				pair_vector.push_back(ij_pair);
+				first_time = 1;
+			}
+		}
+	}
+}
+
 //kevin 18 July
 int paired_structure(int i, int j, int* pair_index){
 	if( (pair_index[i] == j) && (pair_index[j] == i) ){
@@ -990,27 +1023,68 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 	
 }
 
+
 //kevin 18 July
-double method3_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+void simfold_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
 	W_final *simfold = new W_final (sequence, restricted, energy_models);
 	if (simfold == NULL) giveup ("Cannot allocate memory", "method3 Simfold");
-	double energy = 0;
-
-	int length = strlen(sequence);
-	char simfold_structure[length];
-	
 	simfold->call_simfold();
 	simfold->return_structure (structure);
-	strcpy(simfold_structure,structure);
+}
+
+//kevin 18 July
+double method3_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	double energy = 0;
+	int length = strlen(sequence);
+	char simfold_structure[length];
+	simfold_emodel(sequence,restricted, simfold_structure, energy_models);
 	printf("G1: %s\nG2: %s\n",restricted,simfold_structure);
 	//^ G' simfold_structure <- SimFold(S sequence, G restricted)
-
 	char* G_updated;
 	G_updated = (char*) malloc(sizeof(char) * strlen(sequence));
 	obtainRelaxedStems(restricted ,simfold_structure, G_updated);
 	printf("Gupdated %s\n",G_updated);
 	//^Gupdated G_updated<- ObtainRelaxedStems(G restricted,G' simfold_structure)
 
+	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
+	return energy;
+}
+
+//kevin 18 July
+double method4_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	double energy = 0;
+	int length = strlen(sequence);
+	char* G_updated;
+	G_updated = (char*) malloc(sizeof(char) * strlen(sequence));
+	int k = 1;
+	//^k <- 1
+	strcpy(G_updated, restricted);
+	//^Gupdated <- G
+	std::vector< std::pair<int,int> > disjoint_substructure_index; //contain pair(i,j) in a vector, ij are index of begin and end of substructure
+	find_disjoint_substructure(restricted, disjoint_substructure_index);
+	//^get disjoint substructure
+	int i = 0;
+	int j = 0;
+	for(auto current_substructure_index : disjoint_substructure_index){
+		i = current_substructure_index.first;
+		j = current_substructure_index.first;
+		char subsequence[length+1];
+		char substructure[length+1];
+		char simfold_structure[length+1];
+		strncpy(subsequence, sequence+i,j);
+		subsequence[j] = '\0';
+		//^Sk
+		strncpy(substructure, substructure+i,j);
+		substructure[j] = '\0';
+		//^Gk
+		simfold_emodel(subsequence, substructure, simfold_structure, energy_models);
+		//^ SimFold(Sk,Gk,Gk',energy_models)
+		char Gp_k_updated[length];
+		obtainRelaxedStems(substructure, simfold_structure, Gp_k_updated);
+		//^obtainRelaxedStems(Gk,Gk',G'kupdated)
+		//todo: add in code here
+		//Gupdated <- Gupdated U G'kupdated
+	}
 	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
 	return energy;
 }
