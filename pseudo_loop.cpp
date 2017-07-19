@@ -17,7 +17,11 @@
 #include "V_final.h"
 #include "s_specific_functions.h"
 
-
+// Ian Wark July 19 2017
+// constant that defines what fres[i].pair will be compared against (>=) for impossible cases
+// set to -1 because >= 0 means there is already a base pair there,
+// and -1 means restricted struture says there is no base pair there.
+#define FRES_RESTRICTED_MIN -1
 
 pseudo_loop::pseudo_loop(char *seq, char* restricted, V_final *V, s_hairpin_loop *H, s_stacked_pair *S, s_internal_loop *VBI, VM_final *VM)
 {
@@ -198,13 +202,13 @@ void pseudo_loop::compute_energies(int i, int j)
 
 	// Hosna, April 18th, 2007
 	// based on discussion with Anne, we changed WMB to case 2 and WMBP(containing the rest of the recurrences)
-	
+
 	//	if(debug){
 	//		printf("calculating VP(%d,%d) \n",i,j);
 	//	}
 	compute_VP(i,j,fres); // Hosna, March 14, 2012, changed the positionof computing VP from after BE to befor WMBP
-	
-	
+
+
 //	if(debug){
 //		printf("calculating WMBP(%d,%d) \n",i,j);
 //	}::compute_WI
@@ -244,7 +248,7 @@ void pseudo_loop::compute_energies(int i, int j)
 
 //AP
 void pseudo_loop::compute_energies_emodel(int i, int j, std::vector<energy_model> *energy_models)
-{	
+{
 	// Hosna, April 18th, 2007
 	// based on discussion with Anne, we changed WMB to case 2 and WMBP(containing the rest of the recurrences)
 	// Hosna, March 14, 2012, changed the position of computing VP from after BE to before WMBP
@@ -349,8 +353,13 @@ void pseudo_loop::compute_WI(int i, int j , h_str_features *fres){
 //		printf("WI(%d,%d) branch 1: m1 = %d\n",i,j,m1);
 //	}
 //	}
+
+	// Ian Wark July 19 2017
+	// fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+
 	// branch 2:
-	if ((fres[i].pair == j && fres[j].pair == i)||(fres[i].pair < 0 && fres[j].pair < 0)){
+	if ((fres[i].pair == j && fres[j].pair == i)||(fres[i].pair < FRES_RESTRICTED_MIN && fres[j].pair < 0)){
 		// Hosna, April 16th, 2007
 		// changed back to see if it will work fine
 		// Hosna: April 19th, 2007
@@ -393,14 +402,14 @@ void pseudo_loop::compute_WI_pkonly(int i, int j , h_str_features *fres){
 	if (WI[ij] != 0){ //calculated before
 		return;
 	}
-	
+
 	//base cases
 	// if [i,j] is not weakly closed then WI[i,j] = INF
 	if (is_weakly_closed(i,j) == 0){
 		WI[ij] = INF;
 		return;
 	}
-	
+
 	// branch 4, one base
 	if (i == j){
 		WI[ij] = PUP_penalty;
@@ -410,8 +419,8 @@ void pseudo_loop::compute_WI_pkonly(int i, int j , h_str_features *fres){
 		WI[ij] = INF;
 		return;
 	}
-	
-	
+
+
 	// branch 1:
 	int t;
 	for (t = i; t< j; t++){
@@ -422,15 +431,15 @@ void pseudo_loop::compute_WI_pkonly(int i, int j , h_str_features *fres){
 	}
 	// branch 2:
 	if (fres[i].pair == j && fres[j].pair == i){
-		
+
 		int v_ener = (i>j)? INF: V->get_energy(i,j);
 		m2 = v_ener + PPS_penalty;
-		
+
 	}
-	// branch 3:	
+	// branch 3:
 	m3 = get_WMB(i,j) + PSP_penalty + PPS_penalty;
-	
-	
+
+
 	min = MIN(m1,MIN(m2,m3));
 	WI[ij] = min;
 }
@@ -447,7 +456,13 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 		return;
 	}
 
-	if (i == j || weakly_closed[ij] == 1 || fres[i].pair >= 0 || fres[j].pair >= 0 || can_pair(int_sequence[i],int_sequence[j]) != 1)	{
+    // Ian Wark July 19 2017
+	// fres[i].pair >= 0 changed to fres[i].pair >= FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+
+	if (i == j || weakly_closed[ij] == 1
+	 || fres[i].pair >= FRES_RESTRICTED_MIN || fres[j].pair >= FRES_RESTRICTED_MIN
+	 || can_pair(int_sequence[i],int_sequence[j]) != 1)	{
 			VP[ij] = INF;
 	//		if (debug){
 	//			printf("VP[%d,%d] = %d and can_pair(%d,%d) = %d\n", i,j, VP[ij],int_sequence[i],int_sequence[j],can_pair(int_sequence[i],int_sequence[j]));
@@ -459,7 +474,7 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 		// a) i == j => VP[ij] = INF
 		// b) [i,j] is a weakly_closed region => VP[ij] = INF
 		// c) i or j is paired in original structure => VP[ij] = INF
-	
+
 		int m1 = INF, m2 = INF, m3 = INF, m4= INF, m5 = INF, m6 = INF, m7 = INF, m8 = INF; //different branches
 		//branchs:
 		// 1) inArc(i) and NOT_inArc(j)
@@ -698,11 +713,18 @@ void pseudo_loop::compute_VP(int i, int j, h_str_features *fres){
 //		}
 		return;
 	}
+
+	// Ian Wark July 19 2017
+	// fres[i].pair >= 0 changed to fres[i].pair >= FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+
 	// base cases:
 	// a) i == j => VP[ij] = INF
 	// b) [i,j] is a weakly_closed region => VP[ij] = INF
 	// c) i or j is paired in original structure => VP[ij] = INF
-	if (i == j || weakly_closed[ij] == 1 || fres[i].pair >= 0 || fres[j].pair >= 0 || can_pair(int_sequence[i],int_sequence[j]) != 1)	{
+	if (i == j || weakly_closed[ij] == 1
+	|| fres[i].pair >= FRES_RESTRICTED_MIN || fres[j].pair >= FRES_RESTRICTED_MIN
+	|| can_pair(int_sequence[i],int_sequence[j]) != 1)	{
 		VP[ij] = INF;
 //		if (debug){
 //			printf("VP[%d,%d] = %d and can_pair(%d,%d) = %d\n", i,j, VP[ij],int_sequence[i],int_sequence[j],can_pair(int_sequence[i],int_sequence[j]));
@@ -939,11 +961,17 @@ void pseudo_loop::compute_VP_pmo(int i, int j, h_str_features *fres){
 //		}
 		return;
 	}
+	// Ian Wark July 19 2017
+	// fres[i].pair >= 0 changed to fres[i].pair >= FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+
 	// base cases:
 	// a) i == j => VP[ij] = INF
 	// b) [i,j] is a weakly_closed region => VP[ij] = INF
 	// c) i or j is paired in original structure => VP[ij] = INF
-	if (i == j || weakly_closed[ij] == 1 || fres[i].pair >= 0 || fres[j].pair >= 0 || can_pair(int_sequence[i],int_sequence[j]) != 1)	{
+	if (i == j || weakly_closed[ij] == 1
+	|| fres[i].pair >= FRES_RESTRICTED_MIN || fres[j].pair >= FRES_RESTRICTED_MIN
+	|| can_pair(int_sequence[i],int_sequence[j]) != 1)	{
 		VP[ij] = INF;
 //		if (debug){
 //			printf("VP[%d,%d] = %d and can_pair(%d,%d) = %d\n", i,j, VP[ij],int_sequence[i],int_sequence[j],can_pair(int_sequence[i],int_sequence[j]));
@@ -1183,7 +1211,13 @@ void pseudo_loop::compute_WMBP(int i, int j, h_str_features *fres){
 	}
 	// Hosna: July 6th, 2007
 	// added impossible cases
-	if ((fres[i].pair >= 0 && fres[i].pair > j) || (fres[j].pair >= 0 && fres[j].pair < i) || (fres[i].pair >= 0 && fres[i].pair < i ) || (fres[j].pair >= 0 && j < fres[j].pair)){
+	// Ian Wark July 19 2017
+	// fres[i].pair >= 0 changed to fres[i].pair >= FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+	if ((fres[i].pair >= FRES_RESTRICTED_MIN && fres[i].pair > j)
+	|| (fres[j].pair >= FRES_RESTRICTED_MIN && fres[j].pair < i)
+	|| (fres[i].pair >= FRES_RESTRICTED_MIN && fres[i].pair < i )
+	|| (fres[j].pair >= FRES_RESTRICTED_MIN && j < fres[j].pair)){
 		WMBP[ij] = INF;
 		return;
 	}
@@ -1191,6 +1225,7 @@ void pseudo_loop::compute_WMBP(int i, int j, h_str_features *fres){
 		int m1 = INF, m3 = INF, m4 = INF, m5 = INF;
 		// if not paired(j) and paired(i) then
 		// WMBP(i,j) = 2*Pb + min_{i<l<bp(i)}(BE(i,bp(i),b'(i,l),bp(b'(i,l)))+WI(b'+1,l-1)+VP(l,j))
+
 		if(fres[j].pair < 0 && fres[i].pair >= 0){
 			int tmp = INF, l, l_min=-1;
 			// Hosna: June 29, 2007
@@ -1336,7 +1371,13 @@ void pseudo_loop::compute_WMB(int i, int j, h_str_features *fres){
 	}
 	// Hosna: July 6th, 2007
 	// added impossible cases
-	if ((fres[i].pair >= 0 && fres[i].pair > j) || (fres[j].pair >= 0 && fres[j].pair < i) || (fres[i].pair >= 0 && fres[i].pair < i ) || (fres[j].pair >= 0 && j < fres[j].pair)){
+	// Ian Wark July 19 2017
+	// fres[i].pair >= 0 changed to fres[i].pair >= FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+	if ((fres[i].pair >= FRES_RESTRICTED_MIN && fres[i].pair > j)
+	|| (fres[j].pair >= FRES_RESTRICTED_MIN && fres[j].pair < i)
+	|| (fres[i].pair >= FRES_RESTRICTED_MIN && fres[i].pair < i )
+	|| (fres[j].pair >= FRES_RESTRICTED_MIN && j < fres[j].pair)){
 		WMB[ij] = INF;
 		return;
 	}
@@ -1416,8 +1457,12 @@ void pseudo_loop::compute_WIP(int i, int j, h_str_features *fres){
 	}
 	int m1 = INF, m2 = INF, m3 = INF, m4 = INF, m5 = INF;
 
+	// Ian Wark July 19 2017
+	// fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+
 	// branch 1:
-	if (fres[i].pair < 0){
+	if (fres[i].pair < FRES_RESTRICTED_MIN){
 		m1 = get_WIP(i+1,j) + cp_penalty;
 //		if (debug && (i == 27 || i == 28) && (j == 68 || j == 67)){
 //			printf("\n ************************* \n");
@@ -1441,8 +1486,12 @@ void pseudo_loop::compute_WIP(int i, int j, h_str_features *fres){
 		}
 	}
 
+    // Ian Wark July 19 2017
+	// fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+
 	// branch 4:
-	if (fres[i].pair == j || (fres[i].pair < 0 && fres[j].pair < 0 && can_pair(int_sequence[i],int_sequence[j]))){
+	if (fres[i].pair == j || (fres[i].pair < FRES_RESTRICTED_MIN && fres[j].pair < FRES_RESTRICTED_MIN && can_pair(int_sequence[i],int_sequence[j]))){
 
 		m4 = V->get_energy(i,j)	+ bp_penalty;
 //		if (debug && i ==15 && j == 20 ){
@@ -1476,13 +1525,17 @@ void pseudo_loop::compute_WIP_pkonly(int i, int j, h_str_features *fres){
 		return;
 	}
 	int m1 = INF, m2 = INF, m3 = INF, m4 = INF, m5 = INF;
-	
+
+    // Ian Wark July 19 2017
+	// fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+
 	// branch 1:
-	if (fres[i].pair < 0){
+	if (fres[i].pair < FRES_RESTRICTED_MIN){
 		m1 = get_WIP(i+1,j) + cp_penalty;
 	}
 	// branch 2:
-	if (fres[j].pair < 0){
+	if (fres[j].pair < FRES_RESTRICTED_MIN){
 		m2 = get_WIP(i,j-1) + cp_penalty;
 	}
 	//branch 3:
@@ -1493,19 +1546,19 @@ void pseudo_loop::compute_WIP_pkonly(int i, int j, h_str_features *fres){
 			m3 = tmp;
 		}
 	}
-	
+
 	// branch 4:
 	if (fres[i].pair == j && fres[j].pair == i){
-		
+
 		m4 = V->get_energy(i,j)	+ bp_penalty;
-		
+
 	}
-	
+
 	// branch 5:
 	m5 = get_WMB(i,j) + PSM_penalty + bp_penalty;
-	
+
 	WIP[ij] = MIN(MIN(m1,MIN(m2,m3)),MIN(m4,m5));
-	
+
 }
 
 
@@ -1544,7 +1597,10 @@ void pseudo_loop::compute_VPP(int i, int j, h_str_features *fres){
 		max_i_bp = get_bp(i,j);
 	}
 	for (r = max_i_bp+1; r < j; r++ ){
-		if (fres[r].pair < 0){
+        // Ian Wark July 19 2017
+        // fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+        // otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+		if (fres[r].pair < FRES_RESTRICTED_MIN){
 			int tmp = get_VP(i,r) + get_WIP(r+1,j);
 //			if (debug){
 //				printf("VPP(%d,%d) branch 1: VP(%d,%d) = %d, WIP(%d,%d)= %d ==> tmp = %d  and m1 = %d\n",i,j,i,r,get_VP(i,r),r+1,j,get_WIP(r+1,j),tmp, m1);
@@ -1563,7 +1619,10 @@ void pseudo_loop::compute_VPP(int i, int j, h_str_features *fres){
 		min_Bp_j = get_Bp(i,j);
 	}
 	for (r = i+1; r < min_Bp_j; r++){
-		if (fres[r].pair < 0){
+        // Ian Wark July 19 2017
+        // fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+        // otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+		if (fres[r].pair < FRES_RESTRICTED_MIN){
 			int tmp = get_WIP(i,r-1) + get_VP(r,j);
 //			if (debug){
 //				printf("VPP(%d,%d) branch 2: WIP(%d,%d) = %d, VP(%d,%d)= %d ==> tmp = %d  and m2 = %d\n",i,j,i,r-1,get_WIP(i,r-1),r,j,get_VP(r,j),tmp, m2);
@@ -1580,7 +1639,10 @@ void pseudo_loop::compute_VPP(int i, int j, h_str_features *fres){
 //		max_i_bp = get_bp(i,j);
 //	}
 	for (r = max_i_bp+1; r < j; r++ ){
-		if (fres[r].pair < 0 && this->is_empty_region(r+1,j)){
+        // Ian Wark July 19 2017
+        // fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+        // otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+		if (fres[r].pair < FRES_RESTRICTED_MIN && this->is_empty_region(r+1,j)){
 			int tmp = get_VP(i,r) + (cp_penalty *(j-r)); // check the (j-r) part
 //			if (debug){
 //				printf("VPP(%d,%d) branch 3: VP(%d,%d) = %d, %d *(%d-%d)= %d ==> tmp = %d  and m3 = %d\n",i,j,i,r,get_VP(i,r),cp_penalty,j,r,cp_penalty *(j-r),tmp, m3);
@@ -1598,7 +1660,10 @@ void pseudo_loop::compute_VPP(int i, int j, h_str_features *fres){
 //		min_Bp_j = get_Bp(i,j);
 //	}
 	for (r = i+1; r < min_Bp_j; r++){
-		if (fres[r].pair < 0 && this->is_empty_region(i,r-1)){
+        // Ian Wark July 19 2017
+        // fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+        // otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+		if (fres[r].pair < FRES_RESTRICTED_MIN && this->is_empty_region(i,r-1)){
 			int tmp = (cp_penalty * (r-i)) + get_VP(r,j);
 //			if (debug){
 //				printf("VPP(%d,%d) branch 4: %d *(%d-%d) = %d, VP(%d,%d)= %d ==> tmp = %d  and m4 = %d\n",i,j,cp_penalty,r,i,cp_penalty * (r-i),r,j,get_VP(r,j),tmp, m4);
@@ -1630,7 +1695,11 @@ void pseudo_loop::compute_BE(int i, int j, int ip, int jp, h_str_features * fres
 //		printf("coming to BE to calculate BE(6,69,11,24) \n");
 //	}
 
-	if (!( i >= 0 && i <= ip && ip < jp && jp <= j && j < nb_nucleotides && fres[i].pair >= 0 && fres[j].pair >= 0 && fres[ip].pair >= 0 && fres[jp].pair >= 0 && fres[i].pair == j && fres[j].pair == i && fres[ip].pair == jp && fres[jp].pair == ip)){ //impossible cases
+    // Ian Wark July 19 2017
+	// fres[i].pair >= 0 changed to fres[i].pair >= FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+
+	if (!( i >= 0 && i <= ip && ip < jp && jp <= j && j < nb_nucleotides && fres[i].pair >= FRES_RESTRICTED_MIN && fres[j].pair >= FRES_RESTRICTED_MIN && fres[ip].pair >= FRES_RESTRICTED_MIN && fres[jp].pair >= FRES_RESTRICTED_MIN && fres[i].pair == j && fres[j].pair == i && fres[ip].pair == jp && fres[jp].pair == ip)){ //impossible cases
 //		if (debug && i == 1 && ip == 11){
 //			printf("BE(%d,%d,%d,%d): Impossible case!! \n",i,j,ip,jp);
 //		}
@@ -1673,8 +1742,12 @@ void pseudo_loop::compute_BE(int i, int j, int ip, int jp, h_str_features * fres
 	// cases 2-5 are all need an l s.t. i<l<=ip and jp<=bp(l)<j
 	int l;
 	for (l = i+1; l<= ip ; l++){
+        // Ian Wark July 19 2017
+        // fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+        // otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+
 		// Hosna: March 14th, 2007
-		if (fres[l].pair >= 0 && jp <= fres[l].pair && fres[l].pair < j){
+		if (fres[l].pair >= FRES_RESTRICTED_MIN && jp <= fres[l].pair && fres[l].pair < j){
 			// Hosna, March 15, 2007
 			// since not_paired_all[i,l] includes i and l themselves
 			// and in BE energy calculation we are looking for the oepn region (i,l)
@@ -1752,7 +1825,11 @@ void pseudo_loop::compute_BE_emodel(int i, int j, int ip, int jp, h_str_features
 	energy_model *model;
 	int iip = index[i]+ip-i;
 
-	if (!( i >= 0 && i <= ip && ip < jp && jp <= j && j < nb_nucleotides && fres[i].pair >= 0 && fres[j].pair >= 0 && fres[ip].pair >= 0 && fres[jp].pair >= 0 && fres[i].pair == j && fres[j].pair == i && fres[ip].pair == jp && fres[jp].pair == ip)) { //impossible cases
+    // Ian Wark July 19 2017
+	// fres[i].pair >= 0 changed to fres[i].pair >= FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+
+	if (!( i >= 0 && i <= ip && ip < jp && jp <= j && j < nb_nucleotides && fres[i].pair >= FRES_RESTRICTED_MIN && fres[j].pair >= FRES_RESTRICTED_MIN && fres[ip].pair >= FRES_RESTRICTED_MIN && fres[jp].pair >= FRES_RESTRICTED_MIN && fres[i].pair == j && fres[j].pair == i && fres[ip].pair == jp && fres[jp].pair == ip)) { //impossible cases
 //		if (debug && i == 1 && ip == 11){
 //			printf("BE(%d,%d,%d,%d): Impossible case!! \n",i,j,ip,jp);
 //		}
@@ -1801,8 +1878,12 @@ void pseudo_loop::compute_BE_emodel(int i, int j, int ip, int jp, h_str_features
 		// cases 2-5 are all need an l s.t. i<l<=ip and jp<=bp(l)<j
 		int l;
 		for (l = i+1; l<= ip ; l++){
+            // Ian Wark July 19 2017
+            // fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+            // otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+
 			// Hosna: March 14th, 2007
-			if (fres[l].pair >= 0 && jp <= fres[l].pair && fres[l].pair < j){
+			if (fres[l].pair >= FRES_RESTRICTED_MIN && jp <= fres[l].pair && fres[l].pair < j){
 				// Hosna, March 15, 2007
 				// since not_paired_all[i,l] includes i and l themselves
 				// and in BE energy calculation we are looking for the oepn region (i,l)
@@ -1872,7 +1953,7 @@ void pseudo_loop::compute_BE_emodel(int i, int j, int ip, int jp, h_str_features
 		// finding the min and putting it in BE[iip]
 		model->energy_value = MIN(m1,MIN(MIN(m2,m3),MIN(m4,m5)));
 	}
-	
+
 	BE[iip] = emodel_energy_function (i, j, energy_models);
 }
 
@@ -1882,7 +1963,17 @@ void pseudo_loop::compute_BE_pmo(int i, int j, int ip, int jp, h_str_features * 
 //		printf("coming to BE to calculate BE(6,69,11,24) \n");
 //	}
 
-	if (!( i >= 0 && i <= ip && ip < jp && jp <= j && j < nb_nucleotides && fres[i].pair >= 0 && fres[j].pair >= 0 && fres[ip].pair >= 0 && fres[jp].pair >= 0 && fres[i].pair == j && fres[j].pair == i && fres[ip].pair == jp && fres[jp].pair == ip)){ //impossible cases
+    // Ian Wark July 19 2017
+	// fres[i].pair >= 0 changed to fres[i].pair >= FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+
+
+	if (!( i >= 0 && i <= ip && ip < jp && jp <= j
+	&& j < nb_nucleotides && fres[i].pair >= FRES_RESTRICTED_MIN
+	&& fres[j].pair >= FRES_RESTRICTED_MIN
+	&& fres[ip].pair >= FRES_RESTRICTED_MIN && fres[jp].pair >= FRES_RESTRICTED_MIN
+	&& fres[i].pair == j && fres[j].pair == i
+	&& fres[ip].pair == jp && fres[jp].pair == ip)){ //impossible cases
 //		if (debug && i == 1 && ip == 11){
 //			printf("BE(%d,%d,%d,%d): Impossible case!! \n",i,j,ip,jp);
 //		}
@@ -1925,8 +2016,12 @@ void pseudo_loop::compute_BE_pmo(int i, int j, int ip, int jp, h_str_features * 
 	// cases 2-5 are all need an l s.t. i<l<=ip and jp<=bp(l)<j
 	int l;
 	for (l = i+1; l<= ip ; l++){
+        // Ian Wark July 19 2017
+        // fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+        // otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+
 		// Hosna: March 14th, 2007
-		if (fres[l].pair >= 0 && jp <= fres[l].pair && fres[l].pair < j){
+		if (fres[l].pair >= FRES_RESTRICTED_MIN && jp <= fres[l].pair && fres[l].pair < j){
 			// Hosna, March 15, 2007
 			// since not_paired_all[i,l] includes i and l themselves
 			// and in BE energy calculation we are looking for the oepn region (i,l)
@@ -2012,7 +2107,7 @@ int pseudo_loop::get_WI(int i, int j){
 		compute_WI(i,j,fres);
 	}
 	 */
-	//printf("get_WI(%d,%d), after computation its value = %d!\n",i,j, WI[ij]);	
+	//printf("get_WI(%d,%d), after computation its value = %d!\n",i,j, WI[ij]);
 	return WI[ij];
 
 
@@ -2032,18 +2127,23 @@ int pseudo_loop::get_WI_pkonly(int i, int j){
 		//printf("get_WI(%d,%d), and we need to compute WI (i.e it's 0)!\n",i,j);
 	//	compute_WI_pkonly(i,j,fres);
 	//}
-	
-	//printf("get_WI(%d,%d), after computation its value = %d!\n",i,j, WI[ij]);	
+
+	//printf("get_WI(%d,%d), after computation its value = %d!\n",i,j, WI[ij]);
 	return WI[ij];
-	
-	
+
+
 }
 */
 
 int pseudo_loop::get_VP(int i, int j){
 	// Hosna, March 16, 2012
 	// two bases should be at least 3 bases apart
-	if (j-i < TURN || i >= j || fres[i].pair >= 0 || fres[j].pair >= 0 || this->is_weakly_closed(i,j) == 1){
+	// Ian Wark July 19 2017
+	// fres[i].pair >= 0 changed to fres[i].pair >= FRES_RESTRICTED_MIN (which equals -1 at time of writing)
+	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
+	if (j-i < TURN || i >= j
+	|| fres[i].pair >= FRES_RESTRICTED_MIN || fres[j].pair >= FRES_RESTRICTED_MIN
+	|| this->is_weakly_closed(i,j) == 1){
 		return INF;
 	}
 	int ij = index[i]+j-i;
@@ -2055,14 +2155,14 @@ int pseudo_loop::get_VP(int i, int j){
 		compute_VP(i,j,fres);
 	}
 	 */
-	//printf("get_VP(%d,%d), after computation its value = %d!\n",i,j, VP[ij]);	
+	//printf("get_VP(%d,%d), after computation its value = %d!\n",i,j, VP[ij]);
 	return VP[ij];
 
 }
 int pseudo_loop::get_WMB(int i, int j){
 	// Hosna: July 6th, 2007
 	// added impossible cases
-	// Hosna, March 16, 2012, 
+	// Hosna, March 16, 2012,
 	// i and j should be at least 3 bases apart
 	if (j-i < TURN ||(fres[i].pair >= 0 && fres[i].pair > j) || (fres[j].pair >= 0 && fres[j].pair < i) || (fres[i].pair >= 0 && fres[i].pair < i ) || (fres[j].pair >= 0 && j < fres[j].pair)){
 		return INF;
@@ -2076,7 +2176,7 @@ int pseudo_loop::get_WMB(int i, int j){
 		compute_WMB(i,j,fres);
 	}
 	 */
-	//printf("get_WMB(%d,%d), after computation its value = %d!\n",i,j, WMB[ij]);	
+	//printf("get_WMB(%d,%d), after computation its value = %d!\n",i,j, WMB[ij]);
 	return WMB[ij];
 }
 
@@ -2085,7 +2185,7 @@ int pseudo_loop::get_WMB(int i, int j){
 int pseudo_loop::get_WMBP(int i, int j){
 	// Hosna: July 6th, 2007
 	// added impossible cases
-	// Hosna, March 16, 2012, 
+	// Hosna, March 16, 2012,
 	// i and j should be at least 3 bases apart
 	if (j-i< TURN || (fres[i].pair >= 0 && fres[i].pair > j) || (fres[j].pair >= 0 && fres[j].pair < i) || (fres[i].pair >= 0 && fres[i].pair < i ) || (fres[j].pair >= 0 && j < fres[j].pair)){
 		return INF;
@@ -2099,12 +2199,12 @@ int pseudo_loop::get_WMBP(int i, int j){
 		compute_WMBP(i,j,fres);
 	}
 	 */
-	//printf("get_WMBP(%d,%d), after computation its value = %d!\n",i,j, WMBP[ij]);	
+	//printf("get_WMBP(%d,%d), after computation its value = %d!\n",i,j, WMBP[ij]);
 	return WMBP[ij];
 }
 
 int pseudo_loop::get_BE(int i, int j, int ip, int jp){
-	// Hosna, March 16, 2012, 
+	// Hosna, March 16, 2012,
 	// i and j should be at least 3 bases apart
 	if (j-i>= TURN && i >= 0 && i <= ip && ip < jp && jp <= j && j < nb_nucleotides && fres[i].pair >=0 && fres[j].pair >= 0 && fres[ip].pair >= 0 && fres[jp].pair >= 0 && fres[i].pair == j && fres[j].pair == i && fres[ip].pair == jp && fres[jp].pair == ip){
 		if(i == ip && j == jp && i<j){
@@ -2125,7 +2225,7 @@ int pseudo_loop::get_BE(int i, int j, int ip, int jp){
 //		if (debug ){
 //			printf("BE[%d,%d]=%d \n",i,ip,BE[iip]);
 //		}
-		//printf("get_BE(%d,%d), after computation its value = %d!\n",i,ip, BE[iip]);	
+		//printf("get_BE(%d,%d), after computation its value = %d!\n",i,ip, BE[iip]);
 		return BE[iip];
 	}else{
 //		if (debug && i == 6 && ip == 11){
@@ -2136,7 +2236,7 @@ int pseudo_loop::get_BE(int i, int j, int ip, int jp){
 }
 
 int pseudo_loop::get_WIP(int i, int j){
-	// Hosna, March 16, 2012, 
+	// Hosna, March 16, 2012,
 	// i and j should be at least 3 bases apart
 	if (j-i < TURN || i >= j || this->is_weakly_closed(i,j) != 1){
 		return INF;
@@ -2150,7 +2250,7 @@ int pseudo_loop::get_WIP(int i, int j){
 		compute_WIP(i,j,fres);
 	}
 	 */
-	//printf("get_WIP(%d,%d), after computation its value = %d!\n",i,j, WIP[ij]);	
+	//printf("get_WIP(%d,%d), after computation its value = %d!\n",i,j, WIP[ij]);
 	return WIP[ij];
 }
 
@@ -2158,7 +2258,7 @@ int pseudo_loop::get_WIP(int i, int j){
 // I don't think we need specific getter function for pkonly case
 /*
 int pseudo_loop::get_WIP_pkonly(int i, int j){
-	// Hosna, March 16, 2012, 
+	// Hosna, March 16, 2012,
 	// i and j should be at least 3 bases apart
 	if (j-i < TURN || i >= j || this->is_weakly_closed(i,j) != 1){
 		return INF;
@@ -2170,14 +2270,14 @@ int pseudo_loop::get_WIP_pkonly(int i, int j){
 		//printf("get_WIP(%d,%d), and we need to compute WIP (i.e. it's INF)!\n",i,j);
 	//	compute_WIP_pkonly(i,j,fres);
 	//}
-	
-	//printf("get_WIP(%d,%d), after computation its value = %d!\n",i,j, WIP[ij]);	
+
+	//printf("get_WIP(%d,%d), after computation its value = %d!\n",i,j, WIP[ij]);
 	return WIP[ij];
 }
 */
 
 int pseudo_loop::get_VPP(int i, int j){
-	// Hosna, March 16, 2012, 
+	// Hosna, March 16, 2012,
 	// i and j should be at least 3 bases apart
 	if (j-i < TURN || i >= j || this->is_weakly_closed(i,j) == 1){
 		return INF;
@@ -2192,7 +2292,7 @@ int pseudo_loop::get_VPP(int i, int j){
 		compute_VPP(i,j,fres);
 	}
 	 */
-	//printf("get_VPP(%d,%d), after computation its value = %d!\n",i,j, VPP[ij]);	
+	//printf("get_VPP(%d,%d), after computation its value = %d!\n",i,j, VPP[ij]);
 	return VPP[ij];
 
 }
@@ -2351,7 +2451,7 @@ void pseudo_loop::back_track(char *structure, minimum_fold *f, seq_interval *cur
 	needs_computation = 0;
 	// Hosna March 8, 2012
 	// changing the nested if structure to switch for optimality
-	switch (cur_interval->type) 
+	switch (cur_interval->type)
 	{
 			case P_WMB:
 			{
@@ -2915,7 +3015,7 @@ void pseudo_loop::back_track(char *structure, minimum_fold *f, seq_interval *cur
 				}
 			}
 				break;
-			case P_VPP: 
+			case P_VPP:
 			{
 			int i = cur_interval->i;
 			int j = cur_interval->j;
@@ -3858,7 +3958,7 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 					for (auto &model : *energy_models) {
 						model.energy_value = get_e_stP_emodel(i,j,&model)+ get_VP(i+1,j-1);
 					}
-					tmp = emodel_energy_function (i, j, energy_models);					
+					tmp = emodel_energy_function (i, j, energy_models);
 
 					if (tmp < min){
 						min = tmp;
@@ -4096,7 +4196,7 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 				}
 			}
 				break;
-			case P_VPP: 
+			case P_VPP:
 			{
 			int i = cur_interval->i;
 			int j = cur_interval->j;
@@ -4714,7 +4814,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 	needs_computation = 0;
 	// Hosna March 8, 2012
 	// changing the nested if structure to switch for optimality
-	switch (cur_interval->type) 
+	switch (cur_interval->type)
 	{
 		case P_WMB:
 		{
@@ -4726,7 +4826,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			if (i >= j)
 				return;
 			int tmp = INF, best_l = -1, best_row = -1, min = INF;
-			
+
 			// case 1
 			if (fres[j].pair >= 0 && j > fres[j].pair){
 				int l, acc = INF;
@@ -4735,13 +4835,13 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 					// Hosna: April 24, 2007
 					// correct case 2 such that a multi-pseudoknotted
 					// loop would not be treated as case 2
-					
+
 					// Hosna: July 5th, 2007:
 					// We don't need this restriction
 					//				if (l > fres[i].pair){
 					// Hosna April 9th,
 					// checking the borders as they may be negative numbers
-					
+
 					// Hosna: July 5th, 2007:
 					// We don't need to check for l not being paired
 					//					if (fres[l].pair < 0 && get_Bp(l,j) >= 0 && get_Bp(l,j)<nb_nucleotides){
@@ -4762,7 +4862,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 					//					printf("P_WMB: case 2: min = %d, best_l = %d and best_row = %d \n", min, best_l, best_row);
 					//				}
 				}
-				
+
 			}
 			// case WMBP
 			tmp = get_WMBP(i,j);
@@ -4773,7 +4873,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				//				printf("P_WMB: case WMBP: min = %d, best_row = %d \n", min, best_row);
 				//			}
 			}
-			
+
 			switch (best_row)
 			{
 				case 1:
@@ -4805,7 +4905,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			if (i >= j)
 				return;
 			int tmp = INF, best_l = -1, best_row = -1, min = INF;
-			
+
 			// case 1
 			if(fres[j].pair < 0 && fres[i].pair >= 0){
 				int l, l1 = -1;
@@ -4822,7 +4922,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 					//				if(fres[l].pair < 0 && get_bp(i,l) >= 0 && get_bp(i,l) < nb_nucleotides){
 					// Hosna: July 5th, 2007:
 					// removed bp(l)<0 as VP should handle that
-					if(get_bp(i,l) >= 0 && get_bp(i,l) < nb_nucleotides && l+TURN <= j){ 
+					if(get_bp(i,l) >= 0 && get_bp(i,l) < nb_nucleotides && l+TURN <= j){
 						// Hosna: April 19th, 2007
 						// the chosen l should be less than border_b(i,j)
 						//					if (get_b(i,j) >= 0 && l < get_b(i,j)){
@@ -4903,7 +5003,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				//				printf("P_WMBP: case 4: min = %d and best_row = %d \n", min, best_row);
 				//			}
 			}
-			
+
 			// case 5
 			if(fres[j].pair < j){
 				int l, acc = INF;
@@ -4923,12 +5023,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 					}
 				}
 			}
-			
+
 			//		if (debug){
 			//			printf("P_WMBP: best_row = %d, best_l = %d and min = %d \n",best_row, best_l,min);
 			//		}
-			
-			
+
+
 			switch (best_row)
 			{
 				case 1:
@@ -4967,7 +5067,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 					}
 					break;
 			}
-			
+
 		}
 			break;
 		case P_VP:
@@ -4987,9 +5087,9 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			//printf("----> pkonly VP: adding (%d,%d) <-------\n",i,j);
 			f[i].type = P_VP;
 			f[j].type = P_VP;
-			
+
 			int min = INF, tmp = INF, best_ip = INF, best_jp = INF, best_row = -1, best_r = INF;
-			
+
 			//case 1
 			// Hosna April 9th, 2007
 			// need to check the borders as they may be negative
@@ -5159,7 +5259,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 					}
 				}
 			}
-			
+
 			switch (best_row)
 			{
 				case 1:
@@ -5288,7 +5388,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			}
 		}
 			break;
-		case P_VPP: 
+		case P_VPP:
 		{
 			int i = cur_interval->i;
 			int j = cur_interval->j;
@@ -5299,8 +5399,8 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				return;
 			}
 			int min = INF, tmp = INF, best_r = INF, best_row = -1;
-			
-			
+
+
 			//case 1
 			int r ;
 			// Hosna April 9th, 2007
@@ -5342,12 +5442,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 					}
 				}
 			}
-			
+
 			// Hosna: July 4th, 2007
 			// After discussion with Anne, we figured out that we need to add
 			// two more cases to VPP so that it can handle cases that in only one side
 			// we have some structure and the other side is empty
-			
+
 			// Branch 3:
 			//		max_i_bp = i;
 			//		if (get_bp(i,j) > 0 && get_bp(i,j) < nb_nucleotides && get_bp(i,j) > max_i_bp){
@@ -5366,9 +5466,9 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 					}
 				}
 			}
-			
+
 			// Branch 4:
-			
+
 			//		min_Bp_j = j;
 			//		if (get_Bp(i,j) > 0 && get_Bp(i,j) < nb_nucleotides && get_bp(i,j) < min_Bp_j){
 			//			min_Bp_j = get_Bp(i,j);
@@ -5460,7 +5560,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				return;
 			}
 			int min = INF, tmp = INF, best_row = -1, best_t= -1;
-			
+
 			// Hosna: July 2nd, 2007
 			// in branch 1 of WI, we can have a case like
 			// ((..))((...))
@@ -5492,7 +5592,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				// Hosna: April 19th, 2007
 				// I think we should call the restricted version
 				//			tmp = V->get_energy_restricted(i,j,fres) + PPS_penalty;
-				
+
 				tmp = V->get_energy(i,j) + PPS_penalty;
 				if(tmp < min){
 					min = tmp;
@@ -5505,7 +5605,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			//case 3
 			// Hosna: April 20, 2007
 			// removed the penalty of PPS
-			
+
 			// Hosna: July 5th, 2007
 			// Anne said we should put PPS back
 			// change PSM to PSP
@@ -5569,7 +5669,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			if (i > ip || i > j || ip > jp || jp > j){
 				return;
 			}
-			
+
 			f[i].pair = j;
 			f[j].pair = i;
 			structure[i] = '(';
@@ -5582,11 +5682,11 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			structure[jp] = ')';
 			f[ip].type = P_BE;
 			f[jp].type = P_BE;
-			
+
 			//    	if (debug){
 			//    		printf("P_BE: paired (%d,%d) and (%d,%d) in structure \n",i,j,ip,jp);
 			//    	}
-			
+
 			int min = INF, tmp = INF, best_row = -1, best_l = INF;
 			//case 1
 			if (fres[i+1].pair == j-1){
@@ -5610,12 +5710,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 					int lp = fres[l].pair;
 					int il = index[i]+l-i;
 					int lpj = index[lp]+j-lp;
-					
+
 					//			if (debug){
 					//				printf("BE: checking cases 2-5 for i = %d, j= %d, ip = %d, jp = %d, l = %d and lp = %d \n",i,j,ip,jp,l,lp);
 					//
 					//			}
-					
+
 					// case 2
 					//			if (is_empty_region(i+1,l-1) == 1 && is_empty_region(lp+1,j-1) == 1){
 					// Hosna June 29, 2007
@@ -5637,7 +5737,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 							}
 						}
 					}
-					
+
 					// case 3
 					if (is_weakly_closed(i+1,l-1) == 1 && is_weakly_closed(lp+1,j-1) == 1){
 						tmp = get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1);
@@ -5650,7 +5750,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 							}
 						}
 					}
-					
+
 					// case 4
 					if (is_weakly_closed(i+1,l-1) == 1 && is_empty_region(lp+1,j-1) == 1){
 						// Hosna: July 5th, 2007
@@ -5666,7 +5766,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 							}
 						}
 					}
-					
+
 					// case 5
 					if (is_empty_region(i+1,l-1) == 1 && is_weakly_closed(lp+1,j-1) == 1){
 						// Hosna: July 5th, 2007
@@ -5766,7 +5866,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 					}
 					break;
 			}
-			
+
 		}
 			break;
 		case P_WIP:
@@ -5896,7 +5996,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			}
 		}
 			break;
-			
+
 			//default:
 			//printf("Should not happen!!!");
 	}
@@ -5909,7 +6009,7 @@ void pseudo_loop::back_track_pmo(char *structure, minimum_fold *f, seq_interval 
 	needs_computation = 0;
 	// Hosna March 8, 2012
 	// changing the nested if structure to switch for optimality
-	switch (cur_interval->type) 
+	switch (cur_interval->type)
 	{
 			case P_WMB:
 			{
@@ -6473,7 +6573,7 @@ void pseudo_loop::back_track_pmo(char *structure, minimum_fold *f, seq_interval 
 				}
 			}
 				break;
-			case P_VPP: 
+			case P_VPP:
 			{
 			int i = cur_interval->i;
 			int j = cur_interval->j;
@@ -7109,7 +7209,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 	needs_computation = 0;
 	// Hosna March 8, 2012
 	// changing the nested if structure to switch for optimality
-	switch (cur_interval->type) 
+	switch (cur_interval->type)
 	{
 		case P_WMB:
 		{
@@ -7121,7 +7221,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 			if (i >= j)
 				return;
 			int tmp = INF, best_l = -1, best_row = -1, min = INF;
-			
+
 			// case 1
 			if (fres[j].pair >= 0 && j > fres[j].pair){
 				int l, acc = INF;
@@ -7130,13 +7230,13 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 					// Hosna: April 24, 2007
 					// correct case 2 such that a multi-pseudoknotted
 					// loop would not be treated as case 2
-					
+
 					// Hosna: July 5th, 2007:
 					// We don't need this restriction
 					//				if (l > fres[i].pair){
 					// Hosna April 9th,
 					// checking the borders as they may be negative numbers
-					
+
 					// Hosna: July 5th, 2007:
 					// We don't need to check for l not being paired
 					//					if (fres[l].pair < 0 && get_Bp(l,j) >= 0 && get_Bp(l,j)<nb_nucleotides){
@@ -7157,7 +7257,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 					//					printf("P_WMB: case 2: min = %d, best_l = %d and best_row = %d \n", min, best_l, best_row);
 					//				}
 				}
-				
+
 			}
 			// case WMBP
 			tmp = get_WMBP(i,j);
@@ -7168,7 +7268,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 				//				printf("P_WMB: case WMBP: min = %d, best_row = %d \n", min, best_row);
 				//			}
 			}
-			
+
 			switch (best_row)
 			{
 				case 1:
@@ -7200,7 +7300,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 			if (i >= j)
 				return;
 			int tmp = INF, best_l = -1, best_row = -1, min = INF;
-			
+
 			// case 1
 			if(fres[j].pair < 0 && fres[i].pair >= 0){
 				int l, l1 = -1;
@@ -7217,7 +7317,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 					//				if(fres[l].pair < 0 && get_bp(i,l) >= 0 && get_bp(i,l) < nb_nucleotides){
 					// Hosna: July 5th, 2007:
 					// removed bp(l)<0 as VP should handle that
-					if(get_bp(i,l) >= 0 && get_bp(i,l) < nb_nucleotides && l+TURN <= j){ 
+					if(get_bp(i,l) >= 0 && get_bp(i,l) < nb_nucleotides && l+TURN <= j){
 						// Hosna: April 19th, 2007
 						// the chosen l should be less than border_b(i,j)
 						//					if (get_b(i,j) >= 0 && l < get_b(i,j)){
@@ -7298,7 +7398,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 				//				printf("P_WMBP: case 4: min = %d and best_row = %d \n", min, best_row);
 				//			}
 			}
-			
+
 			// case 5
 			if(fres[j].pair < j){
 				int l, acc = INF;
@@ -7318,12 +7418,12 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 					}
 				}
 			}
-			
+
 			//		if (debug){
 			//			printf("P_WMBP: best_row = %d, best_l = %d and min = %d \n",best_row, best_l,min);
 			//		}
-			
-			
+
+
 			switch (best_row)
 			{
 				case 1:
@@ -7362,7 +7462,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 					}
 					break;
 			}
-			
+
 		}
 			break;
 		case P_VP:
@@ -7382,9 +7482,9 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 			//printf("----> pkonly VP: adding (%d,%d) <-------\n",i,j);
 			f[i].type = P_VP;
 			f[j].type = P_VP;
-			
+
 			int min = INF, tmp = INF, best_ip = INF, best_jp = INF, best_row = -1, best_r = INF;
-			
+
 			//case 1
 			// Hosna April 9th, 2007
 			// need to check the borders as they may be negative
@@ -7441,7 +7541,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 			}
 			//case 4
 			if(fres[i+1].pair < 0 && fres[j-1].pair < 0 && can_pair(int_sequence[i+1],int_sequence[j-1])){
-				tmp = get_e_stP(i,j)+ get_VP(i+1,j-1); 
+				tmp = get_e_stP(i,j)+ get_VP(i+1,j-1);
 				if (tmp < min){
 					min = tmp;
 					best_row = 4;
@@ -7544,7 +7644,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 					}
 				}
 			}
-			
+
 			switch (best_row)
 			{
 				case 1:
@@ -7673,7 +7773,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 			}
 		}
 			break;
-		case P_VPP: 
+		case P_VPP:
 		{
 			int i = cur_interval->i;
 			int j = cur_interval->j;
@@ -7684,8 +7784,8 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 				return;
 			}
 			int min = INF, tmp = INF, best_r = INF, best_row = -1;
-			
-			
+
+
 			//case 1
 			int r ;
 			// Hosna April 9th, 2007
@@ -7727,12 +7827,12 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 					}
 				}
 			}
-			
+
 			// Hosna: July 4th, 2007
 			// After discussion with Anne, we figured out that we need to add
 			// two more cases to VPP so that it can handle cases that in only one side
 			// we have some structure and the other side is empty
-			
+
 			// Branch 3:
 			//		max_i_bp = i;
 			//		if (get_bp(i,j) > 0 && get_bp(i,j) < nb_nucleotides && get_bp(i,j) > max_i_bp){
@@ -7751,9 +7851,9 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 					}
 				}
 			}
-			
+
 			// Branch 4:
-			
+
 			//		min_Bp_j = j;
 			//		if (get_Bp(i,j) > 0 && get_Bp(i,j) < nb_nucleotides && get_bp(i,j) < min_Bp_j){
 			//			min_Bp_j = get_Bp(i,j);
@@ -7845,7 +7945,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 				return;
 			}
 			int min = INF, tmp = INF, best_row = -1, best_t= -1;
-			
+
 			// Hosna: July 2nd, 2007
 			// in branch 1 of WI, we can have a case like
 			// ((..))((...))
@@ -7877,7 +7977,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 				// Hosna: April 19th, 2007
 				// I think we should call the restricted version
 				//			tmp = V->get_energy_restricted(i,j,fres) + PPS_penalty;
-				
+
 				tmp = V->get_energy(i,j) + PPS_penalty;
 				if(tmp < min){
 					min = tmp;
@@ -7890,7 +7990,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 			//case 3
 			// Hosna: April 20, 2007
 			// removed the penalty of PPS
-			
+
 			// Hosna: July 5th, 2007
 			// Anne said we should put PPS back
 			// change PSM to PSP
@@ -7954,7 +8054,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 			if (i > ip || i > j || ip > jp || jp > j){
 				return;
 			}
-			
+
 			f[i].pair = j;
 			f[j].pair = i;
 			structure[i] = '(';
@@ -7967,11 +8067,11 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 			structure[jp] = ')';
 			f[ip].type = P_BE;
 			f[jp].type = P_BE;
-			
+
 			//    	if (debug){
 			//    		printf("P_BE: paired (%d,%d) and (%d,%d) in structure \n",i,j,ip,jp);
 			//    	}
-			
+
 			int min = INF, tmp = INF, best_row = -1, best_l = INF;
 			//case 1
 			if (fres[i+1].pair == j-1){
@@ -7990,12 +8090,12 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 					int lp = fres[l].pair;
 					int il = index[i]+l-i;
 					int lpj = index[lp]+j-lp;
-					
+
 					//			if (debug){
 					//				printf("BE: checking cases 2-5 for i = %d, j= %d, ip = %d, jp = %d, l = %d and lp = %d \n",i,j,ip,jp,l,lp);
 					//
 					//			}
-					
+
 					// case 2
 					//			if (is_empty_region(i+1,l-1) == 1 && is_empty_region(lp+1,j-1) == 1){
 					// Hosna June 29, 2007
@@ -8012,7 +8112,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 							}
 						}
 					}
-					
+
 					// case 3
 					if (is_weakly_closed(i+1,l-1) == 1 && is_weakly_closed(lp+1,j-1) == 1){
 						tmp = get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1);
@@ -8025,7 +8125,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 							}
 						}
 					}
-					
+
 					// case 4
 					if (is_weakly_closed(i+1,l-1) == 1 && is_empty_region(lp+1,j-1) == 1){
 						// Hosna: July 5th, 2007
@@ -8041,7 +8141,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 							}
 						}
 					}
-					
+
 					// case 5
 					if (is_empty_region(i+1,l-1) == 1 && is_weakly_closed(lp+1,j-1) == 1){
 						// Hosna: July 5th, 2007
@@ -8141,7 +8241,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 					}
 					break;
 			}
-			
+
 		}
 			break;
 		case P_WIP:
@@ -8271,7 +8371,7 @@ void pseudo_loop::back_track_pkonly(char *structure, minimum_fold *f, seq_interv
 			}
 		}
 			break;
-			
+
 			//default:
 			//printf("Should not happen!!!");
 	}
@@ -8285,7 +8385,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 	needs_computation = 0;
 	// Hosna March 8, 2012
 	// changing the nested if structure to switch for optimality
-	switch (cur_interval->type) 
+	switch (cur_interval->type)
 	{
 		case P_WMB:
 		{
@@ -8297,7 +8397,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 			if (i >= j)
 				return;
 			int tmp = INF, best_l = -1, best_row = -1, min = INF;
-			
+
 			// case 1
 			if (fres[j].pair >= 0 && j > fres[j].pair){
 				int l, acc = INF;
@@ -8306,13 +8406,13 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 					// Hosna: April 24, 2007
 					// correct case 2 such that a multi-pseudoknotted
 					// loop would not be treated as case 2
-					
+
 					// Hosna: July 5th, 2007:
 					// We don't need this restriction
 					//				if (l > fres[i].pair){
 					// Hosna April 9th,
 					// checking the borders as they may be negative numbers
-					
+
 					// Hosna: July 5th, 2007:
 					// We don't need to check for l not being paired
 					//					if (fres[l].pair < 0 && get_Bp(l,j) >= 0 && get_Bp(l,j)<nb_nucleotides){
@@ -8333,7 +8433,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 					//					printf("P_WMB: case 2: min = %d, best_l = %d and best_row = %d \n", min, best_l, best_row);
 					//				}
 				}
-				
+
 			}
 			// case WMBP
 			tmp = get_WMBP(i,j);
@@ -8344,7 +8444,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 				//				printf("P_WMB: case WMBP: min = %d, best_row = %d \n", min, best_row);
 				//			}
 			}
-			
+
 			switch (best_row)
 			{
 				case 1:
@@ -8376,7 +8476,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 			if (i >= j)
 				return;
 			int tmp = INF, best_l = -1, best_row = -1, min = INF;
-			
+
 			// case 1
 			if(fres[j].pair < 0 && fres[i].pair >= 0){
 				int l, l1 = -1;
@@ -8393,7 +8493,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 					//				if(fres[l].pair < 0 && get_bp(i,l) >= 0 && get_bp(i,l) < nb_nucleotides){
 					// Hosna: July 5th, 2007:
 					// removed bp(l)<0 as VP should handle that
-					if(get_bp(i,l) >= 0 && get_bp(i,l) < nb_nucleotides && l+TURN <= j){ 
+					if(get_bp(i,l) >= 0 && get_bp(i,l) < nb_nucleotides && l+TURN <= j){
 						// Hosna: April 19th, 2007
 						// the chosen l should be less than border_b(i,j)
 						//					if (get_b(i,j) >= 0 && l < get_b(i,j)){
@@ -8474,7 +8574,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 				//				printf("P_WMBP: case 4: min = %d and best_row = %d \n", min, best_row);
 				//			}
 			}
-			
+
 			// case 5
 			if(fres[j].pair < j){
 				int l, acc = INF;
@@ -8494,12 +8594,12 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 					}
 				}
 			}
-			
+
 			//		if (debug){
 			//			printf("P_WMBP: best_row = %d, best_l = %d and min = %d \n",best_row, best_l,min);
 			//		}
-			
-			
+
+
 			switch (best_row)
 			{
 				case 1:
@@ -8538,7 +8638,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 					}
 					break;
 			}
-			
+
 		}
 			break;
 		case P_VP:
@@ -8558,9 +8658,9 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 			//printf("----> pkonly VP: adding (%d,%d) <-------\n",i,j);
 			f[i].type = P_VP;
 			f[j].type = P_VP;
-			
+
 			int min = INF, tmp = INF, best_ip = INF, best_jp = INF, best_row = -1, best_r = INF;
-			
+
 			//case 1
 			// Hosna April 9th, 2007
 			// need to check the borders as they may be negative
@@ -8720,7 +8820,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 					}
 				}
 			}
-			
+
 			switch (best_row)
 			{
 				case 1:
@@ -8849,7 +8949,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 			}
 		}
 			break;
-		case P_VPP: 
+		case P_VPP:
 		{
 			int i = cur_interval->i;
 			int j = cur_interval->j;
@@ -8860,8 +8960,8 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 				return;
 			}
 			int min = INF, tmp = INF, best_r = INF, best_row = -1;
-			
-			
+
+
 			//case 1
 			int r ;
 			// Hosna April 9th, 2007
@@ -8903,12 +9003,12 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 					}
 				}
 			}
-			
+
 			// Hosna: July 4th, 2007
 			// After discussion with Anne, we figured out that we need to add
 			// two more cases to VPP so that it can handle cases that in only one side
 			// we have some structure and the other side is empty
-			
+
 			// Branch 3:
 			//		max_i_bp = i;
 			//		if (get_bp(i,j) > 0 && get_bp(i,j) < nb_nucleotides && get_bp(i,j) > max_i_bp){
@@ -8927,9 +9027,9 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 					}
 				}
 			}
-			
+
 			// Branch 4:
-			
+
 			//		min_Bp_j = j;
 			//		if (get_Bp(i,j) > 0 && get_Bp(i,j) < nb_nucleotides && get_bp(i,j) < min_Bp_j){
 			//			min_Bp_j = get_Bp(i,j);
@@ -9021,7 +9121,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 				return;
 			}
 			int min = INF, tmp = INF, best_row = -1, best_t= -1;
-			
+
 			// Hosna: July 2nd, 2007
 			// in branch 1 of WI, we can have a case like
 			// ((..))((...))
@@ -9053,7 +9153,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 				// Hosna: April 19th, 2007
 				// I think we should call the restricted version
 				//			tmp = V->get_energy_restricted(i,j,fres) + PPS_penalty;
-				
+
 				tmp = V->get_energy(i,j) + PPS_penalty;
 				if(tmp < min){
 					min = tmp;
@@ -9066,7 +9166,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 			//case 3
 			// Hosna: April 20, 2007
 			// removed the penalty of PPS
-			
+
 			// Hosna: July 5th, 2007
 			// Anne said we should put PPS back
 			// change PSM to PSP
@@ -9130,7 +9230,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 			if (i > ip || i > j || ip > jp || jp > j){
 				return;
 			}
-			
+
 			f[i].pair = j;
 			f[j].pair = i;
 			structure[i] = '(';
@@ -9143,11 +9243,11 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 			structure[jp] = ')';
 			f[ip].type = P_BE;
 			f[jp].type = P_BE;
-			
+
 			//    	if (debug){
 			//    		printf("P_BE: paired (%d,%d) and (%d,%d) in structure \n",i,j,ip,jp);
 			//    	}
-			
+
 			int min = INF, tmp = INF, best_row = -1, best_l = INF;
 			//case 1
 			if (fres[i+1].pair == j-1){
@@ -9166,12 +9266,12 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 					int lp = fres[l].pair;
 					int il = index[i]+l-i;
 					int lpj = index[lp]+j-lp;
-					
+
 					//			if (debug){
 					//				printf("BE: checking cases 2-5 for i = %d, j= %d, ip = %d, jp = %d, l = %d and lp = %d \n",i,j,ip,jp,l,lp);
 					//
 					//			}
-					
+
 					// case 2
 					//			if (is_empty_region(i+1,l-1) == 1 && is_empty_region(lp+1,j-1) == 1){
 					// Hosna June 29, 2007
@@ -9188,7 +9288,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 							}
 						}
 					}
-					
+
 					// case 3
 					if (is_weakly_closed(i+1,l-1) == 1 && is_weakly_closed(lp+1,j-1) == 1){
 						tmp = get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1);
@@ -9201,7 +9301,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 							}
 						}
 					}
-					
+
 					// case 4
 					if (is_weakly_closed(i+1,l-1) == 1 && is_empty_region(lp+1,j-1) == 1){
 						// Hosna: July 5th, 2007
@@ -9217,7 +9317,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 							}
 						}
 					}
-					
+
 					// case 5
 					if (is_empty_region(i+1,l-1) == 1 && is_weakly_closed(lp+1,j-1) == 1){
 						// Hosna: July 5th, 2007
@@ -9317,7 +9417,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 					}
 					break;
 			}
-			
+
 		}
 			break;
 		case P_WIP:
@@ -9447,7 +9547,7 @@ void pseudo_loop::back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_in
 			}
 		}
 			break;
-			
+
 			//default:
 			//printf("Should not happen!!!");
 	}

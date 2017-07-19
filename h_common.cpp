@@ -991,7 +991,7 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 }
 
 //kevin 18 July
-void method3_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+double method3_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
 	W_final *simfold = new W_final (sequence, restricted, energy_models);
 	if (simfold == NULL) giveup ("Cannot allocate memory", "method3 Simfold");
 	double energy = 0;
@@ -1039,8 +1039,8 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 	}
 	*/
 	
-	printf("method 3\n");
-	method3_emodel(sequence,restricted,structure,energy_models);
+	//printf("method 3\n");
+	//min_energy = method3_emodel(sequence,restricted,structure,energy_models);
 	/*
 	printf("method 4\n");
 	*/

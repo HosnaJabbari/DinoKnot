@@ -127,8 +127,6 @@ class W_final: public s_min_folding{
         //int *intseq;
 //        int *index;
         
-        //kevin 19 july
-        void call_simfold();
         
 };
 
