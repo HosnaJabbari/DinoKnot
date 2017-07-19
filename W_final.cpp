@@ -12,8 +12,15 @@
 #include "h_externs.h"
 #include "h_common.h"
 
+
+//kevin
+#include "simfold.h"
+#include "params.h"
+#include "structs.h"
+#include "common.h"
+
 #define debug 1
-#define KEVIN_DEBUG 1
+
 
 
 // Hosna June 20th, 2007
@@ -489,8 +496,11 @@ double W_final::hfold(){
 	
 }
 
+
 //AP
 double W_final::hfold_emodel() { //kevin debug
+	int KEVIN_DEBUG = 1;
+
 	double energy;
     int i, j;
 	
@@ -535,7 +545,7 @@ double W_final::hfold_emodel() { //kevin debug
         }
 
         // if I put this before V calculation, WM(i,j) cannot be calculated, because it returns infinity
-        VM->compute_energy_WM_restricted_emodel (j, fres, energy_models);
+//        VM->compute_energy_WM_restricted_emodel (j, fres, energy_models);
 		
 		// test V values
 		/*
@@ -548,7 +558,9 @@ double W_final::hfold_emodel() { //kevin debug
 		 }
 		 */
     }
-	
+	printf("done\n");
+	//VM->print_all_v();
+	//exit(7);
 
 	for (j=0; j < nb_nucleotides; j++) {
         for (i =j; i >= 0; i--) {//for (i=0; i<=j; i++) {            
@@ -561,14 +573,12 @@ double W_final::hfold_emodel() { //kevin debug
 	// end of addition at March 8, 2012, Hosna
 	for (j= 1; j < nb_nucleotides; j++) {
     	this->compute_W_restricted_emodel(j,fres);
-		if(KEVIN_DEBUG)
-			printf("%c W[%d]= %d\n",restricted[j],j,W[j]);
 	}
 
 	if(KEVIN_DEBUG){
 		//printf("fres:\n");
 		//for (i=0; i < nb_nucleotides; i++){printf("%c i=%d f_type=%c f_pair=%d\n",restricted[i],i,fres[i].type, fres[i].pair);} //kevin debug
-		printf("W1:\n");
+		printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~W1:\n");
 		for (i=0; i < nb_nucleotides; i++){printf("%c i=%d W=%d\n",restricted[i],i,W[i]);} //kevin debug
 	}
 
@@ -583,28 +593,32 @@ double W_final::hfold_emodel() { //kevin debug
 	
     seq_interval *cur_interval = stack_interval;
 	
-	// energy = this->W[nb_nucleotides-1];
+/*
 	//kevin debug
-	if(KEVIN_DEBUG)
+	if(KEVIN_DEBUG){
 		printf("before backtrack_restricted_emodel\nstructure: %s\n",structure);
     	for (i=0; i < nb_nucleotides; i++){printf("%c i=%d f_type=%c f_pair=%d\n",restricted[i],i,fres[i].type, fres[i].pair);} //kevin debug
-
+	}
+*/	
     while ( cur_interval != NULL) {
         stack_interval = stack_interval->next;
         backtrack_restricted_emodel (cur_interval, fres);
-		if(KEVIN_DEBUG)
-			printf("out of backtrack emodel\n");
+		
         delete cur_interval;    // this should make up for the new in the insert_node
         cur_interval = stack_interval;
     }
-
+/*
 	//kevin debug
-	if(KEVIN_DEBUG)
+	if(KEVIN_DEBUG){
 		printf("after backtrack_restricted_emodel\nstructure: %s\n",structure);
-    	for (i=0; i < nb_nucleotides; i++){printf("%c i=%d f_type=%c f_pair=%d\n",restricted[i],i,fres[i].type, fres[i].pair);} //kevin debug
-	
+    	for (i=0; i < nb_nucleotides; i++){
+			printf("%c i=%d f_type=%c f_pair=%d\n",restricted[i],i,fres[i].type, fres[i].pair);
+		} //kevin debug
+	}
+*/	
 	// The energy calculation is now placed after backtrack is run because we need the contents of f[] (aka typedef struct minimum_fold) in order to determine if the final structure is pseudoknoted or not. If it is then we add the start_hybrid_penalty to our final energy and divide it by 100.
-    energy = this->W[nb_nucleotides-1];
+    energy = this->W[nb_nucleotides-1]; //nb_nucleotides-1
+	printf("energy %lf\n",energy);
 	for (i = 0; i < linker_pos; i++) {
 		if (f[i].pair > linker_pos+linker_length-1) {
 			energy += start_hybrid_penalty;
@@ -613,10 +627,32 @@ double W_final::hfold_emodel() { //kevin debug
 	}
 	energy /= 100.0;
 
+	if (debug)
+    {
+        print_result ();
+    }
+
     delete [] h_fres;
     delete [] fres;
     return energy;	
 }
+
+//kevin 18 July
+void W_final::call_simfold(){
+	//kevin todo change theese to be actually multi model
+	char config_file[200];
+    strcpy (config_file, "./simfold/params/multirnafold.conf");
+    double temperature;
+    temperature = 37; 
+	int dna_or_rna;
+	dna_or_rna = RNA;
+	init_data ("./simfold", config_file, dna_or_rna, temperature); 
+	fill_data_structures_with_new_parameters ("./simfold/params/turner_parameters_fm363_constrdangles.txt");
+	fill_data_structures_with_new_parameters ("./simfold/params/parameters_DP09_chopped.txt");
+	double energy = simfold_restricted (sequence, restricted, structure);
+	//printf("%s %s %s\n",sequence, restricted, structure);
+}
+
 
 //AP
 double W_final::hfold_pkonly_emodel(){
@@ -766,10 +802,7 @@ void W_final::compute_W_restricted_emodel (int j, str_features *fres)
 	} else {
 		W[j] = MIN(m1,MIN(m2,m3));
 	}
-	if(KEVIN_DEBUG){
-		if(j==22)
-			printf("m1=%d m2=%d m3=%d\n",m1,m2,m3);
-	}
+	
 }
 
 //AP
@@ -1147,7 +1180,7 @@ int W_final::compute_W_br2_restricted_emodel (int j, str_features *fres, int &mu
 		if (tmp != INF) {
 			min = tmp;
 		}
-		printf("m2 min = %d\n",min);
+		
     }
     //printf ("Chosen=%d, best_i=%d\n", chosen, best_i);
     return min;
@@ -2517,6 +2550,7 @@ void W_final::backtrack_restricted(seq_interval *cur_interval, str_features *fre
 
 //AP
 void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_features *fres){
+	int KEVIN_DEBUG = 0;
 	if(KEVIN_DEBUG)
 		printf("in backtrack_restricted_emodel\n");
     char type;
