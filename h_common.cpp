@@ -922,16 +922,113 @@ double hfold_emodel(char *sequence, char *restricted, char *structure, std::vect
 }
 */
 
+//kevin 18 July
+int paired_structure(int i, int j, int* pair_index){
+	if( (pair_index[i] == j) && (pair_index[j] == i) ){
+		return 1;
+	}
+	return 0;
+}
+
+//kevin 18 July
+void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
+	int length = strlen(G1);
+	int G1_pair[length];
+	int G2_pair[length];
+
+	//Gresult <- G1
+	strcpy(Gresult,G1);
+
+	detect_original_pairs(G1,G1_pair);
+	detect_original_pairs(G2, G2_pair);
+/*
+	for(int d=0;d<length;d++){
+		printf("%c %d\n",G2[d],G2_pair[d]);
+	}
+*/
+	
+	int i = 0;
+	int j = 0;
+
+	for(int k=0;k<length;k++){
+		if(G2_pair[k] > -1){
+			i = k;
+			j = G2_pair[k];
+			if(i < j){ //for each ij in G2
+				//printf("%d %d\n",i,j);
+				if( (G1[i] != G2[i]) && (G1[j] != G2[j]) ){//if ij not in G1
+					printf("%d %d\n",i,j);
+					//include bulges of size 1
+					if( paired_structure(i-1,j+1,G1_pair) || paired_structure(i+1,j-1,G1_pair) ){
+						printf("case 1\n");
+						Gresult[i] = G2[i];
+						Gresult[j] = G2[j];
+					//include loops of size 1x1
+					}else if( paired_structure(i-2,j+1,G1_pair) || paired_structure(i-1,j+2,G1_pair) || \
+							paired_structure(i+1,j-2,G1_pair) || paired_structure(i+2,j-1,G1_pair) ){
+						printf("case 2\n");
+						Gresult[i] = G2[i];
+						Gresult[j] = G2[j];
+					//include loops of size 1x2 or 2x1
+					}else if( paired_structure(i-2,j+2,G1_pair) || paired_structure(i+2,j-2,G1_pair) ){
+						printf("case 3\n");
+						Gresult[i] = G2[i];
+						Gresult[j] = G2[j];
+					}else if( paired_structure(i-3,j+2,G1_pair) || paired_structure(i-2,j+3,G1_pair) || \
+							paired_structure(i+2,j-3,G1_pair) || paired_structure(i+3,j-2,G1_pair) ){
+						printf("case 4\n");
+						Gresult[i] = G2[i];
+						Gresult[j] = G2[j];
+					}else{
+						printf("case 5\n");
+					}
+				}
+			}
+		}
+	}
+
+	
+}
+
+//kevin 18 July
+void method3_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	W_final *simfold = new W_final (sequence, restricted, energy_models);
+	if (simfold == NULL) giveup ("Cannot allocate memory", "method3 Simfold");
+	double energy = 0;
+
+	int length = strlen(sequence);
+	char simfold_structure[length];
+	
+	simfold->call_simfold();
+	simfold->return_structure (structure);
+	strcpy(simfold_structure,structure);
+	printf("G1: %s\nG2: %s\n",restricted,simfold_structure);
+	//^ G' simfold_structure <- SimFold(S sequence, G restricted)
+
+	char* G_updated;
+	G_updated = (char*) malloc(sizeof(char) * strlen(sequence));
+	obtainRelaxedStems(restricted ,simfold_structure, G_updated);
+	printf("Gupdated %s\n",G_updated);
+	//^Gupdated G_updated<- ObtainRelaxedStems(G restricted,G' simfold_structure)
+
+	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
+	return energy;
+}
+
+//kevin 18 July
 double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	
 	W_final *min_fold = new W_final (sequence, restricted, energy_models);
 	if (min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
 	double energy = 0;
 	double min_energy = 0;
 	char final_structure[strlen(sequence)];
+	/*
 	printf("method 1\n");
 	min_energy = min_fold->hfold_emodel();
 	min_fold->return_structure (structure);
 	strcpy(final_structure,structure);
+	*/
 	/*
 	printf("method 2\n");
 	energy = min_fold->hfold_pkonly_emodel();
@@ -940,12 +1037,17 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 		min_energy = energy;
 		strcpy(final_structure,structure);
 	}
+	*/
+	
 	printf("method 3\n");
+	method3_emodel(sequence,restricted,structure,energy_models);
+	/*
 	printf("method 4\n");
 	*/
 	printf("final_structure: %s\n min_energy: %lf\n",final_structure,min_energy);
 	return min_energy;
 }
+
 
 
 // Hosna, May 3rd, 2012

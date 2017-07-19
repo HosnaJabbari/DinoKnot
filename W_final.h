@@ -52,7 +52,9 @@ class W_final: public s_min_folding{
         void return_structure (char *structure) ;        
         // writes the predicted MFE structure into structure
         
-        
+        //kevin
+        void call_simfold();
+
     protected:
     	// Hosna: June 18th, 2007:
         // this pointer is the main part of the Hierarchical fold program
@@ -124,6 +126,9 @@ class W_final: public s_min_folding{
         //int seq_length; 
         //int *intseq;
 //        int *index;
+        
+        //kevin 19 july
+        void call_simfold();
         
 };
 
