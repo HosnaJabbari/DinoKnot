@@ -1023,12 +1023,12 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 	double energy = 0;
 	double min_energy = 0;
 	char final_structure[strlen(sequence)];
-	/*
+
 	printf("method 1\n");
 	min_energy = min_fold->hfold_emodel();
 	min_fold->return_structure (structure);
 	strcpy(final_structure,structure);
-	*/
+
 	/*
 	printf("method 2\n");
 	energy = min_fold->hfold_pkonly_emodel();
