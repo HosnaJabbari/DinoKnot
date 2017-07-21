@@ -59,15 +59,15 @@ PARAMTYPE s_stacked_pair::compute_energy (int i, int j)
 //     else if (sequence[j-1] == 0 && sequence[i+1] == 3 && sequence[j] == 0 && sequence[i] == 3)
 //         local_energy = stack[0][3][0][3];
 //     else
-//         local_energy = -100; 
+//         local_energy = -100;
 
-	
+
     min = V_energy + local_energy;
-    
+
     // add the loss
     if (pred_pairings != NULL)
     {
-        pred_pairings[i] = j;   
+        pred_pairings[i] = j;
 		pred_pairings[j] = i;
         min = min - loss (i,i) - loss (j,j);
     }
@@ -78,6 +78,15 @@ PARAMTYPE s_stacked_pair::compute_energy (int i, int j)
 PARAMTYPE s_stacked_pair::compute_energy_emodel (int i, int j, energy_model *model)
 // compute the free energy of the structure closed by this stacked pair
 {
+    // Ian Wark and Kevin July 20 2017
+    // if i or j is linker (X), cannot be anything
+    // if i+1 or j-1 is linker, cannot be stack, because linker cannot be paired
+    // However, we don't consider i-1 and j+1 because compute_energy_emodel doesn't even consider that as part of the stack
+    if (sequence[i+1] == X || sequence[j-1] == X || sequence[i] == X || sequence [j] == X) {
+        return INF;
+    }
+
+
     PARAMTYPE min=INF, local_energy, V_energy;
 
     V_energy = V->get_energy (i+1,j-1);
@@ -90,15 +99,15 @@ PARAMTYPE s_stacked_pair::compute_energy_emodel (int i, int j, energy_model *mod
 //     else if (sequence[j-1] == 0 && sequence[i+1] == 3 && sequence[j] == 0 && sequence[i] == 3)
 //         local_energy = stack[0][3][0][3];
 //     else
-//         local_energy = -100; 
+//         local_energy = -100;
 
-	
+
     min = V_energy + local_energy;
-    
+
     // add the loss
     if (pred_pairings != NULL)
     {
-        pred_pairings[i] = j;   
+        pred_pairings[i] = j;
 		pred_pairings[j] = i;
         min = min - loss (i,i) - loss (j,j);
     }
@@ -123,15 +132,15 @@ PARAMTYPE s_stacked_pair::compute_energy_pmo (int i, int j)
 //     else if (sequence[j-1] == 0 && sequence[i+1] == 3 && sequence[j] == 0 && sequence[i] == 3)
 //         local_energy = stack[0][3][0][3];
 //     else
-//         local_energy = -100; 
+//         local_energy = -100;
 
-	
+
     min = V_energy + local_energy;
-    
+
     // add the loss
     if (pred_pairings != NULL)
     {
-        pred_pairings[i] = j;   
+        pred_pairings[i] = j;
 		pred_pairings[j] = i;
         min = min - loss (i,i) - loss (j,j);
     }
@@ -144,8 +153,8 @@ PARAMTYPE s_stacked_pair::compute_energy_restricted (int i, int j, str_features 
 {
 	if (fres[i].pair == j && fres[j].pair==i && !can_pair(sequence[i],sequence[j])){
 		return V->get_energy (i+1,j-1);
-	}else if (fres[i].pair == j && fres[j].pair==i && 
-			  fres[i+1].pair == j-1 && fres[j-1].pair==i+1 && 
+	}else if (fres[i].pair == j && fres[j].pair==i &&
+			  fres[i+1].pair == j-1 && fres[j-1].pair==i+1 &&
 			  !can_pair(sequence[i+1],sequence[j-1])){
 		return V->get_energy (i+1,j-1);
 	}
@@ -158,16 +167,20 @@ PARAMTYPE s_stacked_pair::compute_energy_restricted (int i, int j, str_features 
 PARAMTYPE s_stacked_pair::compute_energy_restricted_emodel (int i, int j, str_features *fres, energy_model *model)
 // compute the free energy of the structure closed by this stacked pair
 {
+    // Ian Wark and Kevin July 20 2017
+    // This shouldn't be up here due to the forced pairs from input structure handled in if statements in compute_energy_emodel
+    /*
 	//AP
 	if (sequence[i] == X || sequence[j] == X)
-		return 0;
+		return 0; // Why return 0 not INF?
 	if (sequence[i+1] == X || sequence[j+1] == X || sequence[i-1] == X || sequence[j-1] == X)
 		return INF;
+    */
 
 	if (fres[i].pair == j && fres[j].pair==i && !can_pair(sequence[i],sequence[j])){
 		return V->get_energy (i+1,j-1);
-	}else if (fres[i].pair == j && fres[j].pair==i && 
-			  fres[i+1].pair == j-1 && fres[j-1].pair==i+1 && 
+	}else if (fres[i].pair == j && fres[j].pair==i &&
+			  fres[i+1].pair == j-1 && fres[j-1].pair==i+1 &&
 			  !can_pair(sequence[i+1],sequence[j-1])){
 		return V->get_energy (i+1,j-1);
 	}
@@ -197,8 +210,8 @@ PARAMTYPE s_stacked_pair::compute_energy_restricted_pmo (int i, int j, str_featu
 
 	if (fres[i].pair == j && fres[j].pair==i && !can_pair(sequence[i],sequence[j])){
 		return V->get_energy (i+1,j-1);
-	}else if (fres[i].pair == j && fres[j].pair==i && 
-			  fres[i+1].pair == j-1 && fres[j-1].pair==i+1 && 
+	}else if (fres[i].pair == j && fres[j].pair==i &&
+			  fres[i+1].pair == j-1 && fres[j-1].pair==i+1 &&
 			  !can_pair(sequence[i+1],sequence[j-1])){
 		return V->get_energy (i+1,j-1);
 	}
@@ -236,12 +249,12 @@ PARAMTYPE s_stacked_pair::get_energy (int i, int j, int *sequence)
 //         return stack[0][3][0][3];
 //     else
 //         return -100;
-	
+
 	PARAMTYPE energy= stack [sequence[i]]
 							[sequence[j]]
 							[sequence[i+1]]
 							[sequence[j-1]];
-    
+
     return energy;
 }
 
@@ -257,12 +270,12 @@ PARAMTYPE s_stacked_pair::get_energy_emodel (int i, int j, int *sequence, energy
 //         return stack[0][3][0][3];
 //     else
 //         return -100;
-	
+
 	PARAMTYPE energy= model->stack [sequence[i]]
 							[sequence[j]]
 							[sequence[i+1]]
 							[sequence[j-1]];
-    
+
     return energy;
 }
 
@@ -277,12 +290,12 @@ PARAMTYPE s_stacked_pair::get_energy_pmo (int i, int j, int *sequence)
 //         return stack[0][3][0][3];
 //     else
 //         return -100;
-	
+
 	PARAMTYPE energy= stack_pmo [sequence[i]]
 								[sequence[j]]
 								[sequence[i+1]]
 								[sequence[j-1]];
-    
+
     return energy;
 }
 

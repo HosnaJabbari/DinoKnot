@@ -15,8 +15,8 @@
  *                                                                         *
  ***************************************************************************/
 
-// The main class for multi-loop related functions, the mfe case 
- 
+// The main class for multi-loop related functions, the mfe case
+
 #include <stdio.h>
 //Hosna, March 5, 2012
 // malloc.h is not needed on my mac as stdlib.h does the same
@@ -36,7 +36,7 @@ s_multi_loop::s_multi_loop (int *seq, int length)
     sequence = seq;
     seqlen = length;
     this->V = NULL;
-    
+
     index = new int[length];    // an array with indexes, such that we don't work with a 2D array, but with a 1D array of length (n*(n+1))/2
     int total_length = (length *(length+1))/2;
     index[0] = 0;
@@ -45,7 +45,7 @@ s_multi_loop::s_multi_loop (int *seq, int length)
 
     WM = new PARAMTYPE [total_length];
     if (WM == NULL) giveup ("Cannot allocate memory", "s_multi_loop");
-    for (i=0; i < total_length; i++) WM[i] = INF;                                    
+    for (i=0; i < total_length; i++) WM[i] = INF;
 }
 
 
@@ -84,13 +84,13 @@ void s_multi_loop::compute_energy_WM (int j)
                              [sequence[i+1]]
                              [sequence[i]] +
                   misc.multi_helix_penalty +
-                  misc.multi_free_base_penalty;                  
+                  misc.multi_free_base_penalty;
         // add the loss
         if (pred_pairings != NULL)
         {
             pred_pairings[i] = -1;
             tmp = tmp - loss (i,i);
-        }                          
+        }
         if (tmp < WM[ij])
         {
             WM[ij] = tmp;
@@ -108,7 +108,7 @@ void s_multi_loop::compute_energy_WM (int j)
         {
             pred_pairings[j] = -1;
             tmp = tmp - loss (j,j);
-        }                                            
+        }
         if (tmp < WM[ij])
         {
             WM[ij] = tmp;
@@ -130,19 +130,19 @@ void s_multi_loop::compute_energy_WM (int j)
             pred_pairings[i] = -1;
             pred_pairings[j] = -1;
             tmp = tmp - loss (i,i) - loss(j,j);
-        }                                            
+        }
         if (tmp < WM[ij])
         {
                 WM[ij] = tmp;
         }
 
-        tmp = WM[iplus1j] + misc.multi_free_base_penalty;            
+        tmp = WM[iplus1j] + misc.multi_free_base_penalty;
         // add the loss
         if (pred_pairings != NULL)
         {
             pred_pairings[i] = -1;
             tmp = tmp - loss (i,i);
-        }                                                   
+        }
         if (tmp < WM[ij])
         {
             WM[ij] = tmp;
@@ -154,7 +154,7 @@ void s_multi_loop::compute_energy_WM (int j)
         {
             pred_pairings[j] = -1;
             tmp = tmp - loss(j,j);
-        }                                           
+        }
         if (tmp < WM[ij])
         {
             WM[ij] = tmp;
@@ -191,15 +191,15 @@ PARAMTYPE s_multi_loop::compute_energy (int i, int j)
         kplus1jminus1 = index[k+1] + j-1 -k-1;
         iplus2k = index[i+2] + k -i-2;
         kplus1jminus2 = index[k+1] + j-2 -k-1;
-        
+
         tmp = WM[iplus1k] + WM[kplus1jminus1];
         if (tmp < min)
             min = tmp;
-              
-        tmp = WM[iplus2k] + WM[kplus1jminus1] + 
+
+        tmp = WM[iplus2k] + WM[kplus1jminus1] +
               dangle_top [sequence [i]]
               [sequence [j]]
-              [sequence [i+1]] + 
+              [sequence [i+1]] +
               misc.multi_free_base_penalty;
         // add the loss
         if (pred_pairings != NULL)
@@ -210,27 +210,27 @@ PARAMTYPE s_multi_loop::compute_energy (int i, int j)
         if (tmp < min)
             min = tmp;
 
-        tmp = WM[iplus1k] + WM[kplus1jminus2] + 
+        tmp = WM[iplus1k] + WM[kplus1jminus2] +
               dangle_bot [sequence[i]]
               [sequence[j]]
-              [sequence[j-1]] + 
+              [sequence[j-1]] +
               misc.multi_free_base_penalty;
         // add the loss
         if (pred_pairings != NULL)
         {
             pred_pairings[j-1] = -1;
             tmp = tmp - loss (j-1,j-1);
-        }              
+        }
         if (tmp < min)
             min = tmp;
 
-        tmp = WM[iplus2k] + WM[kplus1jminus2] + 
+        tmp = WM[iplus2k] + WM[kplus1jminus2] +
               dangle_top [sequence [i]]
               [sequence [j]]
-              [sequence [i+1]] +  
+              [sequence [i+1]] +
               dangle_bot [sequence[i]]
               [sequence[j]]
-              [sequence[j-1]] + 
+              [sequence[j-1]] +
               2 * misc.multi_free_base_penalty;
         // add the loss
         if (pred_pairings != NULL)
@@ -238,11 +238,11 @@ PARAMTYPE s_multi_loop::compute_energy (int i, int j)
             pred_pairings[i+1] = -1;
             pred_pairings[j-1] = -1;
             tmp = tmp - loss (i+1,i+1) - loss (j-1,j-1);
-        }                            
+        }
         if (tmp < min)
           min = tmp;
-    }    
-                          
+    }
+
     min += misc.multi_helix_penalty + misc.multi_offset +
            AU_penalty (sequence[i], sequence[j]);
     return min;
@@ -267,8 +267,8 @@ void s_multi_loop::compute_energy_WM_restricted (int j, str_features *fres)
         if (tmp < WM[ij]) {
             WM[ij] = tmp;
         }
-          
-        if (fres[i].pair <= -1)  
+
+        if (fres[i].pair <= -1)
         {
             tmp = V->get_energy(i+1,j) +
                     AU_penalty (sequence[i+1], sequence[j]) +
@@ -283,7 +283,7 @@ void s_multi_loop::compute_energy_WM_restricted (int j, str_features *fres)
             }
         }
         if (fres[j].pair <= -1)
-        {    
+        {
             tmp = V->get_energy(i,j-1) +
                     AU_penalty (sequence[i], sequence[j-1]) +
                     dangle_top [sequence [j-1]]
@@ -314,15 +314,15 @@ void s_multi_loop::compute_energy_WM_restricted (int j, str_features *fres)
                     WM[ij] = tmp;
             }
         }
-         
+
         if (fres[i].pair <= -1)
-        {   
-            tmp = WM[iplus1j] + misc.multi_free_base_penalty;            
+        {
+            tmp = WM[iplus1j] + misc.multi_free_base_penalty;
             if (tmp < WM[ij])
             {
                 WM[ij] = tmp;
             }
-        }    
+        }
 
         if (fres[j].pair <= -1)
         {
@@ -331,8 +331,8 @@ void s_multi_loop::compute_energy_WM_restricted (int j, str_features *fres)
             {
                 WM[ij] = tmp;
             }
-        }    
-            
+        }
+
         for (int k=i; k < j; k++)
         {
             int ik = index[i]+k-i;
@@ -370,21 +370,21 @@ void s_multi_loop::compute_energy_WM_restricted_pmo (int j, str_features *fres)
         if (tmp < WM[ij]) {
             WM[ij] = tmp;
         }
-          
-        if (fres[i].pair <= -1)  
+
+        if (fres[i].pair <= -1)
         {
             tmp = V->get_energy(i+1,j) +
                   (PARAMTYPE) (pmo_percentage*AU_penalty_pmo(sequence[i+1], sequence[j]) + rna_percentage*AU_penalty(sequence[i+1], sequence[j])) +
                   (PARAMTYPE) (pmo_percentage*dangle_bot_pmo[sequence[j]][sequence[i+1]][sequence[i]] + rna_percentage*dangle_bot[sequence[j]][sequence[i+1]][sequence[i]]) +
                   (PARAMTYPE) (pmo_percentage*misc_pmo.multi_helix_penalty + rna_percentage*misc.multi_helix_penalty); +
                   (PARAMTYPE) (pmo_percentage*misc_pmo.multi_free_base_penalty + rna_percentage*misc.multi_free_base_penalty);
-            
+
 			if (tmp < WM[ij]) {
                 WM[ij] = tmp;
             }
         }
         if (fres[j].pair <= -1)
-        {    
+        {
             tmp = V->get_energy(i,j-1) +
                   (PARAMTYPE) (pmo_percentage*AU_penalty_pmo(sequence[i], sequence[j-1]) + rna_percentage*AU_penalty(sequence[i], sequence[j-1])) +
                   (PARAMTYPE) (pmo_percentage*dangle_top_pmo[sequence [j-1]][sequence [i]][sequence [j]] + rna_percentage*dangle_top[sequence [j-1]][sequence [i]][sequence [j]]) +
@@ -409,15 +409,15 @@ void s_multi_loop::compute_energy_WM_restricted_pmo (int j, str_features *fres)
             	WM[ij] = tmp;
             }
         }
-         
+
         if (fres[i].pair <= -1)
-        {   
-            tmp = WM[iplus1j] + (PARAMTYPE) (pmo_percentage*misc_pmo.multi_free_base_penalty + rna_percentage*misc.multi_free_base_penalty); 
-           
+        {
+            tmp = WM[iplus1j] + (PARAMTYPE) (pmo_percentage*misc_pmo.multi_free_base_penalty + rna_percentage*misc.multi_free_base_penalty);
+
             if (tmp < WM[ij]) {
                 WM[ij] = tmp;
             }
-        }    
+        }
 
         if (fres[j].pair <= -1)
         {
@@ -426,8 +426,8 @@ void s_multi_loop::compute_energy_WM_restricted_pmo (int j, str_features *fres)
             if (tmp < WM[ij]) {
                 WM[ij] = tmp;
             }
-        }    
-            
+        }
+
         for (int k=i; k < j; k++)
         {
             int ik = index[i]+k-i;
@@ -462,46 +462,46 @@ PARAMTYPE s_multi_loop::compute_energy_restricted (int i, int j, str_features *f
         kplus1jminus1 = index[k+1] + j-1 -k-1;
         iplus2k = index[i+2] + k -i-2;
         kplus1jminus2 = index[k+1] + j-2 -k-1;
-        
+
         tmp = WM[iplus1k] + WM[kplus1jminus1];
         if (tmp < min)
             min = tmp;
-              
+
         if (fres[i+1].pair <= -1)
-        {    
-            tmp = WM[iplus2k] + WM[kplus1jminus1] + 
+        {
+            tmp = WM[iplus2k] + WM[kplus1jminus1] +
                 dangle_top [sequence [i]]
                 [sequence [j]]
-                [sequence [i+1]] + 
+                [sequence [i+1]] +
                 misc.multi_free_base_penalty;
             if (tmp < min)
                 min = tmp;
         }
         if (fres[j-1].pair <= -1)
         {
-            tmp = WM[iplus1k] + WM[kplus1jminus2] + 
+            tmp = WM[iplus1k] + WM[kplus1jminus2] +
                 dangle_bot [sequence[i]]
                 [sequence[j]]
-                [sequence[j-1]] + 
+                [sequence[j-1]] +
                 misc.multi_free_base_penalty;
             if (tmp < min)
                 min = tmp;
         }
         if (fres[i+1].pair <= -1 && fres[j-1].pair <= -1)
         {
-            tmp = WM[iplus2k] + WM[kplus1jminus2] + 
+            tmp = WM[iplus2k] + WM[kplus1jminus2] +
                 dangle_top [sequence [i]]
                 [sequence [j]]
-                [sequence [i+1]] +  
+                [sequence [i+1]] +
                 dangle_bot [sequence[i]]
                 [sequence[j]]
-                [sequence[j-1]] + 
+                [sequence[j-1]] +
                 2 * misc.multi_free_base_penalty;
             if (tmp < min)
             min = tmp;
-        }    
-    }    
-                          
+        }
+    }
+
     min += misc.multi_helix_penalty + misc.multi_offset +
            AU_penalty (sequence[i], sequence[j]);
     return min;
@@ -518,60 +518,76 @@ PARAMTYPE s_multi_loop::compute_energy_restricted_emodel (int i, int j, str_feat
     int iplus2k;
     int kplus1jminus2;
 
+/*
 	//AP
-	if (sequence[i] == 4 || sequence[j] == 4)
-		return 0;
-	if (sequence[i+1] == 4 || sequence[j+1] == 4 || sequence[i-1] == 4 || sequence[j-1] == 4)
+	if (sequence[i] == X || sequence[j] == X)
+		return 0; // Why 0 not INF?
+	if (sequence[i+1] == X || sequence[j+1] == X || sequence[i-1] == X || sequence[j-1] == X)
+		return INF;
+*/
+
+    // TODO ian comment better
+    // Ian Wark and Kevin July 20 2017
+    // if i or j is linker (X), cannot be anything
+    // Uses i+1 or j-1, so those also cannot be X
+    if (sequence[i] == X || sequence[j] == X)
+        return INF;
+	if (sequence[i+1] == X || sequence[j-1] == X)
 		return INF;
 
 	// May 16, 2007: Replaced this for loop, because we may have very short restricted branches
     //for (k = i+TURN+1; k <= j-TURN-2; k++)
     for (k = i+2; k <= j-3; k++)
     {
+        // TODO Ian worry is that, are we supposed to do something if k == x?
+        if(sequence[k] == X) {
+            //printf("multiloop k == X \n");
+        }
+
         iplus1k = index[i+1] + k -i-1;
         kplus1jminus1 = index[k+1] + j-1 -k-1;
         iplus2k = index[i+2] + k -i-2;
         kplus1jminus2 = index[k+1] + j-2 -k-1;
-        
+
         tmp = WM[iplus1k] + WM[kplus1jminus1];
         if (tmp < min)
             min = tmp;
-              
+
         if (fres[i+1].pair <= -1)
-        {    
-            tmp = WM[iplus2k] + WM[kplus1jminus1] + 
+        {
+            tmp = WM[iplus2k] + WM[kplus1jminus1] +
                 model->dangle_top [sequence [i]]
 								[sequence [j]]
-								[sequence [i+1]] + 
+								[sequence [i+1]] +
                 model->misc.multi_free_base_penalty;
             if (tmp < min)
                 min = tmp;
         }
         if (fres[j-1].pair <= -1)
         {
-            tmp = WM[iplus1k] + WM[kplus1jminus2] + 
+            tmp = WM[iplus1k] + WM[kplus1jminus2] +
                 model->dangle_bot [sequence[i]]
 								[sequence[j]]
-								[sequence[j-1]] + 
+								[sequence[j-1]] +
                 model->misc.multi_free_base_penalty;
             if (tmp < min)
                 min = tmp;
         }
         if (fres[i+1].pair <= -1 && fres[j-1].pair <= -1)
         {
-            tmp = WM[iplus2k] + WM[kplus1jminus2] + 
+            tmp = WM[iplus2k] + WM[kplus1jminus2] +
                 model->dangle_top [sequence [i]]
 								[sequence [j]]
-								[sequence [i+1]] +  
+								[sequence [i+1]] +
                 model->dangle_bot [sequence[i]]
 								[sequence[j]]
-								[sequence[j-1]] + 
+								[sequence[j-1]] +
                 2 * model->misc.multi_free_base_penalty;
             if (tmp < min)
             	min = tmp;
-        }    
-    }    
-                          
+        }
+    }
+
     min += model->misc.multi_helix_penalty + model->misc.multi_offset +
            AU_penalty_emodel (sequence[i], sequence[j], model);
     return min;
@@ -583,10 +599,27 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
     int i;
     PARAMTYPE tmp;
 	energy_model *model;
-	
+
+    // Ian Wark and Kevin July 20 2017
+    // Cannot have j be paired if it is in the linker
+    // Check for j here to save time if j is not valid
+	if (sequence[j] == X || sequence[j-1] == X) {
+        return;
+	}
+
     for (i=j-1; i>=0; i--) {
+
+    // Kevin and Ian Wark July 20 2017
+    // commented out because we think this is too general
+    /*
 		//AP
-		if (sequence[i] == 4 || sequence[j] == 4 || sequence[i+1] == 4 || sequence[j+1] == 4 || sequence[i-1] == 4 || sequence[j-1] == 4)
+		if (sequence[i] == X || sequence[j] == X || sequence[i+1] == X || sequence[j+1] == X || sequence[i-1] == X || sequence[j-1] == X)
+			continue;
+    */
+        // Ian Wark and Kevin July 20 2017
+        // Cannot have i be paired if it is in the linker
+        // Check for i here because it has to be in the for loop. j is already valid if we got here
+        if (sequence[i] == X || sequence[i+1] == X )
 			continue;
 
         int ij = index[i]+j-i;
@@ -605,8 +638,8 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 		    if (tmp < model->energy_value) {
 		        model->energy_value = tmp;
 		    }
-		      
-		    if (fres[i].pair <= -1)  
+
+		    if (fres[i].pair <= -1)
 		    {
 		        tmp = V->get_energy(i+1,j) +
 		                AU_penalty_emodel (sequence[i+1], sequence[j], model) +
@@ -621,7 +654,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 		        }
 		    }
 		    if (fres[j].pair <= -1)
-		    {    
+		    {
 		        tmp = V->get_energy(i,j-1) +
 		                AU_penalty_emodel (sequence[i], sequence[j-1], model) +
 		                model->dangle_top [sequence [j-1]]
@@ -652,15 +685,15 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 		                model->energy_value = tmp;
 		        }
 		    }
-		     
+
 		    if (fres[i].pair <= -1)
-		    {   
-		        tmp = WM[iplus1j] + model->misc.multi_free_base_penalty;            
+		    {
+		        tmp = WM[iplus1j] + model->misc.multi_free_base_penalty;
 		        if (tmp < model->energy_value)
 		        {
 		            model->energy_value = tmp;
 		        }
-		    }    
+		    }
 
 		    if (fres[j].pair <= -1)
 		    {
@@ -669,10 +702,16 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 		        {
 		            model->energy_value = tmp;
 		        }
-		    }    
-		        
+		    }
+
 		    for (int k=i; k < j; k++)
 		    {
+                // TODO ian
+                // Kevin and Ian Wark July 20 2017
+                // k could be a linker. Is this bad ?
+                if (sequence[k] == X)
+                    continue;
+
 		        int ik = index[i]+k-i;
 		        int kplus1j = index[k+1]+j-k-1;
 		        tmp = WM[ik] + WM[kplus1j];
@@ -708,19 +747,19 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_emodel (int j, str_featur
 		for (auto &energy_model : *energy_models) {
 			model = &energy_model;
 			model->energy_value = WM[ij];
-		
+
 			if (fres[i].pair == j && fres[j].pair == i){
 				tmp = V->get_energy(i,j) +
 				AU_penalty_emodel (sequence[i], sequence[j], model) +
 				model->misc.multi_helix_penalty;
 			}
-		
+
 		    if (tmp < model->energy_value)
 			{
 		        model->energy_value = tmp;
 			}
-		
-		    if (fres[i].pair <= -1 && fres[i+1].pair == j && fres[j].pair == i+1)  
+
+		    if (fres[i].pair <= -1 && fres[i+1].pair == j && fres[j].pair == i+1)
 		    {
 		        tmp = V->get_energy(i+1,j) +
 				AU_penalty_emodel (sequence[i+1], sequence[j], model) +
@@ -735,7 +774,7 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_emodel (int j, str_featur
 		        }
 		    }
 		    if (fres[j].pair <= -1 && fres[i].pair == j-1 && fres[j-1].pair == i)
-		    {    
+		    {
 		        tmp = V->get_energy(i,j-1) +
 				AU_penalty_emodel (sequence[i], sequence[j-1], model) +
 				model->dangle_top [sequence [j-1]]
@@ -748,7 +787,7 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_emodel (int j, str_featur
 		            model->energy_value = tmp;
 		        }
 		    }
-		
+
 		    if (fres[i].pair <= -1 && fres[j].pair <= -1 && fres[i+1].pair == j-1 && fres[j-1].pair == i+1)
 		    {
 		        tmp = V->get_energy(i+1,j-1) +
@@ -766,16 +805,16 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_emodel (int j, str_featur
 					model->energy_value = tmp;
 		        }
 		    }
-		
+
 		    if (fres[i].pair <= -1)
-		    {   
-		        tmp = WM[iplus1j] + model->misc.multi_free_base_penalty;            
+		    {
+		        tmp = WM[iplus1j] + model->misc.multi_free_base_penalty;
 		        if (tmp < model->energy_value)
 		        {
 		            model->energy_value = tmp;
 		        }
-		    }    
-		
+		    }
+
 		    if (fres[j].pair <= -1)
 		    {
 		        tmp = WM[ijminus1] + model->misc.multi_free_base_penalty;
@@ -783,8 +822,8 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_emodel (int j, str_featur
 		        {
 		            model->energy_value = tmp;
 		        }
-		    }    
-		
+		    }
+
 		    for (int k=i; k < j; k++)
 		    {
 		        int ik = index[i]+k-i;
@@ -824,71 +863,71 @@ PARAMTYPE s_multi_loop::compute_energy_restricted_pmo (int i, int j, str_feature
         kplus1jminus1 = index[k+1] + j-1 -k-1;
         iplus2k = index[i+2] + k -i-2;
         kplus1jminus2 = index[k+1] + j-2 -k-1;
-        
+
         tmp = WM[iplus1k] + WM[kplus1jminus1];
         if (tmp < min)
             min = tmp;
-              
+
         if (fres[i+1].pair <= -1)
-        {    
-            tmp = WM[iplus2k] + 
-				WM[kplus1jminus1] + 
+        {
+            tmp = WM[iplus2k] +
+				WM[kplus1jminus1] +
                 (PARAMTYPE) (pmo_percentage*dangle_top_pmo[sequence[i]]
 														[sequence[j]]
-														[sequence[i+1]] + 
+														[sequence[i+1]] +
 								rna_percentage*dangle_top[sequence[i]]
 														[sequence[j]]
 														[sequence[i+1]]) +
                 (PARAMTYPE) (pmo_percentage*misc_pmo.multi_free_base_penalty + rna_percentage*misc.multi_free_base_penalty);
-            
+
 			if (tmp < min)
                 min = tmp;
         }
         if (fres[j-1].pair <= -1)
         {
-            tmp = WM[iplus1k] + 
-				WM[kplus1jminus2] + 
+            tmp = WM[iplus1k] +
+				WM[kplus1jminus2] +
                 (PARAMTYPE) (pmo_percentage*dangle_bot_pmo[sequence[i]]
 														[sequence[j]]
-														[sequence[j-1]] + 
+														[sequence[j-1]] +
 								rna_percentage*dangle_bot[sequence[i]]
 														[sequence[j]]
-														[sequence[j-1]]) + 
+														[sequence[j-1]]) +
                 (PARAMTYPE) (pmo_percentage*misc_pmo.multi_free_base_penalty + rna_percentage*misc.multi_free_base_penalty);
-            
+
 			if (tmp < min)
                 min = tmp;
         }
         if (fres[i+1].pair <= -1 && fres[j-1].pair <= -1)
         {
             tmp = WM[iplus2k] +
-				WM[kplus1jminus2] + 
+				WM[kplus1jminus2] +
                 (PARAMTYPE) (pmo_percentage*dangle_top_pmo[sequence[i]]
 														[sequence[j]]
-														[sequence[i+1]] + 
+														[sequence[i+1]] +
 								rna_percentage*dangle_top[sequence[i]]
 														[sequence[j]]
-														[sequence[i+1]]) +  
+														[sequence[i+1]]) +
                 (PARAMTYPE) (pmo_percentage*dangle_bot_pmo[sequence[i]]
 														[sequence[j]]
-														[sequence[j-1]] + 
+														[sequence[j-1]] +
 								rna_percentage*dangle_bot[sequence[i]]
 														[sequence[j]]
-														[sequence[j-1]]) + 
+														[sequence[j-1]]) +
                 (PARAMTYPE) (pmo_percentage*2*misc_pmo.multi_free_base_penalty + rna_percentage*2*misc.multi_free_base_penalty);
-            
+
 			if (tmp < min)
             	min = tmp;
-        }    
-    }    
-                          
-    min += (PARAMTYPE) (pmo_percentage*(misc_pmo.multi_helix_penalty + 
-										misc_pmo.multi_offset + 
-										AU_penalty_pmo(sequence[i], sequence[j])) + 
-						rna_percentage*(misc.multi_helix_penalty + 
-										misc.multi_offset + 
+        }
+    }
+
+    min += (PARAMTYPE) (pmo_percentage*(misc_pmo.multi_helix_penalty +
+										misc_pmo.multi_offset +
+										AU_penalty_pmo(sequence[i], sequence[j])) +
+						rna_percentage*(misc.multi_helix_penalty +
+										misc.multi_offset +
 										AU_penalty(sequence[i], sequence[j])));
-    
+
 	return min;
 }
 
@@ -898,25 +937,25 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly (int j, str_features *fre
 {
     int i;
     PARAMTYPE tmp = INF;
-	
+
     for (i=j-1; i>=0; i--)
     {
         int ij = index[i]+j-i;
         int iplus1j = index[i+1]+j-i-1;
         int ijminus1 = index[i]+j-1-i;
-		
+
 		if (fres[i].pair == j && fres[j].pair == i){
 			tmp = V->get_energy(i,j) +
 			AU_penalty (sequence[i], sequence[j]) +
 			misc.multi_helix_penalty;
 		}
-		
+
         if (tmp < WM[ij])
 		{
             WM[ij] = tmp;
 		}
-		
-        if (fres[i].pair <= -1 && fres[i+1].pair == j && fres[j].pair == i+1)  
+
+        if (fres[i].pair <= -1 && fres[i+1].pair == j && fres[j].pair == i+1)
         {
             tmp = V->get_energy(i+1,j) +
 			AU_penalty (sequence[i+1], sequence[j]) +
@@ -931,7 +970,7 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly (int j, str_features *fre
             }
         }
         if (fres[j].pair <= -1 && fres[i].pair == j-1 && fres[j-1].pair == i)
-        {    
+        {
             tmp = V->get_energy(i,j-1) +
 			AU_penalty (sequence[i], sequence[j-1]) +
 			dangle_top [sequence [j-1]]
@@ -944,7 +983,7 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly (int j, str_features *fre
                 WM[ij] = tmp;
             }
         }
-		
+
         if (fres[i].pair <= -1 && fres[j].pair <= -1 && fres[i+1].pair == j-1 && fres[j-1].pair == i+1)
         {
             tmp = V->get_energy(i+1,j-1) +
@@ -962,16 +1001,16 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly (int j, str_features *fre
 				WM[ij] = tmp;
             }
         }
-		
+
         if (fres[i].pair <= -1)
-        {   
-            tmp = WM[iplus1j] + misc.multi_free_base_penalty;            
+        {
+            tmp = WM[iplus1j] + misc.multi_free_base_penalty;
             if (tmp < WM[ij])
             {
                 WM[ij] = tmp;
             }
-        }    
-		
+        }
+
         if (fres[j].pair <= -1)
         {
             tmp = WM[ijminus1] + misc.multi_free_base_penalty;
@@ -979,8 +1018,8 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly (int j, str_features *fre
             {
                 WM[ij] = tmp;
             }
-        }    
-		
+        }
+
         for (int k=i; k < j; k++)
         {
             int ik = index[i]+k-i;
@@ -1001,7 +1040,7 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_pmo (int j, str_features 
     int i;
 	double pmo_percentage, rna_percentage;
     PARAMTYPE tmp = INF;
-	
+
     for (i=j-1; i>=0; i--) {
         int ij = index[i]+j-i;
         int iplus1j = index[i+1]+j-i-1;
@@ -1009,18 +1048,18 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_pmo (int j, str_features 
 
 		get_pmo_usage_percentages(i, j, &pmo_percentage, &rna_percentage);
 		if (pmo_percentage == 0 && rna_percentage == 0)
-			continue;		
+			continue;
 
 		if (fres[i].pair == j && fres[j].pair == i) {
 			tmp = V->get_energy(i,j) +
 			(PARAMTYPE) (pmo_percentage*AU_penalty_pmo(sequence[i], sequence[j]) + rna_percentage*AU_penalty(sequence[i], sequence[j])) +
 			(PARAMTYPE) (pmo_percentage*misc_pmo.multi_helix_penalty + rna_percentage*misc.multi_helix_penalty);
 		}
-		
+
         if (tmp < WM[ij]) {
             WM[ij] = tmp;
 		}
-		
+
         if (fres[i].pair <= -1 && fres[i+1].pair == j && fres[j].pair == i+1) {
             tmp = V->get_energy(i+1,j) +
 			(PARAMTYPE) (pmo_percentage*AU_penalty_pmo(sequence[i+1], sequence[j]) + rna_percentage*AU_penalty(sequence[i+1], sequence[j])) +
@@ -1038,63 +1077,63 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_pmo (int j, str_features 
             }
         }
 
-        if (fres[j].pair <= -1 && fres[i].pair == j-1 && fres[j-1].pair == i) {    
+        if (fres[j].pair <= -1 && fres[i].pair == j-1 && fres[j-1].pair == i) {
             tmp = V->get_energy(i,j-1) +
 			(PARAMTYPE) (pmo_percentage*AU_penalty_pmo(sequence[i], sequence[j-1]) + rna_percentage*AU_penalty(sequence[i], sequence[j-1])) +
 			(PARAMTYPE) (pmo_percentage*dangle_top_pmo[sequence [j-1]]
 													[sequence [i]]
-													[sequence [j]] + 
+													[sequence [j]] +
 							rna_percentage*dangle_top[sequence [j-1]]
 													[sequence [i]]
 													[sequence [j]]) +
 			(PARAMTYPE) (pmo_percentage*misc_pmo.multi_helix_penalty + rna_percentage*misc.multi_helix_penalty) +
 			(PARAMTYPE) (pmo_percentage*misc_pmo.multi_free_base_penalty + rna_percentage*misc.multi_free_base_penalty);
-          
+
 			if (tmp < WM[ij]) {
                 WM[ij] = tmp;
             }
         }
-		
+
         if (fres[i].pair <= -1 && fres[j].pair <= -1 && fres[i+1].pair == j-1 && fres[j-1].pair == i+1) {
             tmp = V->get_energy(i+1,j-1) +
 			(PARAMTYPE) (pmo_percentage*AU_penalty_pmo(sequence[i+1], sequence[j-1]) + rna_percentage*AU_penalty(sequence[i+1], sequence[j-1])) +
 			(PARAMTYPE) (pmo_percentage*dangle_bot_pmo[sequence[j-1]]
 													[sequence[i+1]]
-													[sequence[i]] + 
+													[sequence[i]] +
 							rna_percentage*dangle_bot[sequence[j-1]]
 													[sequence[i+1]]
 													[sequence[i]]) +
 
 			(PARAMTYPE) (pmo_percentage*dangle_top_pmo[sequence [j-1]]
 													[sequence [i+1]]
-													[sequence [j]] + 
+													[sequence [j]] +
 							rna_percentage*dangle_top[sequence [j-1]]
 													[sequence [i+1]]
 													[sequence [j]]) +
 			(PARAMTYPE) (pmo_percentage*misc_pmo.multi_helix_penalty + rna_percentage*misc.multi_helix_penalty) +
 			(PARAMTYPE) (pmo_percentage*2*misc_pmo.multi_free_base_penalty + rna_percentage*2*misc.multi_free_base_penalty);
-            
+
 			if (tmp < WM[ij])  {
 				WM[ij] = tmp;
             }
         }
-		
-        if (fres[i].pair <= -1) {   
+
+        if (fres[i].pair <= -1) {
             tmp = WM[iplus1j] + (PARAMTYPE) (pmo_percentage*misc_pmo.multi_free_base_penalty + rna_percentage*misc.multi_free_base_penalty);
-           
+
             if (tmp < WM[ij]) {
                 WM[ij] = tmp;
             }
-        }    
-		
+        }
+
         if (fres[j].pair <= -1) {
             tmp = WM[ijminus1] + (PARAMTYPE) (pmo_percentage*misc_pmo.multi_free_base_penalty + rna_percentage*misc.multi_free_base_penalty);
 
             if (tmp < WM[ij]) {
                 WM[ij] = tmp;
             }
-        }    
-		
+        }
+
         for (int k=i; k < j; k++) {
             int ik = index[i]+k-i;
             int kplus1j = index[k+1]+j-k-1;
