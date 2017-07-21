@@ -734,9 +734,26 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_emodel (int j, str_featur
     PARAMTYPE tmp = INF;
 	energy_model *model;
 
+	// Ian Wark and Kevin July 20 2017
+    // Cannot have j be paired if it is in the linker
+    // Check for j here to save time if j is not valid
+	if (sequence[j] == X || sequence[j-1] == X) {
+        return;
+	}
+
     for (i=j-1; i>=0; i--) {
-		//AP
-		if (sequence[i] == 4 || sequence[j] == 4 || sequence[i+1] == 4 || sequence[j+1] == 4 || sequence[i-1] == 4 || sequence[j-1] == 4)
+		    // Kevin and Ian Wark July 20 2017
+            // commented out because we think this is too general
+            /*
+                //AP
+                if (sequence[i] == X || sequence[j] == X || sequence[i+1] == X || sequence[j+1] == X || sequence[i-1] == X || sequence[j-1] == X)
+                    continue;
+            */
+
+        // Ian Wark and Kevin July 20 2017
+        // Cannot have i be paired if it is in the linker
+        // Check for i here because it has to be in the for loop. j is already valid if we got here
+        if (sequence[i] == X || sequence[i+1] == X )
 			continue;
 
         int ij = index[i]+j-i;

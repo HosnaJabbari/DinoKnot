@@ -31,7 +31,7 @@ void printUsage();
 int validateModelType(char* type);
 
 #define KEVIN_DEBUG 1
-/* 
+/*
 As requested, any blocks of changes have "//AP" near them.
 
 Throughout the program there will be multiple lines that look like the following:
@@ -41,14 +41,14 @@ Throughout the program there will be multiple lines that look like the following
 	}
 	min_en[0] = emodel_energy_function (i, j, energy_models);
 
-The for loop is used to go iterate through the energy model vector and use each energy model to 
-perform a certain calculation, such as computing the energy for H. This value is stored inside the 
-energy model to be used in emodel_energy_function. Once a value has been calculated for each energy 
-model, the energy model vector will be passed into emodel_energy_function which can be found in 
-common.cpp. This function is used to calculate the average value depending on where in the sequence the 
-i and j value are. This will be changed once the PMO energy table is implemented. This can be changed 
-if checks are done before the calculation occurs to determine whether or not certain energy models will 
-just get a value of zero. Doing this will save time on a running extra iterations of the code that will 
+The for loop is used to go iterate through the energy model vector and use each energy model to
+perform a certain calculation, such as computing the energy for H. This value is stored inside the
+energy model to be used in emodel_energy_function. Once a value has been calculated for each energy
+model, the energy model vector will be passed into emodel_energy_function which can be found in
+common.cpp. This function is used to calculate the average value depending on where in the sequence the
+i and j value are. This will be changed once the PMO energy table is implemented. This can be changed
+if checks are done before the calculation occurs to determine whether or not certain energy models will
+just get a value of zero. Doing this will save time on a running extra iterations of the code that will
 only give you zero anyways.
 
 	if (sequence[i] == X || sequence[j] == X || sequence[ip] == X || sequence[jp] == X)
@@ -56,7 +56,7 @@ only give you zero anyways.
 	if (sequence[i+1] == X || sequence[j+1] == X || sequence[ip+1] == X || sequence[jp+1] == X || sequence[i-1] == X || sequence[j-1] == X || sequence[ip-1] == X || sequence[jp-1] == X)
 		return INF;
 
-These if statements are used in the s_..._loop.cpp files to check for the nucleotide 'X'. This has to be done manually because the program will crash if you try to change the NUCL variable. The variable is set currently set to four but if you try to change it to five to tell the program that there is an extra 'X' nucleotide then it crashes due to the various hard coded functions throughout simfold. Since the 'X' nucleotide is set to four in the sequence, we have to manually check for instances of 'X' and act accordingly. 
+These if statements are used in the s_..._loop.cpp files to check for the nucleotide 'X'. This has to be done manually because the program will crash if you try to change the NUCL variable. The variable is set currently set to four but if you try to change it to five to tell the program that there is an extra 'X' nucleotide then it crashes due to the various hard coded functions throughout simfold. Since the 'X' nucleotide is set to four in the sequence, we have to manually check for instances of 'X' and act accordingly.
 */
 
 int main (int argc, char *argv[]) {
@@ -68,7 +68,7 @@ int main (int argc, char *argv[]) {
 	double energies[MAXSUBSTR];
 
 	// A vector is used to store the energy models in order to keep generality throughout the rest of the program. This means that you can add extra energy models withour having to change the code of how many energy models to loop through.
-	std::vector<energy_model> energy_models; 
+	std::vector<energy_model> energy_models;
 	energy_model *model_1;
 	energy_model *model_2;
 
@@ -91,7 +91,7 @@ int main (int argc, char *argv[]) {
 	char inputStructure1[MAXSLEN];
 	char inputStructure2[MAXSLEN];
 	char inputStructure[MAXSLEN];
-	char* inputPath; 
+	char* inputPath;
 	inputPath = (char*) malloc(sizeof(char) * 1000);
 
 	char* outputPath;
@@ -99,7 +99,7 @@ int main (int argc, char *argv[]) {
 
 	int model_1_Type = -1;
 	int model_2_Type = -1;
-	
+
 	bool sequence1Found = false;
 	bool structure1Found = false;
 	bool sequence2Found = false;
@@ -109,7 +109,7 @@ int main (int argc, char *argv[]) {
 	bool errorFound = false;
 	bool type1Found = false;
 	bool type2Found = false;
-	
+
 	int option;
 
 	//kevin: june 23 2017 https://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Option-Example.html
@@ -217,11 +217,11 @@ int main (int argc, char *argv[]) {
 				inputPathFound = true;
 				break;
 			case 'o':
-				strcpy(outputPath, optarg); 
+				strcpy(outputPath, optarg);
 				//printf("access: %d\n",access(outputPath, F_OK));
 				if(access(outputPath, F_OK) != -1) { //if file already exist
 					addTimestamp(&outputPath);
-				}	
+				}
 				outputPathFound = true;
 				break;
 			case 'e':
@@ -234,7 +234,7 @@ int main (int argc, char *argv[]) {
 				if(model_1_Type < 0){
 					printf("Model Type is invalid\n");
 					errorFound = true;
-					break;		
+					break;
 				}
 				type1Found = true;
 				break;
@@ -248,7 +248,7 @@ int main (int argc, char *argv[]) {
 				if(model_2_Type < 0){
 					printf("Model Type is invalid\n");
 					errorFound = true;
-					break;		
+					break;
 				}
 				type2Found = true;
 				break;
@@ -311,7 +311,7 @@ int main (int argc, char *argv[]) {
 	if(outputPathFound && inputPathFound){
 		addPath(&outputPath, inputPath);
 		//printf("out path: %s\n",outputPath);
-		
+
 	}
 
 	//kevin: june 23 2017
@@ -323,7 +323,8 @@ int main (int argc, char *argv[]) {
 
 	strcpy(sequence, inputSequence1);
 	if(KEVIN_DEBUG){
-		strcat(sequence, "AAAAA");
+		strcat(sequence, "XXXXX");
+		//linker_length = 0;
 	}else{
 		strcat(sequence, linker);
 	}
@@ -392,7 +393,7 @@ int main (int argc, char *argv[]) {
 		fill_data_structures_with_new_parameters_emodel ("./simfold/params/parameters_DP09.txt", &energy_model);
 	}
 
-	
+
 	//energy = hfold_emodel(sequence, restricted, structure, &energy_models);
 	//kevin july 13 changed to call hfold_interacting_emodel instead of hfold_emodel
 	energy = hfold_interacting_emodel(sequence, restricted, structure, &energy_models);
@@ -415,7 +416,7 @@ int main (int argc, char *argv[]) {
 		}
 	}
 
-	
+
 
 	if(outputPathFound){
 		FILE* fp;
@@ -424,8 +425,8 @@ int main (int argc, char *argv[]) {
 			fprintf(fp,"Sequence: %s\n",sequence);
 			fprintf(fp,"Input_structure: %s\n",inputStructure);
 			fprintf(fp,"Output_structure: %s\n",structure);
-			fprintf(fp,"Energy: %.2lf\n",energy);	
-			fclose(fp);	
+			fprintf(fp,"Energy: %.2lf\n",energy);
+			fclose(fp);
 		}
 	}else{
 		printf ("Seq: %s\n", sequence);
@@ -465,7 +466,7 @@ int validateModelType(char* type){
 	if(strcmp(type, "DNA") == 0){
 		return DNA;
 	}
-	//kevin 30 June 2017 
+	//kevin 30 June 2017
 	//added PMO
 	if(strcmp(type, "PMO") == 0){
 		return PMO;
