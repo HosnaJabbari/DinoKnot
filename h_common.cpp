@@ -21,6 +21,7 @@
 //kevin
 #include <vector>
 #include <utility>
+#include "init.h"
 
 /*
  * This function is just the same as detect_original_pairs
@@ -1037,7 +1038,33 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	double energy = 0;
 	int length = strlen(sequence);
 	char simfold_structure[length];
-	simfold_emodel(sequence,restricted, simfold_structure, energy_models);
+
+	//set up for simfold
+	std::vector<energy_model> simfold_energy_models; 
+	energy_model *model_1;
+	energy_model *model_2;
+	model_1 = new energy_model();
+	init_energy_model(model_1); // Initializes the data structures in the energy model.
+	model_1->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
+	model_1->dna_or_rna = (*energy_models)[0].dna_or_rna; // what to fold: RNA or DNA
+	model_1->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
+	simfold_energy_models.push_back(*model_1);
+
+	model_2 = new energy_model();
+	init_energy_model(model_2); // Initializes the data structures in the energy model.
+	model_2->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
+	model_2->dna_or_rna = (*energy_models)[0].dna_or_rna; // what to fold: RNA or DNA
+	model_2->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
+	simfold_energy_models.push_back(*model_2);
+
+	for (auto &simfold_energy_model : simfold_energy_models) {
+		init_data_emodel ("./simfold", simfold_energy_model.config_file.c_str(), simfold_energy_model.dna_or_rna, simfold_energy_model.temperature, &simfold_energy_model);
+		fill_data_structures_with_new_parameters_emodel ("./simfold/params/turner_parameters_fm363_constrdangles.txt", &simfold_energy_model);
+		fill_data_structures_with_new_parameters_emodel ("./simfold/params/parameters_DP09_chopped.txt", &simfold_energy_model);
+	}
+	//end of setup for simfold
+
+	simfold_emodel(sequence,restricted, simfold_structure, &simfold_energy_models);
 	printf("G1: %s\nG2: %s\n",restricted,simfold_structure);
 	//^ G' simfold_structure <- SimFold(S sequence, G restricted)
 	char* G_updated;
@@ -1052,6 +1079,31 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 
 //kevin 18 July
 double method4_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	//set up for simfold
+	std::vector<energy_model> simfold_energy_models; 
+	energy_model *model_1;
+	energy_model *model_2;
+	model_1 = new energy_model();
+	init_energy_model(model_1); // Initializes the data structures in the energy model.
+	model_1->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
+	model_1->dna_or_rna = (*energy_models)[0].dna_or_rna; // what to fold: RNA or DNA
+	model_1->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
+	simfold_energy_models.push_back(*model_1);
+
+	model_2 = new energy_model();
+	init_energy_model(model_2); // Initializes the data structures in the energy model.
+	model_2->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
+	model_2->dna_or_rna = (*energy_models)[0].dna_or_rna; // what to fold: RNA or DNA
+	model_2->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
+	simfold_energy_models.push_back(*model_2);
+
+	for (auto &simfold_energy_model : simfold_energy_models) {
+		init_data_emodel ("./simfold", simfold_energy_model.config_file.c_str(), simfold_energy_model.dna_or_rna, simfold_energy_model.temperature, &simfold_energy_model);
+		fill_data_structures_with_new_parameters_emodel ("./simfold/params/turner_parameters_fm363_constrdangles.txt", &simfold_energy_model);
+		fill_data_structures_with_new_parameters_emodel ("./simfold/params/parameters_DP09_chopped.txt", &simfold_energy_model);
+	}
+	//end of setup for simfold
+
 	double energy = 0;
 	int length = strlen(sequence);
 	char* G_updated;
@@ -1077,7 +1129,7 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 		strncpy(substructure, substructure+i,j);
 		substructure[j] = '\0';
 		//^Gk
-		simfold_emodel(subsequence, substructure, simfold_structure, energy_models);
+		simfold_emodel(subsequence, substructure, simfold_structure, &simfold_energy_models);
 		//^ SimFold(Sk,Gk,Gk',energy_models)
 		char Gp_k_updated[length];
 		obtainRelaxedStems(substructure, simfold_structure, Gp_k_updated);
@@ -1092,31 +1144,44 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 //kevin 18 July
 double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
 	
-	W_final *min_fold = new W_final (sequence, restricted, energy_models);
-	if (min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
+	W_final *hfold_min_fold = new W_final (sequence, restricted, energy_models);
+	if (hfold_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
 	double energy = 0;
 	double min_energy = 0;
 	char final_structure[strlen(sequence)];
 
 	printf("method 1\n");
-	min_energy = min_fold->hfold_emodel();
-	min_fold->return_structure (structure);
+	min_energy = hfold_min_fold->hfold_emodel();
+	hfold_min_fold->return_structure (structure);
 	strcpy(final_structure,structure);
 
 	/*
+	W_final *hfold_pk_min_fold = new W_final (sequence, restricted, energy_models);
+	if (hfold_pk_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
 	printf("method 2\n");
-	energy = min_fold->hfold_pkonly_emodel();
-	min_fold->return_structure (structure);
+	energy = hfold_pk_min_fold->hfold_pkonly_emodel();
+	hfold_pk_min_fold->return_structure (structure);
 	if(energy < min_energy){
 		min_energy = energy;
 		strcpy(final_structure,structure);
 	}
 	*/
 	
-	//printf("method 3\n");
-	//min_energy = method3_emodel(sequence,restricted,structure,energy_models);
+	/*
+	printf("method 3\n");
+	energy = method3_emodel(sequence,restricted,structure,energy_models);
+	if(energy < min_energy){
+		min_energy = energy;
+		strcpy(final_structure,structure);
+	}
+	*/
 	/*
 	printf("method 4\n");
+	energy = method4_emodel(sequence,restricted,structure,energy_models);
+	if(energy < min_energy){
+		min_energy = energy;
+		strcpy(final_structure,structure);
+	}
 	*/
 	printf("final_structure: %s\n min_energy: %lf\n",final_structure,min_energy);
 	return min_energy;
