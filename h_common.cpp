@@ -1047,14 +1047,14 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	init_energy_model(model_1); // Initializes the data structures in the energy model.
 	model_1->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
 	model_1->dna_or_rna = (*energy_models)[0].dna_or_rna; // what to fold: RNA or DNA
-	model_1->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
+	model_1->temperature = (*energy_models)[0].temperature; // temperature: any integer or real number between 0 and 100 Celsius
 	simfold_energy_models.push_back(*model_1);
 
 	model_2 = new energy_model();
 	init_energy_model(model_2); // Initializes the data structures in the energy model.
 	model_2->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
-	model_2->dna_or_rna = (*energy_models)[0].dna_or_rna; // what to fold: RNA or DNA
-	model_2->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
+	model_2->dna_or_rna = (*energy_models)[1].dna_or_rna; // what to fold: RNA or DNA
+	model_2->temperature = (*energy_models)[1].temperature; // temperature: any integer or real number between 0 and 100 Celsius
 	simfold_energy_models.push_back(*model_2);
 
 	for (auto &simfold_energy_model : simfold_energy_models) {
