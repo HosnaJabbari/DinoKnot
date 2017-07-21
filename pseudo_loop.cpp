@@ -113,8 +113,16 @@ pseudo_loop::~pseudo_loop()
     delete [] weakly_closed;
     delete [] not_paired_all;
 
-    delete [] border_bs;
-    delete [] border_bps;
+    // Ian Wark July 21 2017
+    // border_bs is array of arrays
+    // need to delete sub arrays as well
+    for(int i = 0; i < nb_nucleotides; i++) {
+        delete border_bs[i];
+        delete border_bps[i];
+    }
+
+    delete border_bs;
+    delete border_bps;
     delete [] index;
     delete [] int_sequence;
 }
