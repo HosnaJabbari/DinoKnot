@@ -48,7 +48,7 @@ void detect_original_pairs_arcs(char *structure, int *p_table, int *arc_table)
 // PRE:  structure contains the desired structure
 // POST: pairs will contain the index of each base pair
 //               or -1 if it does not pair
-// 
+//
 {
 		//printf("structure: %s\n", structure);
         int i, j, struct_len;
@@ -121,7 +121,7 @@ void detect_original_pairs_arcs(char *structure, int *p_table, int *arc_table)
 						break;
 			  }
           }
-	
+
 	/* for (i=137; i<struct_len; i++){
 			printf("p_table[%d] = %d AND arc_table[%d]=%d \n\n",i,p_table[i],i,arc_table[i]);
 		}
@@ -131,7 +131,7 @@ void detect_original_pairs_arcs(char *structure, int *p_table, int *arc_table)
             printf ("The given structure is not valid: %d more left parentheses than right parentheses\n", st.top);
             exit (1);
         }
-	
+
 }
 
 /**
@@ -441,6 +441,7 @@ void detect_border_bs(h_str_features *fres, int** border_bs, int nb_nucleotides)
  */
 
 void detect_border_bps(h_str_features *fres, int** border_bps, int nb_nucleotides){
+    // TODO ian should these be different if the i,l they are at is at linker (X) ?
 
 	int l, i;
 	for (l = 0; l < nb_nucleotides; l++){
@@ -547,7 +548,7 @@ void detect_h_structure_features (char *structure, h_str_features *f)
 		f[i].pair = i_pair;//p_table[i];
         f[i].arc = arc_table[i];
 
-		
+
         if (i_pair>i)//p_table[i] > i)
         {
             //f[i].pair = p_table[i]; //Hosna March 8, 2012, this statement seemed redundant! so removed
@@ -562,7 +563,7 @@ void detect_h_structure_features (char *structure, h_str_features *f)
 						printf("END OF THE LOOP \n");
 						printf("p_table[%d]=%d \n",i,p_table[i]);
 						printf("f[%d].pair = %d, f[%d].type = %c, f[%d].arc = %d \n",i,f[i].pair,i,f[i].type,i,f[i].arc);
-						
+
 					} */
                 continue;
             }
@@ -598,12 +599,12 @@ void detect_h_structure_features (char *structure, h_str_features *f)
                     f[i].bri[j] = bri[j];
             }
         }
-		
+
 		/* if (i>=136){
 							printf("END OF THE LOOP \n");
 							printf("p_table[%d]=%d \n",i,p_table[i]);
 							printf("f[%d].pair = %d, f[%d].type = %c, f[%d].arc = %d \n",i,f[i].pair,i,f[i].type,i,f[i].arc);
-							
+
 						} */
     }
     if (debug){
@@ -992,7 +993,7 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 		printf("%c %d\n",G2[d],G2_pair[d]);
 	}
 */
-	
+
 	int i = 0;
 	int j = 0;
 
@@ -1033,7 +1034,7 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 		}
 	}
 
-	
+
 }
 
 
@@ -1115,6 +1116,7 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	//end of setup for simfold
 
 	simfold_emodel(sequence,restricted, simfold_structure, &simfold_energy_models);
+
 	printf("G1: %s\nG2: %s\n",restricted,simfold_structure);
 	//^ G' simfold_structure <- SimFold(S sequence, G restricted)
 	char* G_updated;
@@ -1216,6 +1218,7 @@ void structure_intersection (char* G1, char* G_p) {
 //kevin 18 July
 //july 24: changed hfold, hfold_pkonly to a method; changed replaced final_structure with method1-4_structure
 double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+
 	double energy = 0;
 	double min_energy = 0;
 	char method1_structure[strlen(sequence)+1];
@@ -1243,6 +1246,7 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 		strcpy(structure,method3_structure);
 	}
 	*/
+
 	/*
 	printf("method 4\n");
 	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
@@ -1282,7 +1286,7 @@ double hfold_interacting(char *sequence, char *restricted, char *structure){
     if (min_fold == NULL) giveup ("Cannot allocate memory", "HFoldInteracting");
     double energy = min_fold->hfold_interacting();
     min_fold->return_structure (structure);
-    return energy;   
+    return energy;
 }
 
 double hfold_interacting_pkonly(char *sequence, char *restricted, char *structure){
@@ -1318,7 +1322,7 @@ void print_emodel(energy_model *model) {
 	printf("\nstack\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "stack.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
@@ -1336,12 +1340,12 @@ void print_emodel(energy_model *model) {
 		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
-	printf("\ntstackh\n");	
+	printf("\ntstackh\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "tstackh.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
@@ -1359,12 +1363,12 @@ void print_emodel(energy_model *model) {
 		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
-	printf("\ntstacki\n");	
+	printf("\ntstacki\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "tstacki.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
@@ -1382,13 +1386,13 @@ void print_emodel(energy_model *model) {
 		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
-	printf("\nint11\n");	
+	printf("\nint11\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "int11.txt");
-	ioFile = fopen(filePath, "w");	
-	fprintf(ioFile, "{");	
+	ioFile = fopen(filePath, "w");
+	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
 		for(int col2 = 0; col2 < NUCL; col2++) {
@@ -1413,25 +1417,25 @@ void print_emodel(energy_model *model) {
 		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
-	printf("\nint21\n");	
+	printf("\nint21\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "int21.txt");
-	ioFile = fopen(filePath, "w");	
-	fprintf(ioFile, "{");	
+	ioFile = fopen(filePath, "w");
+	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
-		fprintf(ioFile, "{");	
+		fprintf(ioFile, "{");
 		for(int col2 = 0; col2 < NUCL; col2++) {
-			fprintf(ioFile, "{");	
+			fprintf(ioFile, "{");
 			for(int col3 = 0; col3 < NUCL; col3++) {
-				fprintf(ioFile, "{");	
+				fprintf(ioFile, "{");
 				for(int col4 = 0; col4 < NUCL; col4++) {
-					fprintf(ioFile, "{");	
+					fprintf(ioFile, "{");
 					for(int col5 = 0; col5 < NUCL; col5++) {
-						fprintf(ioFile, "{");	
+						fprintf(ioFile, "{");
 						for(int col6 = 0; col6 < NUCL; col6++) {
-							fprintf(ioFile, "{");	
+							fprintf(ioFile, "{");
 							for(int col7 = 0; col7 < NUCL; col7++) {
 								fprintf(ioFile, "%d", model->int21[col1][col2][col3][col4][col5][col6][col7]);
 							}
@@ -1448,13 +1452,13 @@ void print_emodel(energy_model *model) {
 		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
-	printf("\nint22\n");	
+	printf("\nint22\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "int22.txt");
-	ioFile = fopen(filePath, "w");	
-	fprintf(ioFile, "{");	
+	ioFile = fopen(filePath, "w");
+	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
 		for(int col2 = 0; col2 < NUCL; col2++) {
@@ -1487,12 +1491,12 @@ void print_emodel(energy_model *model) {
 		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
-	printf("\ndangle_top\n");	
+	printf("\ndangle_top\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "dangle_top.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
@@ -1506,118 +1510,118 @@ void print_emodel(energy_model *model) {
 		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
-	printf("\ndangle_bot\n");	
+	printf("\ndangle_bot\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "dangle_bot.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
 		for(int col2 = 0; col2 < NUCL; col2++) {
 			fprintf(ioFile, "{");
 			for(int col3 = 0; col3 < NUCL; col3++) {
-				fprintf(ioFile, "%d", model->dangle_bot[col1][col2][col3]);	
+				fprintf(ioFile, "%d", model->dangle_bot[col1][col2][col3]);
 			}
 			fprintf(ioFile, "}");
 		}
 		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\ninternal_penalty_by_size\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "internal_penalty_by_size.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < MAXLOOP+1; col1++) {
 		fprintf(ioFile, "%d", model->internal_penalty_by_size[col1]);
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\nbulge_penalty_by_size\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "bulge_penalty_by_size.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < MAXLOOP+1; col1++) {
 		fprintf(ioFile, "%d", model->bulge_penalty_by_size[col1]);
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\nhairpin_penalty_by_size\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "hairpin_penalty_by_size.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < MAXLOOP+1; col1++) {
 		fprintf(ioFile, "%d", model->hairpin_penalty_by_size[col1]);
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\ntriloop\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "triloop.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < MAXTRILOOPNO; col1++) {
 		fprintf(ioFile, "{%s%d}", model->triloop[col1].seq, model->triloop[col1].energy);
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\ntloop\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "tloop.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < MAXTRILOOPNO; col1++) {
 		fprintf(ioFile, "{%s%d}", model->tloop[col1].seq, model->tloop[col1].energy);
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\nnb_triloops\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "nb_triloops.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "%d", model->nb_triloops);
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\nnb_tloops\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "nb_tloops.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "%d", model->nb_tloops);
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\nspecial_hl\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "special_hl.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < MAX_SPECIAL_LOOP_NO; col1++) {
 		fprintf(ioFile, "{%s%d}", model->special_hl[col1].seq, model->special_hl[col1].energy);
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\nnb_special_hl\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "nb_special_hl.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "%d", model->nb_special_hl);
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\nint11_experimental_addition\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "int11_experimental_addition.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
@@ -1643,15 +1647,15 @@ void print_emodel(energy_model *model) {
 		fprintf(ioFile, "z}");
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\nint21_experimental_addition\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "int21_experimental_addition.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
-		fprintf(ioFile, "{");		
+		fprintf(ioFile, "{");
 		for(int col2 = 0; col2 < NUCL; col2++) {
 			fprintf(ioFile, "{");
 			for(int col3 = 0; col3 < NUCL; col3++) {
@@ -1678,12 +1682,12 @@ void print_emodel(energy_model *model) {
 		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\nint22_experimental_addition\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "int22_experimental_addition.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
@@ -1717,12 +1721,12 @@ void print_emodel(energy_model *model) {
 		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\nbulge1\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "bulge1.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
@@ -1744,24 +1748,24 @@ void print_emodel(energy_model *model) {
 		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\ninternal_asymmetry\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "internal_asymmetry.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < MAXLOOP+1; col1++) {
 		fprintf(ioFile, "%d", model->internal_asymmetry[col1]);
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
-	
+	fclose(ioFile);
+
 	printf("\nenthalpy_stack\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_stack.txt");
-	ioFile = fopen(filePath, "w");	
-	fprintf(ioFile, "{");	
+	ioFile = fopen(filePath, "w");
+	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
 		for(int col2 = 0; col2 < NUCL; col2++) {
@@ -1778,12 +1782,12 @@ void print_emodel(energy_model *model) {
 		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\nenthalpy_tstackh\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_tstackh.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
@@ -1801,12 +1805,12 @@ void print_emodel(energy_model *model) {
 		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
-	fclose(ioFile);	
+	fclose(ioFile);
 
 	printf("\nenthalpy_tstacki\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_tstacki.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
@@ -1829,7 +1833,7 @@ void print_emodel(energy_model *model) {
 	printf("\nenthalpy_int11\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_int11.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
@@ -1860,8 +1864,8 @@ void print_emodel(energy_model *model) {
 	printf("\nenthalpy_int21\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_int21.txt");
-	ioFile = fopen(filePath, "w");	
-	fprintf(ioFile, "{");	
+	ioFile = fopen(filePath, "w");
+	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
 		for(int col2 = 0; col2 < NUCL; col2++) {
@@ -1892,10 +1896,10 @@ void print_emodel(energy_model *model) {
 	fprintf(ioFile, "}");
 	fclose(ioFile);
 
-	printf("\nenthalpy_int22\n");	
+	printf("\nenthalpy_int22\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_int22.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
@@ -1934,7 +1938,7 @@ void print_emodel(energy_model *model) {
 	printf("\nenthalpy_dangle_top\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_dangle_top.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
@@ -1945,7 +1949,7 @@ void print_emodel(energy_model *model) {
 			}
 			fprintf(ioFile, "}");
 		}
-		fprintf(ioFile, "}");	
+		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
 	fclose(ioFile);
@@ -1953,7 +1957,7 @@ void print_emodel(energy_model *model) {
 	printf("\nenthalpy_dangle_bot\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_dangle_bot.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < NUCL; col1++) {
 		fprintf(ioFile, "{");
@@ -1964,7 +1968,7 @@ void print_emodel(energy_model *model) {
 			}
 			fprintf(ioFile, "}");
 		}
-		fprintf(ioFile, "}");	
+		fprintf(ioFile, "}");
 	}
 	fprintf(ioFile, "}");
 	fclose(ioFile);
@@ -1972,7 +1976,7 @@ void print_emodel(energy_model *model) {
 	printf("\nenthalpy_internal_penalty_by_size\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_internal_penalty_by_size.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < MAXLOOP+1; col1++) {
 		fprintf(ioFile, "%d", model->enthalpy_internal_penalty_by_size[col1]);
@@ -1983,18 +1987,18 @@ void print_emodel(energy_model *model) {
 	printf("\nenthalpy_bulge_penalty_by_size\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_bulge_penalty_by_size.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < MAXLOOP+1; col1++) {
 		fprintf(ioFile, "%d", model->enthalpy_bulge_penalty_by_size[col1]);
 	}
 	fprintf(ioFile, "}");
 	fclose(ioFile);
-		
+
 	printf("\nenthalpy_hairpin_penalty_by_size\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_hairpin_penalty_by_size.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < MAXLOOP+1; col1++) {
 		fprintf(ioFile, "%d", model->enthalpy_hairpin_penalty_by_size[col1]);
@@ -2003,7 +2007,7 @@ void print_emodel(energy_model *model) {
 	printf("\nenthalpy_triloop\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_triloop.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < MAXTRILOOPNO; col1++) {
 		fprintf(ioFile, "{%s%d}", model->enthalpy_triloop[col1].seq, model->enthalpy_triloop[col1].energy);
@@ -2014,7 +2018,7 @@ void print_emodel(energy_model *model) {
 	printf("\nenthalpy_tloop\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_tloop.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "{");
 	for(int col1 = 0; col1 < MAXTRILOOPNO; col1++) {
 		fprintf(ioFile, "{%s%d}", model->enthalpy_tloop[col1].seq, model->enthalpy_tloop[col1].energy);
@@ -2025,14 +2029,14 @@ void print_emodel(energy_model *model) {
 	printf("\nenthalpy_nb_triloops\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_nb_triloops.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "%d", model->enthalpy_nb_triloops);
 	fclose(ioFile);
 
 	printf("\nenthalpy_nb_tloops\n");
 	strcpy(filePath, "./temp/");
 	strcat(filePath, "enthalpy_nb_tloops.txt");
-	ioFile = fopen(filePath, "w");	
+	ioFile = fopen(filePath, "w");
 	fprintf(ioFile, "%d", model->enthalpy_nb_tloops);
 	fclose(ioFile);
 }

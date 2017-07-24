@@ -20,14 +20,14 @@
 
 // define the model
 
-// Instead of doing this, I have 3 levels of parsi_xxx variables. 
+// Instead of doing this, I have 3 levels of parsi_xxx variables.
 //  This permits me to add things on top of the SIMPLE (turner99) model, and also to compile only once
 #define PARSI 1
 #define LAVISH 0
 #define T99 2
-#define ZL 3 
+#define ZL 3
 // ZL is the Zhiang_Liang_2008 model for bulge and internal loop length. The number of features is the same as for parsimonious. I only incorporate the slope.
-#define HLI 4   
+#define HLI 4
 // HLI = HALF LAVISH for internal loops: meaning I add the parsi, + the internal loops that appear in the experiments, but no more.
 // the implementation for HLI is not finished
 #define T99_LAVISH  5
@@ -38,7 +38,7 @@
 // #else
 // #define MODEL SIMPLE
 // #endif
-// 
+//
 // #define SIMPLE 0        // the model with 363 parameters that I used in the ISMB 2007 paper
 // #define EXTENDED 1
 
@@ -99,7 +99,7 @@
 // for MultiFold
 #define MAXNUMSEQ      50
 
-#define NUM_DANG       48        // there are 48 dangling ends 
+#define NUM_DANG       48        // there are 48 dangling ends
 
 #define A               0
 #define C               1
@@ -113,10 +113,10 @@
 #define MAXLOOP         30           // max size for internal loops, hairpin loops and bulge loops
 
 #define MAXLOOP_ASYM    29
-#define MAX_EXP_ASYM    4           
+#define MAX_EXP_ASYM    4
 // the maximum internal loop asymmetry (abs(size1-size2)) for which we have experimental values
 
-// max loop size for which tabulated values are experimentally determined 
+// max loop size for which tabulated values are experimentally determined
 //    for len > MAX, the following formula is applied: lenpen (len) = lenpen(MAX) + 1.75 RT*log(1.0*len/MAX));
 //    RT = 1.75 * 1.98717 / 1000 * 310.15;
 
@@ -129,8 +129,8 @@
 #define MAXLOOP_I_PARSI   10
 #define MAXLOOP_B_PARSI   3
 
-#define MAXLOOP_H_LAVISH     30 
-#define MAXLOOP_I_LAVISH     30 
+#define MAXLOOP_H_LAVISH     30
+#define MAXLOOP_I_LAVISH     30
 #define MAXLOOP_B_LAVISH     30
 
 #define MAXTRILOOPNO    100          // max number of hairpin loops of size 3
@@ -156,7 +156,7 @@
 #define FREE            'W'         // this base is free to be paired or unpaired to other base
 #define LOOP            'V'         // closes a loop
 
-#define M_FM            'F'         // regular FM from the multiloop decomposition of Wutchy et al 
+#define M_FM            'F'         // regular FM from the multiloop decomposition of Wutchy et al
 #define M_FM1           'A'         // regular FM1 from the multiloop decomposition of Wutchy et al
 
 #define M_FM_LINK       'P'         // special FM adapted from FM = the multiloop decomposition of Wutchy et al
@@ -165,6 +165,10 @@
 // Structure types. Might not be used anymore.
 #define OLIGO	"AO"
 #define GENE	"GE"
+
+// Hosna November 16, 2015
+// Kevin and Ian July 20 2017 moved from h_global
+#define START_HYBRID_PENALTY 310.0
 
 #endif
 
