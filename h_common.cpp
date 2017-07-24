@@ -913,8 +913,10 @@ int h_create_string_params(){
 double hfold(char *sequence, char *restricted, char *structure){
 	W_final *min_fold = new W_final (sequence, restricted);
 	if (min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
+
 	double energy = min_fold->hfold();
     min_fold->return_structure (structure);
+
     delete min_fold;
     return energy;
 }
@@ -1051,7 +1053,7 @@ void simfold_emodel(char *sequence, char *restricted, char *structure, std::vect
 	simfold->call_simfold_emodel();
 	printf("simfold 2\n");
 	simfold->return_structure (structure);
-  
+
   delete simfold;
 }
 
@@ -1063,8 +1065,8 @@ double method1_emodel(char *sequence, char *restricted, char *structure, std::ve
 	printf("method 1\n");
 	energy = hfold_min_fold->hfold_emodel();
 	hfold_min_fold->return_structure (structure);
-  
-  delete min_fold;
+
+  delete hfold_min_fold;
 	return energy;
 }
 
@@ -1089,7 +1091,7 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 		if (hfold_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
 		energy = hfold_min_fold->hfold_emodel();
 		hfold_min_fold->return_structure (structure);
-    
+
     delete hfold_pk_min_fold;
     delete hfold_min_fold;
 		return energy;
@@ -1132,7 +1134,7 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	printf("1\n");
 
 	simfold_emodel(sequence,restricted, simfold_structure, &simfold_energy_models);
-  
+
 	printf("G1: %s\nG2: %s\n",restricted,simfold_structure);
 	//^ G' simfold_structure <- SimFold(S sequence, G restricted)
 	char* G_updated;
@@ -1142,10 +1144,10 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	//^Gupdated G_updated<- ObtainRelaxedStems(G restricted,G' simfold_structure)
 	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
 	printf("method3 energy: %lf\n",energy);
-  
+
   delete model_1;
   delete model_2;
-    
+
 	return energy;
 }
 
@@ -1159,14 +1161,14 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 	init_energy_model(model_1); // Initializes the data structures in the energy model.
 	model_1->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
 	model_1->dna_or_rna = (*energy_models)[0].dna_or_rna; // what to fold: RNA or DNA
-	model_1->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
+	model_1->temperature = (*energy_models)[0].temperature; // temperature: any integer or real number between 0 and 100 Celsius
 	simfold_energy_models.push_back(*model_1);
 
 	model_2 = new energy_model();
 	init_energy_model(model_2); // Initializes the data structures in the energy model.
 	model_2->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
-	model_2->dna_or_rna = (*energy_models)[0].dna_or_rna; // what to fold: RNA or DNA
-	model_2->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
+	model_2->dna_or_rna = (*energy_models)[1].dna_or_rna; // what to fold: RNA or DNA
+	model_2->temperature = (*energy_models)[1].temperature; // temperature: any integer or real number between 0 and 100 Celsius
 	simfold_energy_models.push_back(*model_2);
 
 	for (auto &simfold_energy_model : simfold_energy_models) {
@@ -1215,9 +1217,11 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
 
 
-	delete simfold;
+	delete model_1;
+	delete model_2;
+
 	free(G_updated);
-  
+
 	return energy;
 }
 
@@ -1285,8 +1289,10 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 double hfold_pkonly(char *sequence, char *restricted, char *structure){
 	W_final *min_fold = new W_final (sequence, restricted);
 	if (min_fold == NULL) giveup ("Cannot allocate memory", "HFoldPKonly");
+
 	double energy = min_fold->hfold_pkonly();
     min_fold->return_structure (structure);
+
     delete min_fold;
     return energy;
 }
@@ -1295,8 +1301,10 @@ double hfold_pkonly(char *sequence, char *restricted, char *structure){
 double hfold_pkonly_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
 	W_final *min_fold = new W_final (sequence, restricted, energy_models);
 	if (min_fold == NULL) giveup ("Cannot allocate memory", "HFoldPKonly");
+
 	double energy = min_fold->hfold_pkonly_emodel();
     min_fold->return_structure (structure);
+
     delete min_fold;
     return energy;
 }
@@ -1306,9 +1314,10 @@ double hfold_pkonly_emodel(char *sequence, char *restricted, char *structure, st
 double hfold_interacting(char *sequence, char *restricted, char *structure){
     W_final *min_fold = new W_final (sequence, restricted);
     if (min_fold == NULL) giveup ("Cannot allocate memory", "HFoldInteracting");
+
     double energy = min_fold->hfold_interacting();
     min_fold->return_structure (structure);
- 
+
     delete min_fold;
     return energy;
 }
@@ -1316,8 +1325,10 @@ double hfold_interacting(char *sequence, char *restricted, char *structure){
 double hfold_interacting_pkonly(char *sequence, char *restricted, char *structure){
     W_final *min_fold = new W_final (sequence, restricted);
     if (min_fold == NULL) giveup ("Cannot allocate memory", "HFoldInteracting");
+
     double energy = min_fold->hfold_interacting_pkonly();
     min_fold->return_structure (structure);
+
     delete min_fold;
     return energy;
 }

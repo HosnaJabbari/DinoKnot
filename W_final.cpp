@@ -19,7 +19,7 @@
 #include "structs.h"
 #include "common.h"
 
-#define debug 0
+#define debug 1
 
 
 
@@ -654,8 +654,6 @@ double W_final::call_simfold_emodel(){
 	double energy;
     int i, j;
 
-    printf("call 0\n");
-
     str_features *fres;
     if ((fres = new str_features[nb_nucleotides]) == NULL) giveup ("Cannot allocate memory", "str_features");
     // detect the structure features
@@ -666,8 +664,6 @@ double W_final::call_simfold_emodel(){
         if (fres[i].pair != -1)
             printf ("%d pairs %d, type %c\n", i, fres[i].pair, fres[i].type);
     */
-
-    printf("call 1\n");
 
     for (j=0; j < nb_nucleotides; j++)
     {
@@ -683,12 +679,10 @@ double W_final::call_simfold_emodel(){
         // if I put this before V calculation, WM(i,j) cannot be calculated, because it returns infinity
         VM->compute_energy_WM_restricted_emodel (j, fres, energy_models);
     }
-    printf("call 2\n");
     for (j=1; j < nb_nucleotides; j++)
     {
         compute_W_restricted_simfold_emodel (j, fres);
     }
-    printf("call 3\n");
     energy = W[nb_nucleotides-1]/100.0;
 
     if (debug)
@@ -712,19 +706,25 @@ double W_final::call_simfold_emodel(){
 
     seq_interval *cur_interval = stack_interval;
 
+    printf("call 5\n");
+
     while ( cur_interval != NULL)
     {
+        printf("start the while\n");
         stack_interval = stack_interval->next;
         backtrack_restricted_simfold_emodel (cur_interval, fres);
         delete cur_interval;    // this should make up for the new in the insert_node
         cur_interval = stack_interval;
     }
+    printf("call 6\n");
     if (debug)
     {
         print_result ();
     }
     delete [] fres;
     //delete stack_interval;
+
+    printf("call 7\n");
     return energy;
 }
 
@@ -832,7 +832,7 @@ double W_final::hfold_pkonly_emodel(){
 
 	// The energy calculation is now placed after backtrack is run because we need the contents of f[] (aka typedef struct minimum_fold) in order to determine if the final structure is pseudoknoted or not. If it is then we add the start_hybrid_penalty to our final energy and divide it by 100.
 	energy = this->W[nb_nucleotides-1];
-	
+
 	// Ian Wark and Kevin July 20 2017
 	// We don't need this anymore. It is now in s_energy_matrix::compute_energy_restricted_pkonly_emodel after calculating hairpin
 /*
@@ -1493,7 +1493,7 @@ int W_final::compute_W_br2_restricted_pkonly_emodel (int j, str_features *fres, 
 	// j is done here to save time if it is invalid
 	if (int_sequence[j] == X || int_sequence[j-1] == X)
         return INF;
-  
+
 	must_choose_this_branch = 0;
     for (i=0; i<=j-1; i++) {
         // don't allow pairing with restricted i's
@@ -4127,7 +4127,7 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 
 			if (debug)
 				printf ("\t (%d,%d) M_WM\n", i,j);
-      
+
 			// TODO ian should this be commented out?
 			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
 			//	return;
@@ -4723,9 +4723,9 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
         printf ("\t (%d,%d) M_WM\n", i,j);
 
       // TODO ian should this be commented out?
-			//AP
-			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
-			//	return;
+        //AP
+        //if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
+        //	return;
 
 	//AP
 	for (auto &emodel : *energy_models) {
@@ -4763,7 +4763,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
         //AP
 		for (auto &emodel : *energy_models) {
 			model = &emodel;
-			model->energy_value = v->get_energy(i,j-1) +
+			model->energy_value = V->get_energy(i,j-1) +
 				AU_penalty_emodel (int_sequence[i], int_sequence[j-1], model) +
 				model->dangle_top [int_sequence[j-1]] [int_sequence[i]] [int_sequence[j]] +
 				model->misc.multi_helix_penalty +
@@ -4789,13 +4789,13 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 						2*model->misc.multi_free_base_penalty;
 				}
 				tmp = emodel_energy_function (i, j, energy_models);
-
           if (tmp < min)
           {
               min = tmp;
               best_row = 4;
           }
       }
+      printf("3\n");
       if (fres[i].pair <= -1)
       {
           //AP
@@ -4809,6 +4809,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
               best_row = 5;
           }
       }
+      printf("4\n");
       if (fres[j].pair <= -1)
       {
           //AP
@@ -4833,6 +4834,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 best_row = 7;
               }
         }
+        printf("chose best_row\n");
       switch (best_row)
         {
           case 1: insert_node (i, j, LOOP); break;
@@ -4899,6 +4901,7 @@ void W_final::backtrack_restricted_pmo (seq_interval *cur_interval, str_features
 				case STACK:
 			//if (type == STACK)
 				{
+
 					f[i].type = STACK;
 					f[j].type = STACK;
 					if (i+1 < j-1)
