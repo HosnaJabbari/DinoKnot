@@ -956,6 +956,18 @@ void find_disjoint_substructure(char* structure, std::vector< std::pair<int,int>
 	}
 }
 
+//kevin 24 July
+//is empty if structure does not contain [
+//is not empty if structure contain [
+int is_empty_structure(char* structure){
+	for(int i=0; i<strlen(structure);i++){
+		if(structure[i] == '['){
+			return 0;
+		}
+	}
+	return 1;
+}
+
 //kevin 18 July
 int paired_structure(int i, int j, int* pair_index){
 	if( (pair_index[i] == j) && (pair_index[j] == i) ){
@@ -1031,6 +1043,44 @@ void simfold_emodel(char *sequence, char *restricted, char *structure, std::vect
 	if (simfold == NULL) giveup ("Cannot allocate memory", "method3 Simfold");
 	simfold->call_simfold();
 	simfold->return_structure (structure);
+}
+
+//kevin 24 July
+double method1_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	W_final *hfold_min_fold = new W_final (sequence, restricted, energy_models);
+	if (hfold_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
+	double energy = 0;
+	printf("method 1\n");
+	energy = hfold_min_fold->hfold_emodel();
+	hfold_min_fold->return_structure (structure);
+	return energy;
+}
+
+//kevin 24 July
+double method2_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	double energy = 0;
+	//structure = NULL;
+	W_final *hfold_pk_min_fold = new W_final (sequence, restricted, energy_models);
+	if (hfold_pk_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
+	printf("method 2\n");
+	energy = hfold_pk_min_fold->hfold_pkonly_emodel();
+	//printf("done pkonly\n");
+	hfold_pk_min_fold->return_structure (structure);
+	//printf("done hfold_pk_min_fold->return_structure (structure);   %s\n",structure);
+	if(is_empty_structure(structure)){
+		return energy;
+	}else{
+		char* G_prime;
+		G_prime = (char*) malloc(sizeof(char)*strlen(sequence));
+		structure_intersection(structure,G_prime);
+		W_final *hfold_min_fold = new W_final (sequence, G_prime, energy_models);
+		if (hfold_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
+		energy = hfold_min_fold->hfold_emodel();
+		hfold_min_fold->return_structure (structure);
+		return energy;
+	}
+	
+	
 }
 
 //kevin 18 July
@@ -1141,52 +1191,69 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 	return energy;
 }
 
+//kevin 24 july 2017
+//modification from HFold_iterative: bool find_new_structure (char *input_structure, char *output_structure)
+//changed it from using regex_search and regex_replace to just a for loop
+//changed the name and required arguments to make it more readable and similar to the paper
+//added special case to ignore '.' that is the linker
+//take the intersection of G1 and G (G1-G) and store in G_p
+void structure_intersection (char* G1, char* G_p) {
+	strcpy(G_p,G1);
+	for(int i=0; i< strlen(G1); i++){
+		if(i<linker_pos || i>linker_pos+linker_length-1){
+			if(G1[i] == '.' || G1[i] == '(' || G1[i] == ')'){
+				G_p[i] = '_';
+			}else if(G1[i] == '['){
+				G_p[i] = '(';
+			}else if(G1[i] == ']'){
+				G_p[i] = ')';
+			}
+		}
+	}
+}
+
+
 //kevin 18 July
+//july 24: changed hfold, hfold_pkonly to a method; changed replaced final_structure with method1-4_structure
 double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
-	
-	W_final *hfold_min_fold = new W_final (sequence, restricted, energy_models);
-	if (hfold_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
 	double energy = 0;
 	double min_energy = 0;
-	char final_structure[strlen(sequence)];
+	char method1_structure[strlen(sequence)+1];
+	char method2_structure[strlen(sequence)+1];
+	char method3_structure[strlen(sequence)+1];
+	char method4_structure[strlen(sequence)+1];
 
 	printf("method 1\n");
-	min_energy = hfold_min_fold->hfold_emodel();
-	hfold_min_fold->return_structure (structure);
-	strcpy(final_structure,structure);
+	min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
+	strcpy(structure,method1_structure);
 
-	/*
-	W_final *hfold_pk_min_fold = new W_final (sequence, restricted, energy_models);
-	if (hfold_pk_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
+
 	printf("method 2\n");
-	energy = hfold_pk_min_fold->hfold_pkonly_emodel();
-	hfold_pk_min_fold->return_structure (structure);
+	energy = method2_emodel(sequence,restricted,method2_structure,energy_models);
 	if(energy < min_energy){
 		min_energy = energy;
-		strcpy(final_structure,structure);
+		strcpy(structure,method2_structure);
 	}
-	*/
 	
 	/*
 	printf("method 3\n");
-	energy = method3_emodel(sequence,restricted,structure,energy_models);
+	energy = method3_emodel(sequence,restricted,method3_structure,energy_models);
 	if(energy < min_energy){
 		min_energy = energy;
-		strcpy(final_structure,structure);
+		strcpy(structure,method3_structure);
 	}
 	*/
 	/*
 	printf("method 4\n");
-	energy = method4_emodel(sequence,restricted,structure,energy_models);
+	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
 	if(energy < min_energy){
 		min_energy = energy;
-		strcpy(final_structure,structure);
+		strcpy(structure,method4_structure);
 	}
 	*/
-	printf("final_structure: %s\n min_energy: %lf\n",final_structure,min_energy);
+	printf("final_structure: %s\n min_energy: %lf\n",structure,min_energy);
 	return min_energy;
 }
-
 
 
 // Hosna, May 3rd, 2012
