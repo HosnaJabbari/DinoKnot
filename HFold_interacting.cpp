@@ -323,7 +323,8 @@ int main (int argc, char *argv[]) {
 
 	strcpy(sequence, inputSequence1);
 	if(KEVIN_DEBUG){
-		strcat(sequence, "AAAAA");
+		strcat(sequence, "XXXXX");
+		//linker_length = 0;
 	}else{
 		strcat(sequence, linker);
 	}

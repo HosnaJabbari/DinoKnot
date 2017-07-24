@@ -16,11 +16,12 @@
  ***************************************************************************/
 
 // a class for hairpin loop related functions
- 
+
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
 #include <stdlib.h>
+#include <iostream>
 
 #include "constants.h"
 #include "structs.h"
@@ -42,7 +43,7 @@ s_hairpin_loop::s_hairpin_loop (char * char_seq, int *seq, int length)
     for (int i=0; i < length; i++)
     {
         toupper(csequence[i]);
-    }    
+    }
     sequence = seq;     // just refer it from where it is in memory
     seqlen = length;
 }
@@ -66,11 +67,11 @@ PARAMTYPE s_hairpin_loop::compute_energy (int i, int j)
 
     size = j-i-1;
 
-     // TODO 
+     // TODO
      //if (size < 3)
      //    return INF;
      //return 0;
- 
+
     if (size < 3)
         return INF;
 
@@ -100,7 +101,7 @@ PARAMTYPE s_hairpin_loop::compute_energy (int i, int j)
                     bonus = triloop[k].energy;
             }
         }
-        
+
         // check to see it is a tetraloop in tloop
         else if (size == 4)
         {
@@ -137,7 +138,7 @@ PARAMTYPE s_hairpin_loop::compute_energy (int i, int j)
             sequence[i] == G && sequence[j] == U)
             special_bonus += misc.hairpin_GGG;
     }
-    
+
 
     // check for the special case of "poly-C" hairpin loop
     is_poly_C = 1;
@@ -159,7 +160,7 @@ PARAMTYPE s_hairpin_loop::compute_energy (int i, int j)
 
     energy = penalty_by_size (size, 'H') +
              terminal_mismatch_energy + bonus + special_bonus + AU_pen;
-    
+
     // add the loss
     if (pred_pairings != NULL)
     {
@@ -182,26 +183,26 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted (int i, int j, str_features 
     int k, is_poly_C;
     int size;
     char seq[10] = "";
-    
+
     // don't allow the formation of a hairpin if there are restricted base pairs inside
     if (exists_restricted (i, j, fres))
         return INF;
-    
+
     size = j-i-1;
     if (size < 3)
     {
-        if (fres[i].pair == j)      
+        if (fres[i].pair == j)
             return 0;
             //return (AU_penalty (sequence[i], sequence[j]));   // not sure if we should return AU_penalty - I think we should, since we do it in get_energy and count_energy (Apr 18, 2008)
-            
-        else    
+
+        else
             return INF;
-    }        
+    }
     else if (size == 3)
     {
         terminal_mismatch_energy = 0;
         AU_pen = AU_penalty (sequence[i], sequence[j]);
-		
+
     }
     else
     {
@@ -210,7 +211,7 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted (int i, int j, str_features 
                     [sequence[j]]
                     [sequence[i+1]]
                     [sequence[j-1]];
-		
+
     }
 
     if (parsi_special == T99)
@@ -225,7 +226,7 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted (int i, int j, str_features 
                     bonus = triloop[k].energy;
             }
         }
-        
+
         // check to see it is a tetraloop in tloop
         else if (size == 4)
         {
@@ -261,7 +262,7 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted (int i, int j, str_features 
             sequence[i] == G && sequence[j] == U)
             special_bonus += misc.hairpin_GGG;
     }
-    
+
 
     // check for the special case of "poly-C" hairpin loop
     is_poly_C = 1;
@@ -284,17 +285,17 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted (int i, int j, str_features 
 	if (fres[i].pair == j && fres[j].pair ==i && !can_pair(sequence[i],sequence[j])){
 		//printf("in H(%d,%d) non-canonical: terminal_mistmatch = %d \n", i,j,terminal_mismatch_energy);
 		terminal_mismatch_energy = MIN(0,terminal_mismatch_energy);
-		
+
 	}
 	/*if (fres[i].pair == j && fres[j].pair ==i && !can_pair(sequence[i],sequence[j])){
 		printf("in H(%d,%d) non-canonical: penalty by size = %d, bonus = %d, special_bonus=%d  and AU_pen\n", i,j,penalty_by_size(size, 'H'),bonus, special_bonus, AU_pen);
-		
+
 	}*/
 
     energy = penalty_by_size (size, 'H') +
              terminal_mismatch_energy + bonus + special_bonus + AU_pen;
-	
-	
+
+
     return energy;
 
 }
@@ -311,36 +312,47 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_emodel (int i, int j, str_fe
     int k, is_poly_C;
     int size;
     char seq[10] = "";
-    
+
+    /*
 	//AP
 	if (sequence[i] == X || sequence[j] == X)
-		return 0;
+		return 0; // Why 0 not INF? doesn't reach this case anyways
 	if (sequence[i+1] == X || sequence[j+1] == X || sequence[i-1] == X || sequence[j-1] == X)
+		return INF;
+    */
+
+    // if i or j is linker (X), cannot be anything
+    if (sequence[i] == X || sequence[j] == X)
+		return INF;
+	if (sequence[i+1] == X || sequence[j-1] == X)
 		return INF;
 
     // don't allow the formation of a hairpin if there are restricted base pairs inside
     if (exists_restricted (i, j, fres))
         return INF;
-    
+
 	// This if for the pmo case of when a linker is used to connect two sequences.
 	size = j-i-1;
-	if (i == 597 && j == 605){
-		terminal_mismatch_energy = 0;
-	}
 
+    // Ian Wark and Kevin July 20 2017
+    // TODO ian should we reduce size by linker_length if crossing
+    // This causes it to be different from HFold, but HFold is not necessarily correct for interacting molecules
+    // The reason doing this thing makes sense, is that the length of the linker will greatly change result
+    // We apply our hybrid molecule penalty after this function
 	if ((linker_pos != 0) && (i < linker_pos) && (j > linker_pos+linker_length-1)) {
 		size -= linker_length;
 	}
 
+
     if (size < 3)
     {
-        if (fres[i].pair == j || ((linker_pos != 0) && (i < linker_pos) && (j > linker_pos+linker_length-1)))      
+        if (fres[i].pair == j || ((linker_pos != 0) && (i < linker_pos) && (j > linker_pos+linker_length-1)))
             return 0;
             //return (AU_penalty (sequence[i], sequence[j]));   // not sure if we should return AU_penalty - I think we should, since we do it in get_energy and count_energy (Apr 18, 2008)
-            
-        else    
+
+        else
             return INF;
-    }        
+    }
     else if (size == 3)
     {
         terminal_mismatch_energy = 0;
@@ -353,7 +365,7 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_emodel (int i, int j, str_fe
                     [sequence[j]]
                     [sequence[i+1]]
                     [sequence[j-1]];
-		
+
     }
 
     if (parsi_special == T99)
@@ -368,7 +380,7 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_emodel (int i, int j, str_fe
                     bonus = model->triloop[k].energy;
             }
         }
-        
+
         // check to see it is a tetraloop in tloop
         else if (size == 4)
         {
@@ -404,7 +416,7 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_emodel (int i, int j, str_fe
             sequence[i] == G && sequence[j] == U)
             special_bonus += model->misc.hairpin_GGG;
     }
-    
+
 
     // check for the special case of "poly-C" hairpin loop
     is_poly_C = 1;
@@ -427,11 +439,11 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_emodel (int i, int j, str_fe
 	if (fres[i].pair == j && fres[j].pair ==i && !can_pair(sequence[i],sequence[j])){
 		//printf("in H(%d,%d) non-canonical: terminal_mistmatch = %d \n", i,j,terminal_mismatch_energy);
 		terminal_mismatch_energy = MIN(0,terminal_mismatch_energy);
-		
+
 	}
 	/*if (fres[i].pair == j && fres[j].pair ==i && !can_pair(sequence[i],sequence[j])){
 		printf("in H(%d,%d) non-canonical: penalty by size = %d, bonus = %d, special_bonus=%d  and AU_pen\n", i,j,penalty_by_size(size, 'H'),bonus, special_bonus, AU_pen);
-		
+
 	}*/
 
     energy = penalty_by_size_emodel (size, 'H', model) +
@@ -452,7 +464,7 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_pmo (int i, int j, str_featu
     int size;
 	double pmo_percentage, rna_percentage;
 	char seq[10] = "";
-	
+
 	get_pmo_usage_percentages(i, j, &pmo_percentage, &rna_percentage);
 	if (pmo_percentage == 0 && rna_percentage == 0)
 		return 0;
@@ -460,7 +472,7 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_pmo (int i, int j, str_featu
     // don't allow the formation of a hairpin if there are restricted base pairs inside
     if (exists_restricted (i, j, fres))
         return INF;
-    
+
     size = j-i-1;
 	if (pmo_percentage == 0.25 && rna_percentage == 0.75) {
 		size -= linker_length;
@@ -468,23 +480,23 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_pmo (int i, int j, str_featu
 
     if (size < 3)
     {
-        if (fres[i].pair == j || (pmo_percentage == 0.25 && rna_percentage == 0.75))      
+        if (fres[i].pair == j || (pmo_percentage == 0.25 && rna_percentage == 0.75))
             return 0;
             //return (AU_penalty (sequence[i], sequence[j]));   // not sure if we should return AU_penalty - I think we should, since we do it in get_energy and count_energy (Apr 18, 2008)
-            
-        else    
+
+        else
             return INF;
-    }        
+    }
     else if (size == 3)
     {
         terminal_mismatch_energy = 0;
         AU_pen = (PARAMTYPE) (pmo_percentage*AU_penalty_pmo(sequence[i], sequence[j]) + rna_percentage*AU_penalty(sequence[i], sequence[j]));
-		
+
     }
     else
-    {	
-        terminal_mismatch_energy = (PARAMTYPE) 
-			(pmo_percentage*tstackh_pmo[sequence[i]] [sequence[j]] [sequence[i+1]] [sequence[j-1]] + 
+    {
+        terminal_mismatch_energy = (PARAMTYPE)
+			(pmo_percentage*tstackh_pmo[sequence[i]] [sequence[j]] [sequence[i+1]] [sequence[j-1]] +
 			rna_percentage*tstackh[sequence[i]] [sequence[j]] [sequence[i+1]] [sequence[j-1]]);
     }
 
@@ -493,7 +505,7 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_pmo (int i, int j, str_featu
         // check if it is a triloop
         if (size == 3) {
             substr (csequence, i, j, seq);
-            
+
 			for (k=0; k < nb_triloops; k++) {
                 if (strcmp (seq, triloop[k].seq) == 0)
                     bonus = triloop[k].energy;
@@ -506,7 +518,7 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_pmo (int i, int j, str_featu
 
 			bonus = (PARAMTYPE) (pmo_percentage*bonus_pmo + rna_percentage*bonus);
         }
-        
+
         // check to see it is a tetraloop in tloop
         else if (size == 4) {
             substr (csequence, i, j, seq);
@@ -547,10 +559,10 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_pmo (int i, int j, str_featu
     // to come back - Vienna doesn't have it
     if (i > 1) {
         if (sequence[i-2] == G && sequence[i-1] == G && sequence[i] == G && sequence[j] == U)
-            special_bonus += (PARAMTYPE) 
+            special_bonus += (PARAMTYPE)
 				(pmo_percentage*misc_pmo.hairpin_GGG + rna_percentage*misc.hairpin_GGG);
     }
-    
+
 
     // check for the special case of "poly-C" hairpin loop
     is_poly_C = 1;
@@ -567,8 +579,8 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_pmo (int i, int j, str_featu
         if (size == 3)
             special_bonus += (PARAMTYPE) (pmo_percentage*misc_pmo.hairpin_c3 + rna_percentage*misc.hairpin_c3);
         else
-            special_bonus += (PARAMTYPE) 
-				(pmo_percentage*(misc_pmo.hairpin_c2 + misc_pmo.hairpin_c1 * size) + 
+            special_bonus += (PARAMTYPE)
+				(pmo_percentage*(misc_pmo.hairpin_c2 + misc_pmo.hairpin_c1 * size) +
 				rna_percentage*(misc.hairpin_c2 + misc.hairpin_c1 * size));
     }
 
@@ -576,12 +588,12 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_pmo (int i, int j, str_featu
 	if (fres[i].pair == j && fres[j].pair ==i && !can_pair(sequence[i],sequence[j])){
 		terminal_mismatch_energy = MIN(0,terminal_mismatch_energy);
 	}
-	
-	penalty_size = (PARAMTYPE) 
+
+	penalty_size = (PARAMTYPE)
 		(pmo_percentage*penalty_by_size_pmo(size, 'H') + rna_percentage*penalty_by_size(size, 'H'));
 
     energy = penalty_size + terminal_mismatch_energy + bonus + special_bonus + AU_pen + PMO_RNA_penalty;
-	
+
     return energy;
 }
 
@@ -603,7 +615,7 @@ PARAMTYPE s_hairpin_loop::get_energy (int i, int j, int* sequence, char *csequen
 
     size = j-i-1;
 
-    // TODO 
+    // TODO
 //      if (size < 3)
 //          return INF;
 //      return 500;
@@ -645,11 +657,11 @@ PARAMTYPE s_hairpin_loop::get_energy (int i, int j, int* sequence, char *csequen
             substr (csequence, i, j, seq);
             for (k=0; k < nb_triloops; k++)
             {
-                if (strcmp (seq, triloop[k].seq) == 0)            
+                if (strcmp (seq, triloop[k].seq) == 0)
                     bonus = triloop[k].energy;
             }
         }
-    
+
         // check to see it is a tetraloop in tloop
         else if (size == 4)
         {
@@ -673,7 +685,7 @@ PARAMTYPE s_hairpin_loop::get_energy (int i, int j, int* sequence, char *csequen
             }
         }
     }
-    
+
     // special_bonus from miscloop file
     // check if we have to apply "GGG" loop special bonus
     // Vienna package doesn't have it
@@ -707,7 +719,7 @@ PARAMTYPE s_hairpin_loop::get_energy (int i, int j, int* sequence, char *csequen
 
     energy = penalty_by_size (size, 'H') +
              terminal_mismatch_energy + bonus + special_bonus + AU_pen;
-    //printf ("term_me = %lf\n", terminal_mismatch_energy);     
+    //printf ("term_me = %lf\n", terminal_mismatch_energy);
     return energy;
 }
 
@@ -727,7 +739,7 @@ void s_hairpin_loop::count_get_energy (int i, int j, int* sequence, char *cseque
     int k, is_poly_C;
     int size;
     char seq[10] = "";
-      
+
     size = j-i-1;
 
     // TODO: not sure this is correct
@@ -790,7 +802,7 @@ void s_hairpin_loop::count_get_energy (int i, int j, int* sequence, char *cseque
             //printf ("Energy tstackh equiv %lf\n", energy);
         }
     }
-                                                                                                                                                    
+
     if (parsi_special == T99)
     {
         // check if it is a triloop
@@ -810,7 +822,7 @@ void s_hairpin_loop::count_get_energy (int i, int j, int* sequence, char *cseque
                 }
             }
         }
-                                    
+
         // check to see it is a tetraloop in tloop
         if (size == 4)
         {
@@ -844,7 +856,7 @@ void s_hairpin_loop::count_get_energy (int i, int j, int* sequence, char *cseque
                     counter[index]++;
                     energy += special_hl[k].energy;
                     break;
-        
+
                 }
             }
         }
@@ -853,7 +865,7 @@ void s_hairpin_loop::count_get_energy (int i, int j, int* sequence, char *cseque
   // special_bonus from miscloop file
     // check if we have to apply "GGG" loop special bonus
     // to come back - Vienna doesn't have it
-                                                                                                                                                             
+
     if (parsi_special == T99 || parsi_special == LAVISH || parsi_special == T99_LAVISH)
     {
         if (i > 1)
@@ -867,13 +879,13 @@ void s_hairpin_loop::count_get_energy (int i, int j, int* sequence, char *cseque
                 energy += misc.hairpin_GGG;
             }
         }
-                                                                                                                                                                
-                                                                                                                                                                
+
+
         // check for the special case of "poly-C" hairpin loop
         is_poly_C = 1;
         for (k=i+1; k<j; k++)
         {
-                                                                                                                                                                
+
             if (sequence[k] != C)
             {
                 is_poly_C = 0;
@@ -901,11 +913,11 @@ void s_hairpin_loop::count_get_energy (int i, int j, int* sequence, char *cseque
             }
         }
     }
-                                                                                                                                                                
+
     //printf ("In COUNT, penalty size is %Lf\n",  penalty_by_size (size, 'H'));
     energy += penalty_by_size (size, 'H');
     count_penalty_by_size (size, 'H', counter);
-    
+
     PARAMTYPE energy2 = get_energy (i, j, sequence, csequence, NULL);
     if (fabs (energy/100.0-energy2/100.0) > 0.01)
     {
@@ -1015,7 +1027,7 @@ PARAMTYPE s_hairpin_loop::get_enthalpy (int i, int j, int* sequence, char *csequ
     }
 
     energy = penalty_by_size_enthalpy (size, 'H') +
-            terminal_mismatch_energy + bonus + special_bonus + AU_pen;    
+            terminal_mismatch_energy + bonus + special_bonus + AU_pen;
     return energy;
 }
 

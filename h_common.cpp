@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <iostream>
+
 #include "constants.h"
 #include "externs.h"
 #include "h_externs.h"
@@ -18,6 +20,10 @@
 // Hosna, November 16, 2015
 #include "hfold_interacting.h"
 
+//kevin
+#include <vector>
+#include <utility>
+#include "init.h"
 
 /*
  * This function is just the same as detect_original_pairs
@@ -437,6 +443,7 @@ void detect_border_bs(h_str_features *fres, int** border_bs, int nb_nucleotides)
  */
 
 void detect_border_bps(h_str_features *fres, int** border_bps, int nb_nucleotides){
+    // TODO ian should these be different if the i,l they are at is at linker (X) ?
 
 	int l, i;
 	for (l = 0; l < nb_nucleotides; l++){
@@ -923,6 +930,48 @@ double hfold_emodel(char *sequence, char *restricted, char *structure, std::vect
 }
 */
 
+//kevin 19 july (verified by Mahyar 19 july 2017)
+//count+1 when open bracket, count-1 when close bracket
+//whgen count is 0, we have a substructure
+//assume valid structure
+void find_disjoint_substructure(char* structure, std::vector< std::pair<int,int> > &pair_vector){
+	int length = strlen(structure);
+	int count = 0;
+	int first_time = 1; //flag for first time getting a open bracket for substructure
+	int i = 0;
+	int j = 0;
+	for(int k=0; k<length;k++){
+		if(structure[k] == '(' || structure[k] == '['){
+			if(first_time && count == 0){
+				first_time = 0;
+				i = k;
+			}
+			count += 1;
+
+		}else if(structure[k] == ')' || structure[k] == ']'){
+			count -= 1;
+			j = k;
+			if(count == 0){
+				std::pair <int,int> ij_pair (i,j);
+				pair_vector.push_back(ij_pair);
+				first_time = 1;
+			}
+		}
+	}
+}
+
+//kevin 24 July
+//is empty if structure does not contain [
+//is not empty if structure contain [
+int is_empty_structure(char* structure){
+	for(int i=0; i<strlen(structure);i++){
+		if(structure[i] == '['){
+			return 0;
+		}
+	}
+	return 1;
+}
+
 //kevin 18 July
 int paired_structure(int i, int j, int* pair_index){
 	if( (pair_index[i] == j) && (pair_index[j] == i) ){
@@ -991,68 +1040,244 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 
 }
 
+
 //kevin 18 July
-double method3_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+void simfold_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	std::cout << "simfold sequence: " << sequence << std::endl;
+	std::cout << "restricted: " << restricted << std::endl;
 	W_final *simfold = new W_final (sequence, restricted, energy_models);
 	if (simfold == NULL) giveup ("Cannot allocate memory", "method3 Simfold");
-	double energy = 0;
+	printf("simfold 1\n");
+	simfold->call_simfold_emodel();
+	printf("simfold 2\n");
+	simfold->return_structure (structure);
+  
+  delete simfold;
+}
 
+//kevin 24 July
+double method1_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	W_final *hfold_min_fold = new W_final (sequence, restricted, energy_models);
+	if (hfold_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
+	double energy = 0;
+	printf("method 1\n");
+	energy = hfold_min_fold->hfold_emodel();
+	hfold_min_fold->return_structure (structure);
+  
+  delete min_fold;
+	return energy;
+}
+
+//kevin 24 July
+double method2_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	double energy = 0;
+	//structure = NULL;
+	W_final *hfold_pk_min_fold = new W_final (sequence, restricted, energy_models);
+	if (hfold_pk_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
+	energy = hfold_pk_min_fold->hfold_pkonly_emodel();
+	//printf("done pkonly\n");
+	hfold_pk_min_fold->return_structure (structure);
+	//printf("done hfold_pk_min_fold->return_structure (structure);   %s\n",structure);
+	if(is_empty_structure(structure)){
+    delete hfold_pk_min_fold;
+		return energy;
+	}else{
+		char* G_prime;
+		G_prime = (char*) malloc(sizeof(char)*strlen(sequence));
+		structure_intersection(structure,G_prime);
+		W_final *hfold_min_fold = new W_final (sequence, G_prime, energy_models);
+		if (hfold_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
+		energy = hfold_min_fold->hfold_emodel();
+		hfold_min_fold->return_structure (structure);
+    
+    delete hfold_pk_min_fold;
+    delete hfold_min_fold;
+		return energy;
+	}
+
+
+}
+
+//kevin 18 July
+double method3_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	double energy = 0;
 	int length = strlen(sequence);
 	char simfold_structure[length];
 
-	simfold->call_simfold();
-	simfold->return_structure (structure);
-	strcpy(simfold_structure,structure);
+	//set up for simfold
+	std::vector<energy_model> simfold_energy_models;
+	energy_model *model_1;
+	energy_model *model_2;
+	model_1 = new energy_model();
+	init_energy_model(model_1); // Initializes the data structures in the energy model.
+	model_1->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
+	model_1->dna_or_rna = (*energy_models)[0].dna_or_rna; // what to fold: RNA or DNA
+	model_1->temperature = (*energy_models)[0].temperature; // temperature: any integer or real number between 0 and 100 Celsius
+	simfold_energy_models.push_back(*model_1);
+
+	model_2 = new energy_model();
+	init_energy_model(model_2); // Initializes the data structures in the energy model.
+	model_2->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
+	model_2->dna_or_rna = (*energy_models)[1].dna_or_rna; // what to fold: RNA or DNA
+	model_2->temperature = (*energy_models)[1].temperature; // temperature: any integer or real number between 0 and 100 Celsius
+	simfold_energy_models.push_back(*model_2);
+
+	for (auto &simfold_energy_model : simfold_energy_models) {
+		init_data_emodel ("./simfold", simfold_energy_model.config_file.c_str(), simfold_energy_model.dna_or_rna, simfold_energy_model.temperature, &simfold_energy_model);
+		fill_data_structures_with_new_parameters_emodel ("./simfold/params/turner_parameters_fm363_constrdangles.txt", &simfold_energy_model);
+		fill_data_structures_with_new_parameters_emodel ("./simfold/params/parameters_DP09_chopped.txt", &simfold_energy_model);
+	}
+	//end of setup for simfold
+
+	printf("1\n");
+
+	simfold_emodel(sequence,restricted, simfold_structure, &simfold_energy_models);
+  
 	printf("G1: %s\nG2: %s\n",restricted,simfold_structure);
 	//^ G' simfold_structure <- SimFold(S sequence, G restricted)
-
 	char* G_updated;
 	G_updated = (char*) malloc(sizeof(char) * strlen(sequence));
 	obtainRelaxedStems(restricted ,simfold_structure, G_updated);
 	printf("Gupdated %s\n",G_updated);
 	//^Gupdated G_updated<- ObtainRelaxedStems(G restricted,G' simfold_structure)
-
 	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
-
-	delete simfold;
-	free(G_updated);
+	printf("method3 energy: %lf\n",energy);
+  
+  delete model_1;
+  delete model_2;
+    
 	return energy;
 }
 
 //kevin 18 July
-double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+double method4_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	//set up for simfold
+	std::vector<energy_model> simfold_energy_models;
+	energy_model *model_1;
+	energy_model *model_2;
+	model_1 = new energy_model();
+	init_energy_model(model_1); // Initializes the data structures in the energy model.
+	model_1->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
+	model_1->dna_or_rna = (*energy_models)[0].dna_or_rna; // what to fold: RNA or DNA
+	model_1->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
+	simfold_energy_models.push_back(*model_1);
 
-	W_final *min_fold = new W_final (sequence, restricted, energy_models);
-	if (min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
-	double energy = 0;
-	double min_energy = 0;
-	char final_structure[strlen(sequence)];
+	model_2 = new energy_model();
+	init_energy_model(model_2); // Initializes the data structures in the energy model.
+	model_2->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
+	model_2->dna_or_rna = (*energy_models)[0].dna_or_rna; // what to fold: RNA or DNA
+	model_2->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
+	simfold_energy_models.push_back(*model_2);
 
-	printf("method 1\n");
-	min_energy = min_fold->hfold_emodel();
-	min_fold->return_structure (structure);
-	strcpy(final_structure,structure);
-
-	/*
-	printf("method 2\n");
-	energy = min_fold->hfold_pkonly_emodel();
-	min_fold->return_structure (structure);
-	if(energy < min_energy){
-		min_energy = energy;
-		strcpy(final_structure,structure);
+	for (auto &simfold_energy_model : simfold_energy_models) {
+		init_data_emodel ("./simfold", simfold_energy_model.config_file.c_str(), simfold_energy_model.dna_or_rna, simfold_energy_model.temperature, &simfold_energy_model);
+		fill_data_structures_with_new_parameters_emodel ("./simfold/params/turner_parameters_fm363_constrdangles.txt", &simfold_energy_model);
+		fill_data_structures_with_new_parameters_emodel ("./simfold/params/parameters_DP09_chopped.txt", &simfold_energy_model);
 	}
-	*/
+	//end of setup for simfold
 
-	//printf("method 3\n");
-	//min_energy = method3_emodel(sequence,restricted,structure,energy_models);
-	/*
-	printf("method 4\n");
-	*/
-	printf("final_structure: %s\n min_energy: %lf\n",final_structure,min_energy);
-	delete min_fold;
-	return min_energy;
+	double energy = 0;
+	int length = strlen(sequence);
+	char* G_updated;
+	G_updated = (char*) malloc(sizeof(char) * strlen(sequence));
+	int k = 1;
+	//^k <- 1
+	strcpy(G_updated, restricted);
+	//^Gupdated <- G
+	std::vector< std::pair<int,int> > disjoint_substructure_index; //contain pair(i,j) in a vector, ij are index of begin and end of substructure
+	find_disjoint_substructure(restricted, disjoint_substructure_index);
+	//^get disjoint substructure
+	int i = 0;
+	int j = 0;
+	for(auto current_substructure_index : disjoint_substructure_index){
+		i = current_substructure_index.first;
+		j = current_substructure_index.second;
+		char subsequence[length+1];
+		char substructure[length+1];
+		char simfold_structure[length+1];
+
+		strncpy(subsequence, sequence+i,j+1);
+		subsequence[j+1] = '\0';
+		//^Sk
+		strncpy(substructure, restricted+i,j+1);
+		substructure[j+1] = '\0';
+		//^Gk
+
+		simfold_emodel(subsequence, substructure, simfold_structure, &simfold_energy_models);
+		//^ SimFold(Sk,Gk,Gk',energy_models)
+		char Gp_k_updated[length];
+		obtainRelaxedStems(substructure, simfold_structure, Gp_k_updated);
+		//^obtainRelaxedStems(Gk,Gk',G'kupdated)
+		//todo: add in code here
+		//Gupdated <- Gupdated U G'kupdated
+	}
+
+	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
+
+
+	delete simfold;
+	free(G_updated);
+  
+	return energy;
 }
 
+//kevin 24 july 2017
+//modification from HFold_iterative: bool find_new_structure (char *input_structure, char *output_structure)
+//changed it from using regex_search and regex_replace to just a for loop
+//changed the name and required arguments to make it more readable and similar to the paper
+//added special case to ignore '.' that is the linker
+//take the intersection of G1 and G (G1-G) and store in G_p
+void structure_intersection (char* G1, char* G_p) {
+	strcpy(G_p,G1);
+	for(int i=0; i< strlen(G1); i++){
+		if(i<linker_pos || i>linker_pos+linker_length-1){
+			if(G1[i] == '.' || G1[i] == '(' || G1[i] == ')'){
+				G_p[i] = '_';
+			}else if(G1[i] == '['){
+				G_p[i] = '(';
+			}else if(G1[i] == ']'){
+				G_p[i] = ')';
+			}
+		}
+	}
+}
+
+
+//kevin 18 July
+//july 24: changed hfold, hfold_pkonly to a method; changed replaced final_structure with method1-4_structure
+double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+
+	double energy = 0;
+	double min_energy = INF;
+	char method1_structure[strlen(sequence)+1];
+	char method2_structure[strlen(sequence)+1];
+	char method3_structure[strlen(sequence)+1];
+	char method4_structure[strlen(sequence)+1];
+
+
+	min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
+	strcpy(structure,method1_structure);
+
+	energy = method2_emodel(sequence,restricted,method2_structure,energy_models);
+	if(energy < min_energy){
+		min_energy = energy;
+		strcpy(structure,method2_structure);
+	}
+
+	energy = method3_emodel(sequence,restricted,method3_structure,energy_models);
+	if(energy < min_energy){
+		min_energy = energy;
+		strcpy(structure,method3_structure);
+  }
+
+	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
+	if(energy < min_energy){
+		min_energy = energy;
+		strcpy(structure,method4_structure);
+	}
+
+	return min_energy;
+}
 
 
 // Hosna, May 3rd, 2012
@@ -1083,6 +1308,7 @@ double hfold_interacting(char *sequence, char *restricted, char *structure){
     if (min_fold == NULL) giveup ("Cannot allocate memory", "HFoldInteracting");
     double energy = min_fold->hfold_interacting();
     min_fold->return_structure (structure);
+ 
     delete min_fold;
     return energy;
 }

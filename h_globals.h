@@ -22,7 +22,5 @@ double ap_penalty = 341; //340;			//penalty for introducing a multiloop that spa
 double bp_penalty = 56; //40;			//base pair penalty for a multiloop that spans a band (0.4 Kcal/mol)
 double cp_penalty = 12; //0;			//penalty for unpaired base in a multiloop that spans a band
 
-// Hosna November 16, 2015
-double start_hybrid_penalty = 310.0;
 
 #endif /*H_GLOBALS_H_*/
