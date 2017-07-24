@@ -53,7 +53,7 @@ class W_final: public s_min_folding{
         // writes the predicted MFE structure into structure
 
         //kevin
-        void call_simfold_emodel();
+        double call_simfold();
 
     protected:
     	// Hosna: June 18th, 2007:

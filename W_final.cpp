@@ -637,6 +637,77 @@ double W_final::hfold_emodel() { //kevin debug
 }
 
 //kevin 18 July
+double W_final::call_simfold(){
+	double energy;
+    int i, j;
+
+    str_features *fres;
+    if ((fres = new str_features[nb_nucleotides]) == NULL) giveup ("Cannot allocate memory", "str_features");   
+    // detect the structure features  
+    detect_structure_features (restricted, fres);
+    
+    /*
+    for (i=0; i < nb_nucleotides; i++)
+        if (fres[i].pair != -1)
+            printf ("%d pairs %d, type %c\n", i, fres[i].pair, fres[i].type);
+    */
+    
+    for (j=0; j < nb_nucleotides; j++)
+    {
+        for (i=0; i<j; i++)
+        {            
+            // V(i,j) = infinity if i restricted or j restricted and pair of i is not j
+            if ((fres[i].pair > -1 && fres[i].pair !=j) || (fres[j].pair > -1 && fres[j].pair != i)) 
+                continue;              
+            if (fres[i].pair == -1 || fres[j].pair == -1)   // i or j MUST be unpaired
+                continue;
+            V->compute_energy_restricted_emodel (i, j, fres);
+        }
+        // if I put this before V calculation, WM(i,j) cannot be calculated, because it returns infinity
+        VM->compute_energy_WM_restricted_emodel (j, fres, energy_models);
+    }
+    for (j=1; j < nb_nucleotides; j++)
+    {
+        compute_W_restricted_emodel (j, fres);
+    }
+    energy = W[nb_nucleotides-1]/100.0;        
+    
+    if (debug)
+    {
+        for (j=1; j < nb_nucleotides; j++)
+        {
+            printf ("W(%d) = %d\n", j, W[j]);
+        }
+    }    
+     
+    // backtrack
+    // first add (0,n-1) on the stack
+    stack_interval = new seq_interval;
+    stack_interval->i = 0;
+    stack_interval->j = nb_nucleotides - 1;
+    stack_interval->energy = W[nb_nucleotides-1]; 
+    stack_interval->type = FREE;
+    stack_interval->next = NULL;
+
+    seq_interval *cur_interval = stack_interval;
+
+    while ( cur_interval != NULL)
+    {         
+        stack_interval = stack_interval->next;
+        backtrack_restricted_emodel (cur_interval, fres);
+        delete cur_interval;    // this should make up for the new in the insert_node
+        cur_interval = stack_interval;
+    }
+    if (debug)
+    {
+        print_result ();
+    }    
+    delete [] fres;
+    //delete stack_interval;
+    return energy;
+}
+
+/*
 void W_final::call_simfold_emodel(){
 	//kevin todo change theese to be actually multi model
 	char config_file[200];
@@ -651,6 +722,7 @@ void W_final::call_simfold_emodel(){
 	double energy = simfold_restricted (sequence, restricted, structure);
 	//printf("%s %s %s\n",sequence, restricted, structure);
 }
+*/
 
 
 //AP
