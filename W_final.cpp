@@ -637,7 +637,7 @@ double W_final::hfold_emodel() { //kevin debug
 }
 
 //kevin 18 July
-void W_final::call_simfold(){
+void W_final::call_simfold_emodel(){
 	//kevin todo change theese to be actually multi model
 	char config_file[200];
     strcpy (config_file, "./simfold/params/multirnafold.conf");
@@ -737,8 +737,7 @@ double W_final::hfold_pkonly_emodel(){
     }
 
     // Ian Wark and Kevin July 20 2017
-	// We don't need this anymore. It is now in s_energy_matrix::compute_energy_restricted_emodel after calculating hairpin
-	// TODO ian pkonly penalty
+	// We don't need this anymore. It is now in s_energy_matrix::compute_energy_restricted_pkonly_emodel after calculating hairpin
 /*
 	// The energy calculation is now placed after backtrack is run because we need the contents of f[] (aka typedef struct minimum_fold) in order to determine if the final structure is pseudoknoted or not. If it is then we add the start_hybrid_penalty to our final energy and divide it by 100.
 	energy = this->W[nb_nucleotides-1];
@@ -1211,13 +1210,25 @@ int W_final::compute_W_br2_restricted_pkonly_emodel (int j, str_features *fres, 
     int best_i = 0;
 	energy_model *model;
 
+    // Ian Wark and Kevin July 20 2017
+	// If j or j-1 is X it cannot be paired
+	// j is done here to save time if it is invalid
+	if (int_sequence[j] == X || int_sequence[j-1] == X)
+        return INF;
+
 	must_choose_this_branch = 0;
     for (i=0; i<=j-1; i++) {
         // don't allow pairing with restricted i's
         // added Jan 28, 2006
 
 		//AP
-		if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
+		//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
+		//	continue;
+
+		// Ian Wark and Kevin July 20 2017
+        // If i or i+1 is X it cannot be paired
+        // i is done here because it needs to be in the for
+        if (int_sequence[i] == X || int_sequence[i+1] == X )
 			continue;
 
 		for (auto &energy_model : *energy_models) {
@@ -2584,11 +2595,11 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				return;
 			f[i].pair = j;
 			f[j].pair = i;
-		if(KEVIN_DEBUG){
-			//AP
-			if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
-				return;
-		}
+		//if(KEVIN_DEBUG){
+		//	//AP
+		//	if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
+		//		return;
+		//}
 			// Hosna Jun. 28 2007
 			// if the pairing is part of original structure, put '(' and ')' in the structure
 			// otherwise make it '[' and ']'
@@ -3342,9 +3353,10 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 			f[i].pair = j;
 			f[j].pair = i;
 
+            // TODO ian should this be commented out?
 			//AP
-			if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
-				return;
+			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
+			//	return;
 
 			// Hosna Jun. 28 2007
 			// if the pairing is part of original structure, put '(' and ')' in the structure

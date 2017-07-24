@@ -250,7 +250,7 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
                 // requires there to be exactly 2 energy models
 				if( ((*energy_models)[0].dna_or_rna != (*energy_models)[1].dna_or_rna)              // If working with a hybrid molecule
 				&& (linker_pos != 0) && (i < linker_pos) && (j > linker_pos+linker_length-1)) {     // and this hairpin includes the linker,
-                    min_en[0] += START_HYBRID_PENALTY;                                              // add a hybrid molecule penalty
+                   min_en[0] += START_HYBRID_PENALTY;                                              // add a hybrid molecule penalty
 				}
 			}
 
@@ -325,6 +325,15 @@ void s_energy_matrix::compute_energy_restricted_pkonly_emodel (int i, int j, str
 	            	energy_model.energy_value = H->compute_energy_restricted_emodel (i, j, fres, &energy_model);
 				}
 				min_en[0] = emodel_energy_function (i, j, energy_models);
+
+				// Ian Wark and Kevin July 20 2017
+                // Hybrid molecule penalty
+                // This needs to be out here as we cannot tell if the energy models are different in H->compute_energy_restricted_emodel
+                // requires there to be exactly 2 energy models
+				if( ((*energy_models)[0].dna_or_rna != (*energy_models)[1].dna_or_rna)              // If working with a hybrid molecule
+				&& (linker_pos != 0) && (i < linker_pos) && (j > linker_pos+linker_length-1)) {     // and this hairpin includes the linker,
+                   min_en[0] += START_HYBRID_PENALTY;                                              // add a hybrid molecule penalty
+				}
 			}
 
 			for (auto &energy_model : *energy_models) {

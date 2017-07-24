@@ -249,6 +249,13 @@ void pseudo_loop::compute_energies(int i, int j)
 //AP
 void pseudo_loop::compute_energies_emodel(int i, int j, std::vector<energy_model> *energy_models)
 {
+    // Ian Wark and Kevin July 20 2017
+    // i and j cannot be X
+    // TODO ian - how specific should our linker cases be? should these be in each file?
+    //if (sequence[i] == X || sequence[j] == X || sequence[i+1] == X || sequence[j-1])
+    if (sequence[i] == X || sequence[j] == X )
+        return;
+
 	// Hosna, April 18th, 2007
 	// based on discussion with Anne, we changed WMB to case 2 and WMBP(containing the rest of the recurrences)
 	// Hosna, March 14, 2012, changed the position of computing VP from after BE to before WMBP
@@ -461,12 +468,10 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
 
 	if (i == j || weakly_closed[ij] == 1
-	 || fres[i].pair >= FRES_RESTRICTED_MIN || fres[j].pair >= FRES_RESTRICTED_MIN
-	 || can_pair(int_sequence[i],int_sequence[j]) != 1)	{
-			VP[ij] = INF;
-	//		if (debug){
-	//			printf("VP[%d,%d] = %d and can_pair(%d,%d) = %d\n", i,j, VP[ij],int_sequence[i],int_sequence[j],can_pair(int_sequence[i],int_sequence[j]));
-	//		}
+	|| fres[i].pair >= FRES_RESTRICTED_MIN || fres[j].pair >= FRES_RESTRICTED_MIN
+	|| can_pair(int_sequence[i],int_sequence[j]) != 1)	{
+
+            VP[ij] = INF;
 			return;
 	}
 	else{
