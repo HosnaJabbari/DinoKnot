@@ -1131,8 +1131,8 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	obtainRelaxedStems(restricted ,simfold_structure, G_updated);
 	printf("Gupdated %s\n",G_updated);
 	//^Gupdated G_updated<- ObtainRelaxedStems(G restricted,G' simfold_structure)
-
 	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
+	printf("method3 energy: %lf\n",energy);
 	return energy;
 }
 
@@ -1238,13 +1238,13 @@ void structure_intersection (char* G1, char* G_p) {
 double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
 
 	double energy = 0;
-	double min_energy = 0;
+	double min_energy = INF;
 	char method1_structure[strlen(sequence)+1];
 	char method2_structure[strlen(sequence)+1];
 	char method3_structure[strlen(sequence)+1];
 	char method4_structure[strlen(sequence)+1];
 
-/*
+
 	printf("start method 1\n");
 	min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
 	strcpy(structure,method1_structure);
@@ -1256,7 +1256,7 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 		min_energy = energy;
 		strcpy(structure,method2_structure);
 	}
-*/
+
 
 
 	printf("start method 3\n");
@@ -1267,14 +1267,14 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 	}
 
 
-/*
+
 	printf("start method 4\n");
 	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
 	if(energy < min_energy){
 		min_energy = energy;
 		strcpy(structure,method4_structure);
 	}
-*/
+
 
 	printf("final_structure: %s\n min_energy: %lf\n",structure,min_energy);
 	return min_energy;

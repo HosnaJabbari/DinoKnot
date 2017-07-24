@@ -816,11 +816,13 @@ double W_final::hfold_pkonly_emodel(){
         cur_interval = stack_interval;
     }
 
-    // Ian Wark and Kevin July 20 2017
-	// We don't need this anymore. It is now in s_energy_matrix::compute_energy_restricted_pkonly_emodel after calculating hairpin
-/*
+
 	// The energy calculation is now placed after backtrack is run because we need the contents of f[] (aka typedef struct minimum_fold) in order to determine if the final structure is pseudoknoted or not. If it is then we add the start_hybrid_penalty to our final energy and divide it by 100.
 	energy = this->W[nb_nucleotides-1];
+	
+	// Ian Wark and Kevin July 20 2017
+	// We don't need this anymore. It is now in s_energy_matrix::compute_energy_restricted_pkonly_emodel after calculating hairpin
+/*
 	for (i = 0; i < linker_pos; i++) {
 		if (f[i].pair > linker_pos+linker_length-1) {
 			energy += start_hybrid_penalty;
@@ -895,8 +897,7 @@ void W_final::compute_W_restricted_simfold_emodel (int j, str_features *fres)
     int m1 = W[j-1];
 	int m2;
     int must_choose_this_branch;
-
-    m2 = compute_W_br2_restricted_emodel (j, fres, must_choose_this_branch);
+    m2 = compute_W_br2_restricted_simfold_emodel (j, fres, must_choose_this_branch);
 	if (must_choose_this_branch) {
 		W[j] = m2;
 	} else {
@@ -1126,6 +1127,174 @@ int W_final::compute_W_br2_restricted (int j, str_features *fres, int &must_choo
                 }
             }
         }
+    }
+    //printf ("Chosen=%d, best_i=%d\n", chosen, best_i);
+    return min;
+}
+
+//kevin
+int W_final::compute_W_br2_restricted_simfold_emodel (int j, str_features *fres, int &must_choose_this_branch) {
+	int min = INF, tmp, energy_ij = INF, acc;
+    int i;
+    int chosen = 0;
+    int best_i = 0;
+	energy_model *model;
+
+	// Ian Wark and Kevin July 20 2017
+	// If j or j-1 is X it cannot be paired
+	// j is done here to save time if it is invalid
+	if (int_sequence[j] == X || int_sequence[j-1] == X)
+        return INF;
+
+
+	must_choose_this_branch = 0;
+    for (i=0; i<=j-1; i++) {
+        // don't allow pairing with restricted i's
+        // added Jan 28, 2006
+
+		//AP
+		//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
+		//	continue;
+
+		// Ian Wark and Kevin July 20 2017
+        // If i or i+1 is X it cannot be paired
+        // i is done here because it needs to be in the for
+        if (int_sequence[i] == X || int_sequence[i+1] == X )
+			continue;
+
+		for (auto &energy_model : *energy_models) {
+			model = &energy_model;
+			model->energy_value = min;
+		    // We don't need to make sure i and j don't have to pair with something else,
+		    //  because that would be INF - done in fold_sequence_restricted
+		    acc = (i-1>0) ? W[i-1]: 0;
+
+		    energy_ij = V->get_energy(i,j);
+/*
+			if (energy_ij != INF && j == 23) {//if (energy_ij != INF && j == 165) {
+				acc = (i-1>0) ? W[i-1]: 0;
+			}
+*/
+		    if (energy_ij < INF)
+		    {
+		        tmp = energy_ij + AU_penalty_emodel (int_sequence[i], int_sequence[j], model) + acc;
+		        if (tmp < model->energy_value)
+		        {
+		            model->energy_value = tmp;
+		            chosen = 21;
+					best_i = i;
+		            if (fres[i].pair == j){
+						must_choose_this_branch = 1;
+					} else {
+						must_choose_this_branch = 0;
+					}
+				}
+		    }
+
+		    // I have to condition on  fres[i].pair <= -1 to make sure that i can be unpaired
+		    if (fres[i].pair <= -1 && i+1 < j)
+		    {
+		        energy_ij = V->get_energy(i+1,j);
+		        if (energy_ij < INF)
+		        {
+		            tmp = energy_ij + AU_penalty_emodel (int_sequence[i+1], int_sequence[j], model) + acc;
+		            PARAMTYPE dan = model->dangle_bot [int_sequence[j]]
+												[int_sequence[i+1]]
+												[int_sequence[i]];
+					//Hosna, March 27, 2012
+					// dangle is INF if the bases are non-canonical and \leq 0 otherwise
+					// to accommodate non-canonical base pairing in input structure I add the MIN
+					if (fres[i+1].pair == j && fres[j].pair==i+1){
+						dan = MIN(0,dan);
+					}
+					tmp += dan;
+		            if (tmp < model->energy_value)
+		            {
+		                model->energy_value = tmp;
+		                chosen = 22;
+						best_i = i;
+		                if (fres[i+1].pair == j){
+							must_choose_this_branch = 1;
+						} else {
+							must_choose_this_branch = 0;
+		            	}
+					}
+		        }
+		    }
+
+		    // I have to condition on  fres[j].pair <= -1 to make sure that j can be unpaired
+		    if (fres[j].pair <= -1 && i < j-1)
+		    {
+		        energy_ij = V->get_energy(i,j-1);
+		        if (energy_ij < INF)
+		        {
+					PARAMTYPE AU_pen = AU_penalty_emodel (int_sequence[i], int_sequence[j-1], model);
+		            tmp = energy_ij + AU_pen+ acc;
+					PARAMTYPE dan = model->dangle_top  [int_sequence [j-1]]
+												[int_sequence [i]]
+												[int_sequence [j]];
+					//Hosna, March 27, 2012
+					// dangle is INF if the bases are non-canonical and \leq 0 otherwise
+					// to accommodate non-canonical base pairing in input structure I add the MIN
+					if (fres[i].pair == j-1 && fres[j-1].pair==i){
+						dan = MIN(0,dan);
+					 }
+		            tmp += dan;
+		            if (tmp < model->energy_value)
+		            {
+		                model->energy_value = tmp;
+		                chosen = 23;
+						best_i = i;
+		                if (fres[i].pair == j-1){
+							must_choose_this_branch = 1;
+						} else {
+							must_choose_this_branch = 0;
+						}
+					}
+		        }
+		    }
+
+		    if (fres[i].pair <= -1 && fres[j].pair <= -1 && i+1 < j-1)
+		    {
+		        energy_ij = V->get_energy(i+1,j-1);
+		        if (energy_ij < INF)
+		        {
+		            tmp = energy_ij + AU_penalty_emodel (int_sequence[i+1], int_sequence[j-1], model) + acc;
+					PARAMTYPE dan_bot = model->dangle_bot [int_sequence[j-1]]
+													[int_sequence[i+1]]
+													[int_sequence[i]];
+
+					PARAMTYPE dan_top = model->dangle_top [int_sequence [j-1]]
+										[int_sequence [i+1]]
+										[int_sequence [j]];
+		            //Hosna, March 27, 2012
+					// dangle is INF if the bases are non-canonical and \leq 0 otherwise
+					// to accommodate non-canonical base pairing in input structure I add the MIN
+					if (fres[i+1].pair == j-1 && fres[j-1].pair==i+1){
+						dan_bot = MIN(0,dan_bot);
+						dan_top = MIN(0,dan_top);
+					}
+					tmp += dan_bot;
+		            tmp += dan_top;
+		            if (tmp < model->energy_value)
+		            {
+		                model->energy_value = tmp;
+		                chosen = 24;
+						best_i = i;
+		                if (fres[i+1].pair == j-1){
+							must_choose_this_branch = 1;
+						} else {
+							must_choose_this_branch = 0;
+		            	}
+					}
+		        }
+		    }
+		}
+		tmp = emodel_energy_function (i, j, energy_models);
+		if (tmp != INF) {
+			min = tmp;
+		}
+
     }
     //printf ("Chosen=%d, best_i=%d\n", chosen, best_i);
     return min;
@@ -2934,9 +3103,10 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 			}
 			for (i=0; i<=j-1; i++)    // no TURN
 			{
+				// TODO ian should this be commented out?
 				//AP
-				if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
-					continue;
+				//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
+				//	continue;
 
 				// Don't need to make sure i and j don't have to pair with something else
 				//  it's INF, done in fold_sequence_restricted
@@ -3195,9 +3365,10 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 			if (debug)
 				printf ("\t (%d,%d) M_WM\n", i,j);
 
+			// TODO ian should this be commented out?
 			//AP
-			if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
-				return;
+			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
+			//	return;
 
 			//AP
 			for (auto &emodel : *energy_models) {
@@ -3688,9 +3859,10 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 			}
 			for (i=0; i<=j-1; i++)    // no TURN
 			{
+				// TODO ian should this be commented out?
 				//AP
-				if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
-					continue;
+				//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
+				//	continue;
 
 				// Don't need to make sure i and j don't have to pair with something else
 				//  it's INF, done in fold_sequence_restricted
@@ -3942,9 +4114,9 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 
 			if (debug)
 				printf ("\t (%d,%d) M_WM\n", i,j);
-
-			if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
-				return;
+			// TODO ian should this be commented out?
+			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
+			//	return;
 
 			// the if clause added April 3, 2012
 			if (fres[j].pair == i && fres[i].pair == j){
@@ -4199,12 +4371,13 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 	}
 }
 
+//Kevin and Ian July 24
 void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, str_features *fres)
 // PRE:  All matrixes V, VM, WM and W have been filled
 // POST: Discover the MFE path
 {
     char type;
-
+	energy_model *model;
     if(cur_interval->type == LOOP)
     {
         int i = cur_interval->i;
@@ -4292,8 +4465,8 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 {
                     //AP
                     for (auto &model : *energy_models) {
-                        model.energy_value = vm->get_energy_WM (i+2,k) +
-                            vm->get_energy_WM (k+1, j-1) +
+                        model.energy_value = VM->get_energy_WM (i+2,k) +
+                            VM->get_energy_WM (k+1, j-1) +
                             model.dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]] +
                             model.misc.multi_free_base_penalty;
                     }
@@ -4310,8 +4483,8 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 {
                     //AP
                     for (auto &model : *energy_models) {
-						model.energy_value = vm->get_energy_WM (i+1,k) +
-							vm->get_energy_WM (k+1, j-2) +
+						model.energy_value = VM->get_energy_WM (i+1,k) +
+							VM->get_energy_WM (k+1, j-2) +
 							model.dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]] +
 							model.misc.multi_free_base_penalty;
 					}
@@ -4326,11 +4499,15 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 }
                 if (fres[i+1].pair <= -1 && fres[j-1].pair <= -1)
                 {
-                    tmp = VM->get_energy_WM (i+2,k) + VM->get_energy_WM (k+1, j-2) +
-                    dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]] +
-                    dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]] +
-                    2*misc.multi_free_base_penalty;
-                    if (tmp < min)
+                    //AP
+					for (auto &model : *energy_models) {
+						model.energy_value = VM->get_energy_WM (i+2,k) + VM->get_energy_WM (k+1, j-2) +
+                    		model.dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]] +
+                    		model.dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]] +
+                    		2*model.misc.multi_free_base_penalty;
+                    }
+							tmp = emodel_energy_function (i, j, energy_models);
+					if (tmp < min)
                     {
                         min = tmp;
                         best_k = k;
@@ -4377,6 +4554,10 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
         }
         for (i=0; i<=j-1; i++)    // no TURN
         {
+			// TODO ian should this be commented out?
+			//AP
+			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
+			//	continue;
 
             // Don't need to make sure i and j don't have to pair with something else
             //  it's INF, done in fold_sequence_restricted
@@ -4384,7 +4565,12 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
             energy_ij = V->get_energy(i,j);
             if (energy_ij < INF)
             {
-                tmp = energy_ij + AU_penalty (int_sequence[i],int_sequence[j]) + acc;
+                //AP
+				for (auto &emodel : *energy_models) {
+					model = &emodel;
+					model->energy_value = energy_ij + AU_penalty_emodel (int_sequence[i], int_sequence[j], model) + acc;
+				}
+				tmp = emodel_energy_function (i, j, energy_models);
 //                 if (fres[i].pair == j)
 //                 {
 //                     min = tmp;
@@ -4405,10 +4591,15 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 energy_ij = V->get_energy(i+1,j);
                 if (energy_ij < INF)
                 {
-                    tmp = energy_ij + AU_penalty (int_sequence[i+1],int_sequence[j]) + acc;
-                    tmp += dangle_bot [int_sequence[j]]
-                        [int_sequence[i+1]]
-                        [int_sequence[i]];
+                    //AP
+					for (auto &emodel : *energy_models) {
+						model = &emodel;
+						model->energy_value = energy_ij + AU_penalty_emodel (int_sequence[i+1], int_sequence[j], model) + acc;
+						model->energy_value += model->dangle_bot [int_sequence[j]]
+							[int_sequence[i+1]]
+							[int_sequence[i]];
+					}
+					tmp = emodel_energy_function (i, j, energy_models);
     //                 if (fres[i+1].pair == j)
     //                 {
     //                     min = tmp;
@@ -4429,10 +4620,15 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 energy_ij = V->get_energy(i,j-1);
                 if (energy_ij < INF)
                 {
-                    tmp = energy_ij + AU_penalty (int_sequence[i],int_sequence[j-1]) + acc;
-                    tmp += dangle_top [int_sequence[j-1]]
-                        [int_sequence[i]]
-                        [int_sequence[j]];
+                    //AP
+					for (auto &emodel : *energy_models) {
+						model = &emodel;
+						model->energy_value = energy_ij + AU_penalty_emodel (int_sequence[i], int_sequence[j-1], model) + acc;
+						model->energy_value += model->dangle_top [int_sequence[j-1]]
+							[int_sequence[i]]
+							[int_sequence[j]];
+					}
+					tmp = emodel_energy_function (i, j, energy_models);
     //                 if (fres[i].pair == j-1)
     //                 {
     //                     min = tmp;
@@ -4453,13 +4649,18 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 energy_ij = V->get_energy(i+1,j-1);
                 if (energy_ij < INF)
                 {
-                    tmp = energy_ij + AU_penalty (int_sequence[i+1],int_sequence[j-1]) + acc;
-                    tmp += dangle_bot [int_sequence[j-1]]
-                        [int_sequence[i+1]]
-                        [int_sequence[i]];
-                    tmp += dangle_top [int_sequence[j-1]]
-                        [int_sequence[i+1]]
-                        [int_sequence[j]];
+                    //AP
+					for (auto &emodel : *energy_models) {
+						model = &emodel;
+						model->energy_value = energy_ij + AU_penalty_emodel (int_sequence[i+1], int_sequence[j-1], model) + acc;
+						model->energy_value += model->dangle_bot [int_sequence[j-1]]
+							[int_sequence[i+1]]
+							[int_sequence[i]];
+						model->energy_value += model->dangle_top [int_sequence[j-1]]
+							[int_sequence[i+1]]
+							[int_sequence[j]];
+					}
+					tmp = emodel_energy_function (i, j, energy_models);
     //                 if (fres[i+1].pair == j-1)
     //                 {
     //                     min = tmp;
@@ -4507,9 +4708,19 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
       if (debug)
         printf ("\t (%d,%d) M_WM\n", i,j);
 
-      tmp = V->get_energy(i,j) +
-        AU_penalty (int_sequence[i], int_sequence[j]) +
-        misc.multi_helix_penalty;
+      // TODO ian should this be commented out?
+			//AP
+			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
+			//	return;
+
+	//AP
+	for (auto &emodel : *energy_models) {
+		model = &emodel;
+		model->energy_value = V->get_energy(i,j) +
+			AU_penalty_emodel (int_sequence[i], int_sequence[j], model) +
+			model->misc.multi_helix_penalty;
+	}
+	tmp = emodel_energy_function (i, j, energy_models);
       if (tmp < min)
         {
           min = tmp;
@@ -4517,13 +4728,16 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
         }
       if (fres[i].pair <= -1)
       {
-          tmp = V->get_energy(i+1,j) +
-                AU_penalty (int_sequence[i+1], int_sequence[j]) +
-                dangle_bot [int_sequence[j]]
-                [int_sequence[i+1]]
-                [int_sequence[i]] +
-                misc.multi_helix_penalty +
-                misc.multi_free_base_penalty;
+        //AP
+		for (auto &emodel : *energy_models) {
+			model = &emodel;
+			model->energy_value = V->get_energy(i+1,j) +
+				AU_penalty_emodel (int_sequence[i+1], int_sequence[j], model) +
+				model->dangle_bot [int_sequence[j]] [int_sequence[i+1]] [int_sequence[i]] +
+				model->misc.multi_helix_penalty +
+				model->misc.multi_free_base_penalty;
+		}
+		tmp = emodel_energy_function (i, j, energy_models);
           if (tmp < min)
           {
               min = tmp;
@@ -4532,13 +4746,16 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
       }
       if (fres[j].pair <= -1)
       {
-          tmp = V->get_energy(i,j-1) +
-                AU_penalty (int_sequence[i], int_sequence[j-1]) +
-                dangle_top [int_sequence[j-1]]
-                            [int_sequence[i]]
-                            [int_sequence[j]] +
-                misc.multi_helix_penalty +
-                misc.multi_free_base_penalty;
+        //AP
+		for (auto &emodel : *energy_models) {
+			model = &emodel;
+			model->energy_value = v->get_energy(i,j-1) +
+				AU_penalty_emodel (int_sequence[i], int_sequence[j-1], model) +
+				model->dangle_top [int_sequence[j-1]] [int_sequence[i]] [int_sequence[j]] +
+				model->misc.multi_helix_penalty +
+				model->misc.multi_free_base_penalty;
+		}
+		tmp = emodel_energy_function (i, j, energy_models);
           if (tmp < min)
           {
               min = tmp;
@@ -4547,16 +4764,18 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
       }
       if (fres[i].pair <= -1 && fres[j].pair <= -1)
       {
-          tmp = V->get_energy(i+1,j-1) +
-                AU_penalty (int_sequence[i+1], int_sequence[j-1]) +
-                dangle_bot [int_sequence[j-1]]
-                            [int_sequence[i+1]]
-                            [int_sequence[i]] +
-                dangle_top [int_sequence[j-1]]
-                            [int_sequence[i+1]]
-                            [int_sequence[j]] +
-                misc.multi_helix_penalty +
-                2*misc.multi_free_base_penalty;
+          //AP
+				for (auto &emodel : *energy_models) {
+					model = &emodel;
+					model->energy_value = V->get_energy(i+1,j-1) +
+						AU_penalty_emodel (int_sequence[i+1], int_sequence[j-1], model) +
+						model->dangle_bot [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[i]] +
+						model->dangle_top [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[j]] +
+						model->misc.multi_helix_penalty +
+						2*model->misc.multi_free_base_penalty;
+				}
+				tmp = emodel_energy_function (i, j, energy_models);
+
           if (tmp < min)
           {
               min = tmp;
@@ -4565,7 +4784,11 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
       }
       if (fres[i].pair <= -1)
       {
-          tmp = VM->get_energy_WM (i+1,j) + misc.multi_free_base_penalty;
+          //AP
+		for (auto &model : *energy_models) {
+			model.energy_value = VM->get_energy_WM (i+1,j) + model.misc.multi_free_base_penalty;
+		}
+		tmp = emodel_energy_function (i, j, energy_models);
           if (tmp < min)
           {
               min = tmp;
@@ -4574,7 +4797,11 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
       }
       if (fres[j].pair <= -1)
       {
-          tmp = VM->get_energy_WM (i,j-1) + misc.multi_free_base_penalty;
+          //AP
+		for (auto &model : *energy_models) {
+			model.energy_value = VM->get_energy_WM (i,j-1) + model.misc.multi_free_base_penalty;
+		}
+		tmp = emodel_energy_function (i, j, energy_models);
           if (tmp < min)
           {
               min = tmp;

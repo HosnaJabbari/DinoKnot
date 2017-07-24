@@ -115,6 +115,9 @@ class W_final: public s_min_folding{
 
 		int compute_W_br2_restricted_emodel (int j, str_features *fres, int &must_choose_this_branch);
 
+        //kevin 
+        int compute_W_br2_restricted_simfold_emodel (int j, str_features *fres, int &must_choose_this_branch);
+
 		int compute_W_br2_restricted_pkonly_emodel (int j, str_features *fres, int &must_choose_this_branch);
 
 		int compute_W_br2_restricted_pmo (int j, str_features *fres, int &must_choose_this_branch);//kevin delete
