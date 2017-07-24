@@ -433,11 +433,15 @@ int main (int argc, char *argv[]) {
     	printf ("RES: %s  %.2lf\n", structure, energy);
 	}
 
+	free(inputPath);
+	free(outputPath);
 
 	// Call the destructor for each energy model.
 	for (auto &energy_model : energy_models) {
 		destruct_energy_model(&energy_model);
 	}
+	delete model_1;
+	delete model_2;
 
 	// Clean up the energy model vector that contains N number of energy models.
 	energy_models.erase(std::remove_if(energy_models.begin(), energy_models.end(), [&](energy_model const & emodel) {return &emodel!=NULL; }), energy_models.end());

@@ -915,6 +915,7 @@ double hfold(char *sequence, char *restricted, char *structure){
 	if (min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
 	double energy = min_fold->hfold();
     min_fold->return_structure (structure);
+    delete min_fold;
     return energy;
 }
 
@@ -1050,6 +1051,8 @@ void simfold_emodel(char *sequence, char *restricted, char *structure, std::vect
 	simfold->call_simfold_emodel();
 	printf("simfold 2\n");
 	simfold->return_structure (structure);
+  
+  delete simfold;
 }
 
 //kevin 24 July
@@ -1060,6 +1063,8 @@ double method1_emodel(char *sequence, char *restricted, char *structure, std::ve
 	printf("method 1\n");
 	energy = hfold_min_fold->hfold_emodel();
 	hfold_min_fold->return_structure (structure);
+  
+  delete min_fold;
 	return energy;
 }
 
@@ -1074,6 +1079,7 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 	hfold_pk_min_fold->return_structure (structure);
 	//printf("done hfold_pk_min_fold->return_structure (structure);   %s\n",structure);
 	if(is_empty_structure(structure)){
+    delete hfold_pk_min_fold;
 		return energy;
 	}else{
 		char* G_prime;
@@ -1083,6 +1089,9 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 		if (hfold_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
 		energy = hfold_min_fold->hfold_emodel();
 		hfold_min_fold->return_structure (structure);
+    
+    delete hfold_pk_min_fold;
+    delete hfold_min_fold;
 		return energy;
 	}
 
@@ -1123,7 +1132,7 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	printf("1\n");
 
 	simfold_emodel(sequence,restricted, simfold_structure, &simfold_energy_models);
-
+  
 	printf("G1: %s\nG2: %s\n",restricted,simfold_structure);
 	//^ G' simfold_structure <- SimFold(S sequence, G restricted)
 	char* G_updated;
@@ -1133,6 +1142,10 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	//^Gupdated G_updated<- ObtainRelaxedStems(G restricted,G' simfold_structure)
 	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
 	printf("method3 energy: %lf\n",energy);
+  
+  delete model_1;
+  delete model_2;
+    
 	return energy;
 }
 
@@ -1183,31 +1196,28 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 		char substructure[length+1];
 		char simfold_structure[length+1];
 
-		std::cout << "(" << i << "," << j << ")" << std::endl;
-		std::cout << "sequence " << sequence << std::endl;
-		std::cout << "restricted " << restricted << std::endl;
 		strncpy(subsequence, sequence+i,j+1);
 		subsequence[j+1] = '\0';
 		//^Sk
 		strncpy(substructure, restricted+i,j+1);
 		substructure[j+1] = '\0';
 		//^Gk
-		printf("loop 1\n");
-		std::cout << "subseuqnce " << subsequence << std::endl;
-		std::cout << "substructure " << substructure << std::endl;
+
 		simfold_emodel(subsequence, substructure, simfold_structure, &simfold_energy_models);
 		//^ SimFold(Sk,Gk,Gk',energy_models)
-		printf("loop 2\n");
 		char Gp_k_updated[length];
 		obtainRelaxedStems(substructure, simfold_structure, Gp_k_updated);
-		printf("loop 3\n");
 		//^obtainRelaxedStems(Gk,Gk',G'kupdated)
 		//todo: add in code here
 		//Gupdated <- Gupdated U G'kupdated
 	}
-	printf("3\n");
+
 	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
-	printf("4\n");
+
+
+	delete simfold;
+	free(G_updated);
+  
 	return energy;
 }
 
@@ -1245,38 +1255,27 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 	char method4_structure[strlen(sequence)+1];
 
 
-	printf("start method 1\n");
 	min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
 	strcpy(structure,method1_structure);
 
-
-	printf("start method 2\n");
 	energy = method2_emodel(sequence,restricted,method2_structure,energy_models);
 	if(energy < min_energy){
 		min_energy = energy;
 		strcpy(structure,method2_structure);
 	}
 
-
-
-	printf("start method 3\n");
 	energy = method3_emodel(sequence,restricted,method3_structure,energy_models);
 	if(energy < min_energy){
 		min_energy = energy;
 		strcpy(structure,method3_structure);
-	}
+  }
 
-
-
-	printf("start method 4\n");
 	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
 	if(energy < min_energy){
 		min_energy = energy;
 		strcpy(structure,method4_structure);
 	}
 
-
-	printf("final_structure: %s\n min_energy: %lf\n",structure,min_energy);
 	return min_energy;
 }
 
@@ -1288,6 +1287,7 @@ double hfold_pkonly(char *sequence, char *restricted, char *structure){
 	if (min_fold == NULL) giveup ("Cannot allocate memory", "HFoldPKonly");
 	double energy = min_fold->hfold_pkonly();
     min_fold->return_structure (structure);
+    delete min_fold;
     return energy;
 }
 
@@ -1297,6 +1297,7 @@ double hfold_pkonly_emodel(char *sequence, char *restricted, char *structure, st
 	if (min_fold == NULL) giveup ("Cannot allocate memory", "HFoldPKonly");
 	double energy = min_fold->hfold_pkonly_emodel();
     min_fold->return_structure (structure);
+    delete min_fold;
     return energy;
 }
 
@@ -1307,6 +1308,8 @@ double hfold_interacting(char *sequence, char *restricted, char *structure){
     if (min_fold == NULL) giveup ("Cannot allocate memory", "HFoldInteracting");
     double energy = min_fold->hfold_interacting();
     min_fold->return_structure (structure);
+ 
+    delete min_fold;
     return energy;
 }
 
@@ -1315,6 +1318,7 @@ double hfold_interacting_pkonly(char *sequence, char *restricted, char *structur
     if (min_fold == NULL) giveup ("Cannot allocate memory", "HFoldInteracting");
     double energy = min_fold->hfold_interacting_pkonly();
     min_fold->return_structure (structure);
+    delete min_fold;
     return energy;
 }
 

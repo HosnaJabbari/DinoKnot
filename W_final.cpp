@@ -31,20 +31,32 @@
 W_final::W_final(char *seq, char *res):s_min_folding(seq,res)
 {
 	this->nb_nucleotides = strlen(seq);
+
+	// Ian Wark July 21 2017
+	// we don't need this, this is done in s_min_folding
+	/*
 	this->int_sequence = new int[this->nb_nucleotides];
 	if (int_sequence == NULL) giveup ("Cannot allocate memory", "W_final");
 	int i;
     for (i=0; i < this->nb_nucleotides; i++) int_sequence[i] = nuc_to_int(seq[i]);
+	*/
+
 	space_allocation();
 }
 
 W_final::W_final(char *seq, char *res, std::vector<energy_model> *energy_models):s_min_folding(seq,res,energy_models)
 {
 	this->nb_nucleotides = strlen(seq);
+
+	// Ian Wark July 21 2017
+	// we don't need this, this is done in s_min_folding
+	/*
 	this->int_sequence = new int[this->nb_nucleotides];
 	if (int_sequence == NULL) giveup ("Cannot allocate memory", "W_final");
 	int i;
     for (i=0; i < this->nb_nucleotides; i++) int_sequence[i] = nuc_to_int(seq[i]);
+    */
+
 	space_allocation();
 }
 
@@ -53,8 +65,10 @@ W_final::~W_final()
 	delete vm;
 	delete v;
 	delete WMB;
-	delete [] int_sequence;
 
+	// Ian Wark July 21 2017
+	// we don't need this, this is done in s_min_folding
+	//delete [] int_sequence;
 }
 
 // Hosna June 20th, 2007
@@ -564,8 +578,8 @@ double W_final::hfold_emodel() { //kevin debug
 
 	for (j=0; j < nb_nucleotides; j++) {
         for (i =j; i >= 0; i--) {//for (i=0; i<=j; i++) {
-			WMB->compute_energies_emodel(i,j,energy_models); // TODO need to check this one
-			vm->WM_compute_energy(i,j); // TODO ian does this need an emodel version?
+			    WMB->compute_energies_emodel(i,j,energy_models); // TODO need to check this one
+			    vm->WM_compute_energy(i,j); // TODO ian does this need an emodel version?
         }
 	}
 
@@ -603,7 +617,6 @@ double W_final::hfold_emodel() { //kevin debug
     while ( cur_interval != NULL) {
         stack_interval = stack_interval->next;
         backtrack_restricted_emodel (cur_interval, fres); // TODO do we need to check this one?
-
         delete cur_interval;    // this should make up for the new in the insert_node
         cur_interval = stack_interval;
     }
@@ -830,7 +843,7 @@ double W_final::hfold_pkonly_emodel(){
 		}
 	}
 */
-	energy /= 100.0;
+  	energy /= 100.0;
 
     delete [] h_fres;
     delete [] fres;
@@ -887,10 +900,10 @@ void W_final::compute_W_restricted_emodel (int j, str_features *fres)
 	} else {
 		W[j] = MIN(m1,MIN(m2,m3));
 	}
-
 }
 
 //AP
+//Kevin July 24 2017
 void W_final::compute_W_restricted_simfold_emodel (int j, str_features *fres)
 // compute W(j)
 {
@@ -903,7 +916,6 @@ void W_final::compute_W_restricted_simfold_emodel (int j, str_features *fres)
 	} else {
 		W[j] = MIN(m1,m2);
 	}
-
 }
 
 //AP
@@ -1476,12 +1488,12 @@ int W_final::compute_W_br2_restricted_pkonly_emodel (int j, str_features *fres, 
     int best_i = 0;
 	energy_model *model;
 
-    // Ian Wark and Kevin July 20 2017
+  // Ian Wark and Kevin July 20 2017
 	// If j or j-1 is X it cannot be paired
 	// j is done here to save time if it is invalid
 	if (int_sequence[j] == X || int_sequence[j-1] == X)
         return INF;
-
+  
 	must_choose_this_branch = 0;
     for (i=0; i<=j-1; i++) {
         // don't allow pairing with restricted i's
@@ -1492,9 +1504,9 @@ int W_final::compute_W_br2_restricted_pkonly_emodel (int j, str_features *fres, 
 		//	continue;
 
 		// Ian Wark and Kevin July 20 2017
-        // If i or i+1 is X it cannot be paired
-        // i is done here because it needs to be in the for
-        if (int_sequence[i] == X || int_sequence[i+1] == X )
+    // If i or i+1 is X it cannot be paired
+    // i is done here because it needs to be in the for
+    if (int_sequence[i] == X || int_sequence[i+1] == X )
 			continue;
 
 		for (auto &energy_model : *energy_models) {
@@ -3621,6 +3633,7 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 			f[j].pair = i;
 
             // TODO ian should this be commented out?
+
 			//AP
 			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
 			//	return;
@@ -4114,6 +4127,7 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 
 			if (debug)
 				printf ("\t (%d,%d) M_WM\n", i,j);
+      
 			// TODO ian should this be commented out?
 			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
 			//	return;
