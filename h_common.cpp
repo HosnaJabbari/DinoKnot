@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <iostream>
+
 #include "constants.h"
 #include "externs.h"
 #include "h_externs.h"
@@ -937,14 +939,14 @@ void find_disjoint_substructure(char* structure, std::vector< std::pair<int,int>
 	int first_time = 1; //flag for first time getting a open bracket for substructure
 	int i = 0;
 	int j = 0;
-	for(int k=0; k<length;k++){	
+	for(int k=0; k<length;k++){
 		if(structure[k] == '(' || structure[k] == '['){
 			if(first_time && count == 0){
 				first_time = 0;
 				i = k;
 			}
 			count += 1;
-			
+
 		}else if(structure[k] == ')' || structure[k] == ']'){
 			count -= 1;
 			j = k;
@@ -1040,9 +1042,13 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 
 //kevin 18 July
 void simfold_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	std::cout << "simfold sequence: " << sequence << std::endl;
+	std::cout << "restricted: " << restricted << std::endl;
 	W_final *simfold = new W_final (sequence, restricted, energy_models);
 	if (simfold == NULL) giveup ("Cannot allocate memory", "method3 Simfold");
-	simfold->call_simfold();
+	printf("simfold 1\n");
+	simfold->call_simfold_emodel();
+	printf("simfold 2\n");
 	simfold->return_structure (structure);
 }
 
@@ -1063,7 +1069,6 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 	//structure = NULL;
 	W_final *hfold_pk_min_fold = new W_final (sequence, restricted, energy_models);
 	if (hfold_pk_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
-	printf("method 2\n");
 	energy = hfold_pk_min_fold->hfold_pkonly_emodel();
 	//printf("done pkonly\n");
 	hfold_pk_min_fold->return_structure (structure);
@@ -1080,8 +1085,8 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 		hfold_min_fold->return_structure (structure);
 		return energy;
 	}
-	
-	
+
+
 }
 
 //kevin 18 July
@@ -1091,7 +1096,7 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	char simfold_structure[length];
 
 	//set up for simfold
-	std::vector<energy_model> simfold_energy_models; 
+	std::vector<energy_model> simfold_energy_models;
 	energy_model *model_1;
 	energy_model *model_2;
 	model_1 = new energy_model();
@@ -1115,6 +1120,8 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	}
 	//end of setup for simfold
 
+	printf("1\n");
+
 	simfold_emodel(sequence,restricted, simfold_structure, &simfold_energy_models);
 
 	printf("G1: %s\nG2: %s\n",restricted,simfold_structure);
@@ -1132,7 +1139,7 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 //kevin 18 July
 double method4_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
 	//set up for simfold
-	std::vector<energy_model> simfold_energy_models; 
+	std::vector<energy_model> simfold_energy_models;
 	energy_model *model_1;
 	energy_model *model_2;
 	model_1 = new energy_model();
@@ -1171,25 +1178,36 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 	int j = 0;
 	for(auto current_substructure_index : disjoint_substructure_index){
 		i = current_substructure_index.first;
-		j = current_substructure_index.first;
+		j = current_substructure_index.second;
 		char subsequence[length+1];
 		char substructure[length+1];
 		char simfold_structure[length+1];
-		strncpy(subsequence, sequence+i,j);
-		subsequence[j] = '\0';
+
+		std::cout << "(" << i << "," << j << ")" << std::endl;
+		std::cout << "sequence " << sequence << std::endl;
+		std::cout << "restricted " << restricted << std::endl;
+		strncpy(subsequence, sequence+i,j+1);
+		subsequence[j+1] = '\0';
 		//^Sk
-		strncpy(substructure, substructure+i,j);
-		substructure[j] = '\0';
+		strncpy(substructure, restricted+i,j+1);
+		substructure[j+1] = '\0';
 		//^Gk
+		printf("loop 1\n");
+		std::cout << "subseuqnce " << subsequence << std::endl;
+		std::cout << "substructure " << substructure << std::endl;
 		simfold_emodel(subsequence, substructure, simfold_structure, &simfold_energy_models);
 		//^ SimFold(Sk,Gk,Gk',energy_models)
+		printf("loop 2\n");
 		char Gp_k_updated[length];
 		obtainRelaxedStems(substructure, simfold_structure, Gp_k_updated);
+		printf("loop 3\n");
 		//^obtainRelaxedStems(Gk,Gk',G'kupdated)
 		//todo: add in code here
 		//Gupdated <- Gupdated U G'kupdated
 	}
+	printf("3\n");
 	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
+	printf("4\n");
 	return energy;
 }
 
@@ -1226,35 +1244,38 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 	char method3_structure[strlen(sequence)+1];
 	char method4_structure[strlen(sequence)+1];
 
-	printf("method 1\n");
+/*
+	printf("start method 1\n");
 	min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
 	strcpy(structure,method1_structure);
 
 
-	printf("method 2\n");
+	printf("start method 2\n");
 	energy = method2_emodel(sequence,restricted,method2_structure,energy_models);
 	if(energy < min_energy){
 		min_energy = energy;
 		strcpy(structure,method2_structure);
 	}
-	
-	/*
-	printf("method 3\n");
+*/
+
+
+	printf("start method 3\n");
 	energy = method3_emodel(sequence,restricted,method3_structure,energy_models);
 	if(energy < min_energy){
 		min_energy = energy;
 		strcpy(structure,method3_structure);
 	}
-	*/
 
-	/*
-	printf("method 4\n");
+
+/*
+	printf("start method 4\n");
 	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
 	if(energy < min_energy){
 		min_energy = energy;
 		strcpy(structure,method4_structure);
 	}
-	*/
+*/
+
 	printf("final_structure: %s\n min_energy: %lf\n",structure,min_energy);
 	return min_energy;
 }

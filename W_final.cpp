@@ -637,28 +637,32 @@ double W_final::hfold_emodel() { //kevin debug
 }
 
 //kevin 18 July
-double W_final::call_simfold(){
+double W_final::call_simfold_emodel(){
 	double energy;
     int i, j;
 
+    printf("call 0\n");
+
     str_features *fres;
-    if ((fres = new str_features[nb_nucleotides]) == NULL) giveup ("Cannot allocate memory", "str_features");   
-    // detect the structure features  
+    if ((fres = new str_features[nb_nucleotides]) == NULL) giveup ("Cannot allocate memory", "str_features");
+    // detect the structure features
     detect_structure_features (restricted, fres);
-    
+
     /*
     for (i=0; i < nb_nucleotides; i++)
         if (fres[i].pair != -1)
             printf ("%d pairs %d, type %c\n", i, fres[i].pair, fres[i].type);
     */
-    
+
+    printf("call 1\n");
+
     for (j=0; j < nb_nucleotides; j++)
     {
         for (i=0; i<j; i++)
-        {            
+        {
             // V(i,j) = infinity if i restricted or j restricted and pair of i is not j
-            if ((fres[i].pair > -1 && fres[i].pair !=j) || (fres[j].pair > -1 && fres[j].pair != i)) 
-                continue;              
+            if ((fres[i].pair > -1 && fres[i].pair !=j) || (fres[j].pair > -1 && fres[j].pair != i))
+                continue;
             if (fres[i].pair == -1 || fres[j].pair == -1)   // i or j MUST be unpaired
                 continue;
             V->compute_energy_restricted_emodel (i, j, fres);
@@ -666,42 +670,46 @@ double W_final::call_simfold(){
         // if I put this before V calculation, WM(i,j) cannot be calculated, because it returns infinity
         VM->compute_energy_WM_restricted_emodel (j, fres, energy_models);
     }
+    printf("call 2\n");
     for (j=1; j < nb_nucleotides; j++)
     {
-        compute_W_restricted_emodel (j, fres);
+        compute_W_restricted_simfold_emodel (j, fres);
     }
-    energy = W[nb_nucleotides-1]/100.0;        
-    
+    printf("call 3\n");
+    energy = W[nb_nucleotides-1]/100.0;
+
     if (debug)
     {
         for (j=1; j < nb_nucleotides; j++)
         {
             printf ("W(%d) = %d\n", j, W[j]);
         }
-    }    
-     
+    }
+
+    printf("call 4\n");
+
     // backtrack
     // first add (0,n-1) on the stack
     stack_interval = new seq_interval;
     stack_interval->i = 0;
     stack_interval->j = nb_nucleotides - 1;
-    stack_interval->energy = W[nb_nucleotides-1]; 
+    stack_interval->energy = W[nb_nucleotides-1];
     stack_interval->type = FREE;
     stack_interval->next = NULL;
 
     seq_interval *cur_interval = stack_interval;
 
     while ( cur_interval != NULL)
-    {         
+    {
         stack_interval = stack_interval->next;
-        backtrack_restricted_emodel (cur_interval, fres);
+        backtrack_restricted_simfold_emodel (cur_interval, fres);
         delete cur_interval;    // this should make up for the new in the insert_node
         cur_interval = stack_interval;
     }
     if (debug)
     {
         print_result ();
-    }    
+    }
     delete [] fres;
     //delete stack_interval;
     return energy;
@@ -876,6 +884,23 @@ void W_final::compute_W_restricted_emodel (int j, str_features *fres)
 		W[j] = MIN(m2,m3);
 	} else {
 		W[j] = MIN(m1,MIN(m2,m3));
+	}
+
+}
+
+//AP
+void W_final::compute_W_restricted_simfold_emodel (int j, str_features *fres)
+// compute W(j)
+{
+    int m1 = W[j-1];
+	int m2;
+    int must_choose_this_branch;
+
+    m2 = compute_W_br2_restricted_emodel (j, fres, must_choose_this_branch);
+	if (must_choose_this_branch) {
+		W[j] = m2;
+	} else {
+		W[j] = MIN(m1,m2);
 	}
 
 }
@@ -2784,7 +2809,6 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 						{
 							//AP
 							for (auto &model : *energy_models) {
-								printf("dangle top: %d %d %d %d\n",model.dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]], int_sequence[i],int_sequence[j]);
 								model.energy_value = vm->get_energy_WM (i+2,k) +
 									vm->get_energy_WM (k+1, j-1) +
 									model.dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]] +
@@ -4174,6 +4198,425 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 			printf("Should not be here!\n");
 	}
 }
+
+void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, str_features *fres)
+// PRE:  All matrixes V, VM, WM and W have been filled
+// POST: Discover the MFE path
+{
+    char type;
+
+    if(cur_interval->type == LOOP)
+    {
+        int i = cur_interval->i;
+        int j = cur_interval->j;
+        if (i >= j)
+            return;
+        f[i].pair = j;
+        f[j].pair = i;
+        structure[i] = '(';
+        structure[j] = ')';
+
+        type = V->get_type (i,j);
+        if (debug)
+            printf ("\t(%d,%d) LOOP - type %c\n", i,j,type);
+        if (type == STACK)
+        {
+            f[i].type = STACK;
+            f[j].type = STACK;
+            if (i+1 < j-1)
+                insert_node (i+1, j-1, LOOP);
+            else
+            {
+                printf ("NOT GOOD RESTR STACK, i=%d, j=%d\n", i, j);
+                exit (0);
+            }
+
+        }
+        else if (type == HAIRP)
+        {
+            f[i].type = HAIRP;
+            f[j].type = HAIRP;
+        }
+        else if (type == INTER)
+        {
+            f[i].type = INTER;
+            f[j].type = INTER;
+            // detect the other closing pair
+            int ip, jp, best_ip, best_jp, minq;
+            PARAMTYPE tmp, min = INF;
+            for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1); ip++)
+            {
+                minq = MAX (j-i+ip-MAXLOOP-2, ip+1);
+                for (jp = minq; jp < j; jp++)
+                {
+                    if (exists_restricted (i,ip,fres) || exists_restricted (jp,j,fres))
+                        continue;
+                    //AP
+                    for (auto &model : *energy_models) {
+                        model.energy_value = VBI->get_energy_str_restricted_emodel (i, j, ip, jp, fres, &model);
+                    }
+                    tmp = emodel_energy_function (i, j, energy_models);
+
+                    if (tmp < min)
+                    {
+                        min = tmp;
+                        best_ip = ip;
+                        best_jp = jp;
+                    }
+                }
+            }
+            if (best_ip < best_jp)
+                insert_node (best_ip, best_jp, LOOP);
+            else
+            {
+                printf ("NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
+                exit (0);
+            }
+        }
+        else if (type == MULTI)
+        {
+            f[i].type = MULTI;
+            f[j].type = MULTI;
+            int k, best_k, best_row;
+            PARAMTYPE tmp, min = INF;
+            for (k = i+1; k <= j-1; k++)
+              {
+                tmp = VM->get_energy_WM (i+1,k) + VM->get_energy_WM (k+1, j-1);
+                if (tmp < min)
+                  {
+                    min = tmp;
+                    best_k = k;
+                    best_row = 1;
+                  }
+                if (fres[i+1].pair <= -1)
+                {
+                    //AP
+                    for (auto &model : *energy_models) {
+                        model.energy_value = vm->get_energy_WM (i+2,k) +
+                            vm->get_energy_WM (k+1, j-1) +
+                            model.dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]] +
+                            model.misc.multi_free_base_penalty;
+                    }
+                    tmp = emodel_energy_function (i, j, energy_models);
+
+                    if (tmp < min)
+                    {
+                        min = tmp;
+                        best_k = k;
+                        best_row = 2;
+                    }
+                }
+                if (fres[j-1].pair <= -1)
+                {
+                    //AP
+                    for (auto &model : *energy_models) {
+						model.energy_value = vm->get_energy_WM (i+1,k) +
+							vm->get_energy_WM (k+1, j-2) +
+							model.dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]] +
+							model.misc.multi_free_base_penalty;
+					}
+                    tmp = emodel_energy_function (i, j, energy_models);
+
+                    if (tmp < min)
+                    {
+                        min = tmp;
+                        best_k = k;
+                        best_row = 3;
+                    }
+                }
+                if (fres[i+1].pair <= -1 && fres[j-1].pair <= -1)
+                {
+                    tmp = VM->get_energy_WM (i+2,k) + VM->get_energy_WM (k+1, j-2) +
+                    dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]] +
+                    dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]] +
+                    2*misc.multi_free_base_penalty;
+                    if (tmp < min)
+                    {
+                        min = tmp;
+                        best_k = k;
+                        best_row = 4;
+                    }
+                }
+              }
+            switch (best_row)
+              {
+              case 1: insert_node (i+1, best_k, M_WM);
+                insert_node (best_k+1, j-1, M_WM); break;
+              case 2: insert_node (i+2, best_k, M_WM);
+                insert_node (best_k+1, j-1, M_WM); break;
+              case 3: insert_node (i+1, best_k, M_WM);
+                insert_node (best_k+1, j-2, M_WM); break;
+              case 4: insert_node (i+2, best_k, M_WM);
+                insert_node (best_k+1, j-2, M_WM); break;
+              }
+        }
+    }
+    else if(cur_interval->type == FREE)
+    {
+        int j = cur_interval->j;
+
+        if (j==0) return;
+        //if (j <= TURN) return;
+
+        PARAMTYPE min = INF, tmp, acc, energy_ij;
+        int best_row, i, best_i;
+
+        if (debug)
+            printf ("\t(0,%d) FREE\n", j);
+
+        // this case is for j unpaired, so I have to check that.
+        if (fres[j].pair <= -1)
+        {
+        //printf ("j=%d\n", j);
+            tmp = W[j-1];
+            if (tmp < min)
+            {
+                min = tmp;
+                best_row = 0;
+            }
+        }
+        for (i=0; i<=j-1; i++)    // no TURN
+        {
+
+            // Don't need to make sure i and j don't have to pair with something else
+            //  it's INF, done in fold_sequence_restricted
+            acc = (i-1>0) ? W[i-1] : 0;
+            energy_ij = V->get_energy(i,j);
+            if (energy_ij < INF)
+            {
+                tmp = energy_ij + AU_penalty (int_sequence[i],int_sequence[j]) + acc;
+//                 if (fres[i].pair == j)
+//                 {
+//                     min = tmp;
+//                     best_i = i;
+//                     best_row = 1;
+//                     continue;
+//                 }
+                if (tmp < min)
+                {
+                min = tmp;
+                best_i = i;
+                best_row = 1;
+                }
+            }
+
+            if (fres[i].pair <= -1)
+            {
+                energy_ij = V->get_energy(i+1,j);
+                if (energy_ij < INF)
+                {
+                    tmp = energy_ij + AU_penalty (int_sequence[i+1],int_sequence[j]) + acc;
+                    tmp += dangle_bot [int_sequence[j]]
+                        [int_sequence[i+1]]
+                        [int_sequence[i]];
+    //                 if (fres[i+1].pair == j)
+    //                 {
+    //                     min = tmp;
+    //                     best_i = i;
+    //                     best_row = 2;
+    //                     continue;
+    //                 }
+                    if (tmp < min)
+                    {
+                        min = tmp;
+                        best_i = i;
+                        best_row = 2;
+                    }
+                }
+            }
+            if (fres[j].pair <= -1)
+            {
+                energy_ij = V->get_energy(i,j-1);
+                if (energy_ij < INF)
+                {
+                    tmp = energy_ij + AU_penalty (int_sequence[i],int_sequence[j-1]) + acc;
+                    tmp += dangle_top [int_sequence[j-1]]
+                        [int_sequence[i]]
+                        [int_sequence[j]];
+    //                 if (fres[i].pair == j-1)
+    //                 {
+    //                     min = tmp;
+    //                     best_i = i;
+    //                     best_row = 3;
+    //                     continue;
+    //                 }
+                    if (tmp < min)
+                    {
+                        min = tmp;
+                        best_i = i;
+                        best_row = 3;
+                    }
+                }
+            }
+            if (fres[i].pair <= -1 && fres[j].pair <= -1)
+            {
+                energy_ij = V->get_energy(i+1,j-1);
+                if (energy_ij < INF)
+                {
+                    tmp = energy_ij + AU_penalty (int_sequence[i+1],int_sequence[j-1]) + acc;
+                    tmp += dangle_bot [int_sequence[j-1]]
+                        [int_sequence[i+1]]
+                        [int_sequence[i]];
+                    tmp += dangle_top [int_sequence[j-1]]
+                        [int_sequence[i+1]]
+                        [int_sequence[j]];
+    //                 if (fres[i+1].pair == j-1)
+    //                 {
+    //                     min = tmp;
+    //                     best_i = i;
+    //                     best_row = 4;
+    //                     continue;
+    //                 }
+                    if (tmp < min)
+                    {
+                        min = tmp;
+                        best_i = i;
+                        best_row = 4;
+                    }
+                }
+            }
+        }
+        switch (best_row)
+        {
+            case 0: insert_node (0, j-1, FREE); break;
+            case 1: insert_node (best_i, j, LOOP);
+                if (best_i-1 > 0)     // it was TURN instead of 0  - not sure if TURN shouldn't be here
+                    insert_node (0, best_i-1, FREE);
+                break;
+            case 2: insert_node (best_i+1, j, LOOP);
+                if (best_i-1 > 0)
+                    insert_node (0, best_i-1, FREE);
+                break;
+            case 3: insert_node (best_i, j-1, LOOP);
+                if (best_i-1 > 0)
+                    insert_node (0, best_i-1, FREE);
+                break;
+            case 4: insert_node (best_i+1, j-1, LOOP);
+                if (best_i-1 > 0)
+                    insert_node (0, best_i-1, FREE);
+                break;
+        }
+    }
+  else if(cur_interval->type == M_WM)
+    {
+      int i = cur_interval->i;
+      int j = cur_interval->j;
+      PARAMTYPE tmp, min = INF;
+      int best_k, best_row;
+
+      if (debug)
+        printf ("\t (%d,%d) M_WM\n", i,j);
+
+      tmp = V->get_energy(i,j) +
+        AU_penalty (int_sequence[i], int_sequence[j]) +
+        misc.multi_helix_penalty;
+      if (tmp < min)
+        {
+          min = tmp;
+          best_row = 1;
+        }
+      if (fres[i].pair <= -1)
+      {
+          tmp = V->get_energy(i+1,j) +
+                AU_penalty (int_sequence[i+1], int_sequence[j]) +
+                dangle_bot [int_sequence[j]]
+                [int_sequence[i+1]]
+                [int_sequence[i]] +
+                misc.multi_helix_penalty +
+                misc.multi_free_base_penalty;
+          if (tmp < min)
+          {
+              min = tmp;
+              best_row = 2;
+          }
+      }
+      if (fres[j].pair <= -1)
+      {
+          tmp = V->get_energy(i,j-1) +
+                AU_penalty (int_sequence[i], int_sequence[j-1]) +
+                dangle_top [int_sequence[j-1]]
+                            [int_sequence[i]]
+                            [int_sequence[j]] +
+                misc.multi_helix_penalty +
+                misc.multi_free_base_penalty;
+          if (tmp < min)
+          {
+              min = tmp;
+              best_row = 3;
+          }
+      }
+      if (fres[i].pair <= -1 && fres[j].pair <= -1)
+      {
+          tmp = V->get_energy(i+1,j-1) +
+                AU_penalty (int_sequence[i+1], int_sequence[j-1]) +
+                dangle_bot [int_sequence[j-1]]
+                            [int_sequence[i+1]]
+                            [int_sequence[i]] +
+                dangle_top [int_sequence[j-1]]
+                            [int_sequence[i+1]]
+                            [int_sequence[j]] +
+                misc.multi_helix_penalty +
+                2*misc.multi_free_base_penalty;
+          if (tmp < min)
+          {
+              min = tmp;
+              best_row = 4;
+          }
+      }
+      if (fres[i].pair <= -1)
+      {
+          tmp = VM->get_energy_WM (i+1,j) + misc.multi_free_base_penalty;
+          if (tmp < min)
+          {
+              min = tmp;
+              best_row = 5;
+          }
+      }
+      if (fres[j].pair <= -1)
+      {
+          tmp = VM->get_energy_WM (i,j-1) + misc.multi_free_base_penalty;
+          if (tmp < min)
+          {
+              min = tmp;
+              best_row = 6;
+          }
+      }
+
+      for (int k=i; k < j; k++)
+        {
+            tmp = VM->get_energy_WM (i, k) + VM->get_energy_WM (k+1, j);
+            if (tmp < min)
+              {
+                min = tmp;
+                best_k = k;
+                best_row = 7;
+              }
+        }
+      switch (best_row)
+        {
+          case 1: insert_node (i, j, LOOP); break;
+          case 2: insert_node (i+1, j, LOOP); break;
+          case 3: insert_node (i, j-1, LOOP); break;
+          case 4: insert_node (i+1, j-1, LOOP); break;
+          case 5:
+            if (j-i-1 > 0)
+              insert_node (i+1, j, M_WM);
+            break;
+          case 6:
+            if (j-1-i > 0)
+              insert_node (i, j-1, M_WM);
+            break;
+          case 7:
+            if (best_k-i > 0)
+              insert_node (i, best_k, M_WM);
+            if (j-best_k-1 > 0)
+              insert_node (best_k+1, j, M_WM);
+            break;
+          }
+    }
+}
+
+
 
 void W_final::backtrack_restricted_pmo (seq_interval *cur_interval, str_features *fres){
     char type;

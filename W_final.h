@@ -53,7 +53,7 @@ class W_final: public s_min_folding{
         // writes the predicted MFE structure into structure
 
         //kevin
-        double call_simfold();
+        double call_simfold_emodel();
 
     protected:
     	// Hosna: June 18th, 2007:
@@ -76,6 +76,10 @@ class W_final: public s_min_folding{
 
 		void backtrack_restricted_emodel (seq_interval *cur_interval, str_features *fres);
 
+		// Ian and Kevin
+        // for call_simfold_emodel
+		void backtrack_restricted_simfold_emodel (seq_interval *cur_interval, str_features *fres);
+
 		void backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, str_features *fres);
 
 		void backtrack_restricted_pmo (seq_interval *cur_interval, str_features *fres); //kevin delete
@@ -91,6 +95,10 @@ class W_final: public s_min_folding{
         // fill the W array, the restricted case
 
 		void compute_W_restricted_emodel (int j, str_features *fres);
+
+        // Ian and Kevin
+        // for call_simfold_emodel
+		void compute_W_restricted_simfold_emodel (int j, str_features *fres);
 
 		void compute_W_restricted_pkonly_emodel (int j, str_features *fres);
 
