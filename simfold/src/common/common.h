@@ -84,10 +84,10 @@ double compute_pf_ppv (char *ref_structure, s_partition_function *part, double t
 // part is the partition function object, which contains base pair probabilities
 // returns -1 if undefined (denominator is 0)
 
-void giveup (char *string1, char *string2);
+void giveup (const char *string1, const char *string2);
 // to add: variable nb of parameters, as in scanf, printf
 
-void giveup2 (char *string1, char *string2, FILE *file);
+void giveup2 (const char *string1, const char *string2, FILE *file);
 // to add: variable nb of parameters, as in scanf, printf
 
 void create_random_sequence (int length, char *sequence);
@@ -221,7 +221,7 @@ int loss (int first, int last);
 // Written on August 9, 2008
 // Note: Maybe this measure is better than the Hamming distance:
 //      (# correctly predicted bp - # incorrectly predicted bp) / # true bp.
-//      This will be in (-inf,1], but it only includes the base pairs, 
+//      This will be in (-inf,1], but it only includes the base pairs,
 //      whereas the Hamming distance measure also includes the unpaired bases.
 
 // Added on Sep 3, 2008, for loss-augmented prediction

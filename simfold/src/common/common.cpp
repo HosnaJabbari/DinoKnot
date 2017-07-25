@@ -33,8 +33,8 @@ PARAMTYPE asymmetry_penalty (int size1, int size2)
     if (parsi_asymmetry == T99)
         penalty = MIN (misc.asymmetry_penalty_max_correction, abs (size1-size2) * misc.asymmetry_penalty_array [MIN (2, MIN (size1, size2))-1]);
     //printf ("Asym penalty real: %d\n", penalty);
-    else 
-    {    
+    else
+    {
         if (size1 == size2) return 0;
         if (parsi_asymmetry == PARSI)
         {
@@ -85,8 +85,8 @@ PARAMTYPE asymmetry_penalty_emodel (int size1, int size2, energy_model *model)
     if (parsi_asymmetry == T99)
         penalty = MIN (model->misc.asymmetry_penalty_max_correction, abs (size1-size2) * model->misc.asymmetry_penalty_array [MIN (2, MIN (size1, size2))-1]);
     //printf ("Asym penalty real: %d\n", penalty);
-    else 
-    {    
+    else
+    {
         if (size1 == size2) return 0;
         if (parsi_asymmetry == PARSI)
         {
@@ -136,8 +136,8 @@ PARAMTYPE asymmetry_penalty_pmo (int size1, int size2)
     if (parsi_asymmetry == T99)
         penalty = MIN (misc_pmo.asymmetry_penalty_max_correction, abs (size1-size2) * misc_pmo.asymmetry_penalty_array [MIN (2, MIN (size1, size2))-1]);
     //printf ("Asym penalty real: %d\n", penalty);
-    else 
-    {    
+    else
+    {
         if (size1 == size2) return 0;
         if (parsi_asymmetry == PARSI)
         {
@@ -236,7 +236,7 @@ int loss (int first, int last)
 // Written on August 9, 2008
 // Note: Maybe this measure is better than the Hamming distance:
 //      (# correctly predicted bp - # incorrectly predicted bp) / # true bp.
-//      This will be in (-inf,1], but it only includes the base pairs, 
+//      This will be in (-inf,1], but it only includes the base pairs,
 //      whereas the Hamming distance measure also includes the unpaired bases.
 {
     if (known_pairings == NULL) return 0;
@@ -263,9 +263,9 @@ double compute_accuracy (char *ref_structure, char *pred_structure)
     int distance;
     int len, i;
     double accuracy;
-    
+
     len = strlen(ref_structure);
-    detect_original_pairs (ref_structure, ptable_ref);    
+    detect_original_pairs (ref_structure, ptable_ref);
     detect_original_pairs (pred_structure, ptable_pred);
     distance = 0;
     for (i=0; i < len; i++)
@@ -273,7 +273,7 @@ double compute_accuracy (char *ref_structure, char *pred_structure)
         if (ptable_pred[i] != ptable_ref[i])
             distance ++;
     }
-    accuracy = 1.0-(double)distance/len; 
+    accuracy = 1.0-(double)distance/len;
     return accuracy;
 }
 
@@ -286,9 +286,9 @@ double compute_distance (char *ref_structure, char *pred_structure)
     int ptable_pred[MAXSLEN];
     int distance;
     int len, i;
-    
+
     len = strlen(ref_structure);
-    detect_original_pairs (ref_structure, ptable_ref);    
+    detect_original_pairs (ref_structure, ptable_ref);
     detect_original_pairs (pred_structure, ptable_pred);
     distance = 0;
     for (i=0; i < len; i++)
@@ -310,9 +310,9 @@ double compute_sensitivity (char *ref_structure, char *pred_structure)
     double sens;
     int num_correct_bp;
     int num_true_bp;
-        
+
     len = strlen(ref_structure);
-    detect_original_pairs (ref_structure, ptable_ref);    
+    detect_original_pairs (ref_structure, ptable_ref);
     detect_original_pairs (pred_structure, ptable_pred);
     num_correct_bp = 0;
     num_true_bp = 0;
@@ -323,7 +323,7 @@ double compute_sensitivity (char *ref_structure, char *pred_structure)
             num_true_bp++;
             if (ptable_pred[i] == ptable_ref[i])
                 num_correct_bp++;
-        }                
+        }
     }
     if (num_true_bp == 0)
         return 0.0;
@@ -342,9 +342,9 @@ double compute_ppv (char *ref_structure, char *pred_structure)
     double ppv;
     int num_correct_bp;
     int num_pred_bp;
-        
+
     len = strlen(ref_structure);
-    detect_original_pairs (ref_structure, ptable_ref);    
+    detect_original_pairs (ref_structure, ptable_ref);
     detect_original_pairs (pred_structure, ptable_pred);
     num_correct_bp = 0;
     num_pred_bp = 0;
@@ -353,7 +353,7 @@ double compute_ppv (char *ref_structure, char *pred_structure)
         if (ptable_ref[i] > -1 && ptable_pred[i] == ptable_ref[i])    // paired base
             num_correct_bp++;
         if (ptable_pred[i] > -1)    // paired base
-            num_pred_bp++;            
+            num_pred_bp++;
     }
     if (num_pred_bp == 0)
         return 0.0;
@@ -373,16 +373,16 @@ double compute_pf_ppv (char *ref_structure, s_partition_function *part, double t
     double ppv=0.0;
     int num_correct_bp;
     int num_pred_bp;
-        
+
     // prob begins from 1, and ptable_ref begins from 0
 
     len = strlen(ref_structure);
-    detect_original_pairs (ref_structure, ptable_ref);    
+    detect_original_pairs (ref_structure, ptable_ref);
 
     num_correct_bp = 0;
     num_pred_bp = 0;
-    
-    
+
+
     for (i=0; i < len; i++)
     {
         for (j=i+1; j < len; j++)
@@ -390,7 +390,7 @@ double compute_pf_ppv (char *ref_structure, s_partition_function *part, double t
             if (part->get_probability(i,j) >= threshold && ptable_ref[i] == j)
                 num_correct_bp++;
             if (part->get_probability(i,j) >= threshold)
-                num_pred_bp++;            
+                num_pred_bp++;
         }
     }
 
@@ -402,12 +402,12 @@ double compute_pf_ppv (char *ref_structure, s_partition_function *part, double t
         for (j=i+1; j < len; j++)
         {
             if (prob[i+1][j+1] >= threshold)
-                printf ("\tprob[%d][%d]=%.2lf\n", i+1, j+1, prob[i+1][j+1]); 
+                printf ("\tprob[%d][%d]=%.2lf\n", i+1, j+1, prob[i+1][j+1]);
         }
     }
     printf ("num_correct_bp=%d, num_pred_bp=%d\n", num_correct_bp, num_pred_bp);
     */
-    
+
     if (num_pred_bp == 0)
     {
         //printf ("Undefined ppv\n");
@@ -415,7 +415,7 @@ double compute_pf_ppv (char *ref_structure, s_partition_function *part, double t
         return 0.0;
     }
     ppv = num_correct_bp*1.0/num_pred_bp;
-    printf ("Thr=%.2lf, ppv=%.2lf, nu_corr=%d, num_pred=%d\n", threshold, ppv, num_correct_bp, num_pred_bp);        
+    printf ("Thr=%.2lf, ppv=%.2lf, nu_corr=%d, num_pred=%d\n", threshold, ppv, num_correct_bp, num_pred_bp);
     return ppv;
 }
 
@@ -431,9 +431,9 @@ double compute_pf_sensitivity (char *ref_structure, s_partition_function *part, 
     double sens=0.0;
     int num_correct_bp;
     int num_true_bp;
-        
+
     len = strlen(ref_structure);
-    detect_original_pairs (ref_structure, ptable_ref);    
+    detect_original_pairs (ref_structure, ptable_ref);
     num_correct_bp = 0;
     num_true_bp = 0;
 
@@ -445,7 +445,7 @@ double compute_pf_sensitivity (char *ref_structure, s_partition_function *part, 
         for (j=i+1; j < len; j++)
         {
             if (prob[i+1][j+1] >= threshold)
-                printf ("\tprob[%d][%d]=%.2lf\n", i+1, j+1, prob[i+1][j+1]); 
+                printf ("\tprob[%d][%d]=%.2lf\n", i+1, j+1, prob[i+1][j+1]);
         }
     }
     */
@@ -459,7 +459,7 @@ double compute_pf_sensitivity (char *ref_structure, s_partition_function *part, 
                 if (part->get_probability(i,j) >= threshold && ptable_ref[i] == j)
                     num_correct_bp++;
             }
-        }                
+        }
     }
     if (num_true_bp == 0)
     {
@@ -472,7 +472,7 @@ double compute_pf_sensitivity (char *ref_structure, s_partition_function *part, 
 
 
 
-void giveup (char *string1, char *string2)
+void giveup (const char *string1, const char *string2)
 // to add: variable nb of parameters, as in scanf, printf
 {
     char temp[100];
@@ -528,7 +528,7 @@ void create_random_restricted (char *sequence, char *restricted)
             restricted [MAX (rnumber1, rnumber2)] = ')';
             break;
         }
-    }    
+    }
 }
 
 
@@ -545,8 +545,8 @@ void remove_space (char *structure)
         if (structure[i] != ' ')
             str2[j++] = structure[i];
     }
-    str2[j] = '\0';    
-    strcpy (structure, str2);    
+    str2[j] = '\0';
+    strcpy (structure, str2);
 }
 
 
@@ -578,7 +578,7 @@ int can_pair (int base1, int base2)
             {
                 case G: return 1;
                 default: return 0;
-            }                        
+            }
         case G:
             switch (base2)
             {
@@ -592,8 +592,8 @@ int can_pair (int base1, int base2)
             {
                 case A: case G: return 1;
                 default: return 0;
-            }               
-    }  
+            }
+    }
 }
 
 
@@ -615,7 +615,7 @@ int watson_crick (int base1, int base2)
             {
                 case G: return 1;
                 default: return 0;
-            }                        
+            }
         case G:
             switch (base2)
             {
@@ -627,8 +627,8 @@ int watson_crick (int base1, int base2)
             {
                 case A: return 1;
                 default: return 0;
-            }               
-    }  
+            }
+    }
 }
 
 
@@ -696,7 +696,7 @@ char int_to_nuc (int inuc)
 
 
 int is_nucleotide (char base)
-// PRE:  base is a character 
+// PRE:  base is a character
 // POST: return true if base is a nucleotide (A, C, G, T, U, X)
 //     return false otherwise
 {
@@ -764,7 +764,7 @@ PARAMTYPE penalty_by_size (int size, char type)
     double logval;
     //return 500.0;
     int end;
-    
+
     if (parsi_length == T99)
     {
         if (type == 'H')    end = MAXLOOP_H_T99;
@@ -781,9 +781,9 @@ PARAMTYPE penalty_by_size (int size, char type)
     {
         if (type == 'H')    end = MAXLOOP_H_LAVISH;
         if (type == 'B')    end = MAXLOOP_B_LAVISH;
-        if (type == 'I')    end = MAXLOOP_I_LAVISH;    
-    }   
-    
+        if (type == 'I')    end = MAXLOOP_I_LAVISH;
+    }
+
     // the penalties for size <= MAXLOOP _H, _B, _I should be read from the file "loop"
     //if (size <= MAXLOOP)
     if (type == 'H' && size <= end)
@@ -810,7 +810,7 @@ PARAMTYPE penalty_by_size (int size, char type)
     {
         penalty30 = hairpin_penalty_by_size[end];
         logval = log (1.0*size/end);
-    }        
+    }
     else if (type == 'I')
     {
         penalty30 = internal_penalty_by_size[end];
@@ -846,7 +846,7 @@ PARAMTYPE penalty_by_size_emodel (int size, char type, energy_model *model)
     double logval;
     //return 500.0;
     int end;
-    
+
     if (parsi_length == T99)
     {
         if (type == 'H')    end = MAXLOOP_H_T99;
@@ -863,9 +863,9 @@ PARAMTYPE penalty_by_size_emodel (int size, char type, energy_model *model)
     {
         if (type == 'H')    end = MAXLOOP_H_LAVISH;
         if (type == 'B')    end = MAXLOOP_B_LAVISH;
-        if (type == 'I')    end = MAXLOOP_I_LAVISH;    
-    }   
-    
+        if (type == 'I')    end = MAXLOOP_I_LAVISH;
+    }
+
     // the penalties for size <= MAXLOOP _H, _B, _I should be read from the file "loop"
     //if (size <= MAXLOOP)
     if (type == 'H' && size <= end)
@@ -892,7 +892,7 @@ PARAMTYPE penalty_by_size_emodel (int size, char type, energy_model *model)
     {
         penalty30 = model->hairpin_penalty_by_size[end];
         logval = log (1.0*size/end);
-    }        
+    }
     else if (type == 'I')
     {
         penalty30 = model->internal_penalty_by_size[end];
@@ -927,7 +927,7 @@ PARAMTYPE penalty_by_size_pmo (int size, char type)
     double logval;
     //return 500.0;
     int end;
-    
+
     if (parsi_length == T99)
     {
         if (type == 'H')    end = MAXLOOP_H_T99;
@@ -944,9 +944,9 @@ PARAMTYPE penalty_by_size_pmo (int size, char type)
     {
         if (type == 'H')    end = MAXLOOP_H_LAVISH;
         if (type == 'B')    end = MAXLOOP_B_LAVISH;
-        if (type == 'I')    end = MAXLOOP_I_LAVISH;    
-    }   
-    
+        if (type == 'I')    end = MAXLOOP_I_LAVISH;
+    }
+
     // the penalties for size <= MAXLOOP _H, _B, _I should be read from the file "loop"
     //if (size <= MAXLOOP)
     if (type == 'H' && size <= end)
@@ -973,7 +973,7 @@ PARAMTYPE penalty_by_size_pmo (int size, char type)
     {
         penalty30 = hairpin_penalty_by_size_pmo[end];
         logval = log (1.0*size/end);
-    }        
+    }
     else if (type == 'I')
     {
         penalty30 = internal_penalty_by_size_pmo[end];
@@ -1164,7 +1164,7 @@ void insert_space (char *structure, int place)
     //strncpy (structure, str, length+1);
     for (i = 0; i <= length; i++)
         structure[i] = str[i];
-    structure[i] = '\0';    
+    structure[i] = '\0';
     //strcpy (structure, str);
 }
 
@@ -1214,7 +1214,7 @@ void detect_original_pairs(char *structure, int *p_table) //kevin debug
         struct_len = strlen (structure);
         for (i=0; i < struct_len; i++)
           {
-            if (structure[i] == '.') 
+            if (structure[i] == '.')
               p_table[i] = -1;
             else if (structure[i] == ' ' || structure[i] == '_')
               p_table[i] = -2;
@@ -1272,17 +1272,17 @@ void detect_structure_features (char *structure, str_features *f) //kevin debug
     int p_table[MAXSLEN];
     int bri[MAX_BRANCHES];
     int nb_nucleotides;
-   
+
     nb_nucleotides = strlen(structure);
     detect_original_pairs (structure, p_table);
-    
+
     for (i=0; i < nb_nucleotides; i++)
     {
         f[i].pair = p_table[i];
         if (p_table[i] > i) //kevin: if current nucleotide is open bracket
         {
             f[p_table[i]].pair = i;
-            // this base pair might be angle brackets or parentheses.            
+            // this base pair might be angle brackets or parentheses.
             if (structure[i] == '<')
             {
                 // first make sure the pair is also angle bracket
@@ -1303,7 +1303,7 @@ void detect_structure_features (char *structure, str_features *f) //kevin debug
 //                         exit(1);
 //                     }
 //                 }
-                continue;                
+                continue;
             }
             // if we got here, it means the base pair was ()
             // just make sure the partner is )
@@ -1314,7 +1314,7 @@ void detect_structure_features (char *structure, str_features *f) //kevin debug
             }
 
             // check if it is stacked pair
-            if (p_table[i+1] == p_table[i]-1 && p_table[i+1] > i+1) 
+            if (p_table[i+1] == p_table[i]-1 && p_table[i+1] > i+1)
             {
                 // if the next pair is an angle pair, then this is a multi-loop, deal with it below
                 if (structure[i+1] != '<')
@@ -1330,7 +1330,7 @@ void detect_structure_features (char *structure, str_features *f) //kevin debug
             int is_multi_loop = 0;
             for (j=i+1; j < p_table[i]; j++)
             {
-                if (p_table[j] > j) //kevin: if index of pair is larger than index of itself -> have a pair -> multiloop 
+                if (p_table[j] > j) //kevin: if index of pair is larger than index of itself -> have a pair -> multiloop
                 {
                     if (structure[j] == '<')
                         is_multi_loop = 1;
@@ -1419,7 +1419,7 @@ int complementary_bases (char b1, char b2)
             {
                 case G: return 1;
                 default: return 0;
-            }                        
+            }
         case G:
             switch (base2)
             {
@@ -1431,8 +1431,8 @@ int complementary_bases (char b1, char b2)
             {
                 case A: return 1;
                 default: return 0;
-            }               
-    }      
+            }
+    }
 }
 
 int self_complementary (char *sequence)
@@ -1509,7 +1509,7 @@ void read_parsi_options_from_file (char *filename)
     fgets (buffer, sizeof(buffer), file);
     while (!feof (file))
     {
-        //printf ("buffer = %s\n", buffer);                
+        //printf ("buffer = %s\n", buffer);
         sscanf (buffer, "%s = %d", option, &value);
         //printf ("option = |%s|, value = |%d|\n", option, value);
         if (strcmp (option, "parsi_tstackh") == 0)          parsi_tstackh = value;
@@ -1525,7 +1525,7 @@ void read_parsi_options_from_file (char *filename)
         else if (strcmp (option, "parsi_special") == 0)     parsi_special = value;
         else if (strcmp (option, "use_similarity_rules") == 0)     use_similarity_rules = value;
         fgets (buffer, sizeof(buffer), file);
-    }    
+    }
     fclose (file);
 //     printf ( "parsi_tstackh = %d\n", parsi_tstackh);
 //     printf ( "parsi_tstacki = %d\n", parsi_tstacki);
@@ -1544,12 +1544,12 @@ void read_parsi_options_from_file (char *filename)
         no_dangling_ends = 1;
     else
         no_dangling_ends = 0;
-                                  
+
 }
 
 // AP: This function is used to determine what percentage of pmo or rna are needed for each i.j that is passed in.
 void get_pmo_usage_percentages(int i, int j, double *energy_model_one_percentage, double *energy_model_two_percentage) {
-	
+
 	//PMO:=DNA:=Model 1
 	//RNA:=RNA:=Model 2
 	if ((i < linker_pos) && (j < linker_pos)) {
@@ -1581,7 +1581,7 @@ void get_pmo_usage_percentages(int i, int j, double *energy_model_one_percentage
 PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energy_models) {
 	int size = energy_models->size();
 	PARAMTYPE energy = 0;
-	double energy_model_one_percentage = 0; 
+	double energy_model_one_percentage = 0;
 	double energy_model_two_percentage = 0;
 
 	//Used for one sequence and structure with many possible energy models
@@ -1602,7 +1602,7 @@ PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energ
 	get_pmo_usage_percentages(i, j, &energy_model_one_percentage, &energy_model_two_percentage);
 
 	energy = (PARAMTYPE) round(energy_model_one_percentage * energy_models->at(0).energy_value + energy_model_two_percentage * energy_models->at(1).energy_value);
-	
+
 	if (energy_model_one_percentage == 0 && energy_model_two_percentage == 0) {
 		return INF;
 	} else {

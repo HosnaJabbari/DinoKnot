@@ -5,7 +5,7 @@
     copyright            : (C) 2002 by Mirela Andronescu
     email                : andrones@cs.ubc.ca
  ***************************************************************************/
-                                                                                                                                                             
+
 /***************************************************************************
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,9 +21,9 @@
 #define INIT_H
 void destruct_energy_model(energy_model *model);
 void init_energy_model(energy_model *model);
-void init_data_emodel(char *arg, const char *config_file, int what, double temperature, energy_model *model);
-void init_data(char *arg, char *config_file, int what, double temperature);
-void init_data_pmo(char *arg, char *config_file, double temperature);
+void init_data_emodel(const char *arg, const char *config_file, int what, double temperature, energy_model *model);
+void init_data(const char *arg, char *config_file, int what, double temperature);
+void init_data_pmo(const char *arg, char *config_file, double temperature);
 // the function that must be called by the main program to read data files
 // PRE:  None
 // POST: Read all data and configuration files
