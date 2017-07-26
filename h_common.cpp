@@ -1087,13 +1087,11 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 		char* G_prime;
 		G_prime = (char*) malloc(sizeof(char)*strlen(sequence));
 		structure_intersection(structure,G_prime);
-		W_final *hfold_min_fold = new W_final (sequence, G_prime, energy_models);
-		if (hfold_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
-		energy = hfold_min_fold->hfold_emodel();
-		hfold_min_fold->return_structure (structure);
+		
+		energy = method1_emodel(sequence, G_prime, structure, energy_models);
 
-    delete hfold_pk_min_fold;
-    delete hfold_min_fold;
+    	delete hfold_pk_min_fold;
+    	//delete hfold_min_fold;
 		return energy;
 	}
 

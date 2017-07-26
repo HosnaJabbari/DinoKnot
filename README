@@ -1,3 +1,7 @@
+cmake -H. -Bbuild -DCMAKE_CXX_COMPILER=g++
+cmake --build build
+
+
 Description:
 These methods are base on hierarchical folding hypothesis
 
