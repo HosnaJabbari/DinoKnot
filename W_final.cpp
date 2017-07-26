@@ -2417,11 +2417,20 @@ void W_final::backtrack_restricted(seq_interval *cur_interval, str_features *fre
 			if (fres[j].pair <= -1)
 			{
 				tmp = W[j-1];
-				if (tmp < min)
-				{
+
+				// Ian Wark July 26 2017
+            			// Removed if statement.
+            			// If this is unpaired, tmp will be INF
+           			// if tmp is INF, it cannot be less than min, which is default INF
+           			// So if unpaired best_row will not be properly set to 0
+            			// and it will not recognized that it should be unpaired.
+            			// TODO this error will also be in normal simfold backtrack and should be changed
+
+            			//if (tmp < min)
+            			//{
 					min = tmp;
 					best_row = 0;
-				}
+				//}
 			}
 			for (i=0; i<=j-1; i++)    // no TURN
 			{
