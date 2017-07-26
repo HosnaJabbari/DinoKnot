@@ -398,9 +398,6 @@ int main (int argc, char *argv[]) {
 	//kevin july 13 changed to call hfold_interacting_emodel instead of hfold_emodel
 	energy = hfold_interacting_emodel(sequence, restricted, structure, &energy_models);
 
-
-	//delete min_fold;
-
 	// check if restricted is included in structure
 	// Hosna March 7, 2012
 	// for optimality we get the value once, use it many times
@@ -411,8 +408,9 @@ int main (int argc, char *argv[]) {
 			(restricted[i] != structure[i]))
 		{
 			printf ("There is something wrong with the structure, doesn't match restricted\n");
-			printf ("  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, energy);
-			exit(1);
+			//printf ("  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, energy);
+			//exit(1);
+			break;
 		}
 	}
 
@@ -433,18 +431,14 @@ int main (int argc, char *argv[]) {
     	printf ("RES: %s  %.2lf\n", structure, energy);
 	}
 
-	free(inputPath);
+    // clean up
+    free(inputPath);
 	free(outputPath);
 
-	// Call the destructor for each energy model.
-	for (auto &energy_model : energy_models) {
-		destruct_energy_model(&energy_model);
-	}
+	destruct_energy_model(model_1);
+	destruct_energy_model(model_2);
 	delete model_1;
 	delete model_2;
-
-	// Clean up the energy model vector that contains N number of energy models.
-	energy_models.erase(std::remove_if(energy_models.begin(), energy_models.end(), [&](energy_model const & emodel) {return &emodel!=NULL; }), energy_models.end());
 
 	return 0;
 }

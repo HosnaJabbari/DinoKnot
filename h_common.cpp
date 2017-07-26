@@ -1079,6 +1079,7 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 
 		energy = method1_emodel(sequence, G_prime, structure, energy_models);
 
+        free(G_prime);
     	delete hfold_pk_min_fold;
     	//delete hfold_min_fold;
 		return energy;
@@ -1130,8 +1131,12 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
 	//printf("method3 energy: %lf\n",energy);
 
-  delete model_1;
-  delete model_2;
+    // clean up
+    free(G_updated);
+    destruct_energy_model(model_1);
+    destruct_energy_model(model_2);
+    delete model_1;
+    delete model_2;
 
 	return energy;
 }
@@ -1201,11 +1206,12 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 
 	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
 
-
+    // clean up
+    free(G_updated);
+    destruct_energy_model(model_1);
+    destruct_energy_model(model_2);
 	delete model_1;
 	delete model_2;
-
-	free(G_updated);
 
 	return energy;
 }
