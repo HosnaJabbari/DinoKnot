@@ -1009,30 +1009,24 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 			if(i < j){ //for each ij in G2
 				//printf("%d %d\n",i,j);
 				if( (G1[i] != G2[i]) && (G1[j] != G2[j]) ){//if ij not in G1
-					printf("%d %d\n",i,j);
 					//include bulges of size 1
 					if( paired_structure(i-1,j+1,G1_pair) || paired_structure(i+1,j-1,G1_pair) ){
-						printf("case 1\n");
 						Gresult[i] = G2[i];
 						Gresult[j] = G2[j];
 					//include loops of size 1x1
 					}else if( paired_structure(i-2,j+1,G1_pair) || paired_structure(i-1,j+2,G1_pair) || \
 							paired_structure(i+1,j-2,G1_pair) || paired_structure(i+2,j-1,G1_pair) ){
-						printf("case 2\n");
 						Gresult[i] = G2[i];
 						Gresult[j] = G2[j];
 					//include loops of size 1x2 or 2x1
 					}else if( paired_structure(i-2,j+2,G1_pair) || paired_structure(i+2,j-2,G1_pair) ){
-						printf("case 3\n");
 						Gresult[i] = G2[i];
 						Gresult[j] = G2[j];
 					}else if( paired_structure(i-3,j+2,G1_pair) || paired_structure(i-2,j+3,G1_pair) || \
 							paired_structure(i+2,j-3,G1_pair) || paired_structure(i+3,j-2,G1_pair) ){
-						printf("case 4\n");
+
 						Gresult[i] = G2[i];
 						Gresult[j] = G2[j];
-					}else{
-						printf("case 5\n");
 					}
 				}
 			}
@@ -1045,13 +1039,9 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 
 //kevin 18 July
 void simfold_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
-	std::cout << "simfold sequence: " << sequence << std::endl;
-	std::cout << "restricted: " << restricted << std::endl;
 	W_final *simfold = new W_final (sequence, restricted, energy_models);
 	if (simfold == NULL) giveup ("Cannot allocate memory", "method3 Simfold");
-	printf("simfold 1\n");
 	simfold->call_simfold_emodel();
-	printf("simfold 2\n");
 	simfold->return_structure (structure);
 
   delete simfold;
@@ -1062,7 +1052,6 @@ double method1_emodel(char *sequence, char *restricted, char *structure, std::ve
 	W_final *hfold_min_fold = new W_final (sequence, restricted, energy_models);
 	if (hfold_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
 	double energy = 0;
-	printf("method 1\n");
 	energy = hfold_min_fold->hfold_emodel();
 	hfold_min_fold->return_structure (structure);
 
@@ -1087,7 +1076,7 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 		char* G_prime;
 		G_prime = (char*) malloc(sizeof(char)*strlen(sequence));
 		structure_intersection(structure,G_prime);
-		
+
 		energy = method1_emodel(sequence, G_prime, structure, energy_models);
 
     	delete hfold_pk_min_fold;
@@ -1129,19 +1118,17 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	}
 	//end of setup for simfold
 
-	printf("1\n");
-
 	simfold_emodel(sequence,restricted, simfold_structure, &simfold_energy_models);
 
-	printf("G1: %s\nG2: %s\n",restricted,simfold_structure);
+	//printf("G1: %s\nG2: %s\n",restricted,simfold_structure);
 	//^ G' simfold_structure <- SimFold(S sequence, G restricted)
 	char* G_updated;
 	G_updated = (char*) malloc(sizeof(char) * strlen(sequence));
 	obtainRelaxedStems(restricted ,simfold_structure, G_updated);
-	printf("Gupdated %s\n",G_updated);
+	//printf("Gupdated %s\n",G_updated);
 	//^Gupdated G_updated<- ObtainRelaxedStems(G restricted,G' simfold_structure)
 	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
-	printf("method3 energy: %lf\n",energy);
+	//printf("method3 energy: %lf\n",energy);
 
   delete model_1;
   delete model_2;

@@ -19,7 +19,7 @@
 #include "structs.h"
 #include "common.h"
 
-#define debug 1
+#define debug 0
 
 
 
@@ -513,7 +513,7 @@ double W_final::hfold(){
 
 //AP
 double W_final::hfold_emodel() { //kevin debug
-	int KEVIN_DEBUG = 1;
+	int KEVIN_DEBUG = 0;
 
 	double energy;
     int i, j;
@@ -572,9 +572,6 @@ double W_final::hfold_emodel() { //kevin debug
 		 }
 		 */
     }
-	printf("done\n");
-	//VM->print_all_v();
-	//exit(7);
 
 	for (j=0; j < nb_nucleotides; j++) {
         for (i =j; i >= 0; i--) {//for (i=0; i<=j; i++) {
@@ -637,8 +634,6 @@ double W_final::hfold_emodel() { //kevin debug
 
 	energy /= 100.0;
 
-	printf("energy %lf\n",energy);
-
 	if (debug)
     {
         print_result ();
@@ -693,8 +688,6 @@ double W_final::call_simfold_emodel(){
         }
     }
 
-    printf("call 4\n");
-
     // backtrack
     // first add (0,n-1) on the stack
     stack_interval = new seq_interval;
@@ -706,17 +699,13 @@ double W_final::call_simfold_emodel(){
 
     seq_interval *cur_interval = stack_interval;
 
-    printf("call 5\n");
-
     while ( cur_interval != NULL)
     {
-        printf("start the while\n");
         stack_interval = stack_interval->next;
         backtrack_restricted_simfold_emodel (cur_interval, fres);
         delete cur_interval;    // this should make up for the new in the insert_node
         cur_interval = stack_interval;
     }
-    printf("call 6\n");
     if (debug)
     {
         print_result ();
@@ -724,7 +713,6 @@ double W_final::call_simfold_emodel(){
     delete [] fres;
     //delete stack_interval;
 
-    printf("call 7\n");
     return energy;
 }
 
@@ -4561,7 +4549,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
         {
         //printf ("j=%d\n", j);
             tmp = W[j-1];
-		
+
 	   // Ian Wark July 26 2017
            // Removed if statement.
            // If this is unpaired, tmp will be INF
@@ -4804,7 +4792,6 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
               best_row = 4;
           }
       }
-      printf("3\n");
       if (fres[i].pair <= -1)
       {
           //AP
@@ -4818,7 +4805,6 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
               best_row = 5;
           }
       }
-      printf("4\n");
       if (fres[j].pair <= -1)
       {
           //AP
@@ -4843,7 +4829,6 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 best_row = 7;
               }
         }
-        printf("chose best_row\n");
       switch (best_row)
         {
           case 1: insert_node (i, j, LOOP); break;
