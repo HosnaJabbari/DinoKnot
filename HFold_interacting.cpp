@@ -409,8 +409,17 @@ int main (int argc, char *argv[]) {
 		{
 			printf ("There is something wrong with the structure, doesn't match restricted\n");
 			printf ("  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, energy);
+			
+			 // clean up
+   			free(inputPath);
+			free(outputPath);
+
+			destruct_energy_model(model_1);
+			destruct_energy_model(model_2);
+			delete model_1;
+			delete model_2;
+			
 			exit(1);
-			break;
 		}
 	}
 
