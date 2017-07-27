@@ -11,6 +11,7 @@
 #include "h_struct.h"
 #include "h_common.h"
 #include "params.h"
+#include "simfold.h"
 
 // Hosna feb 12, 2008
 #include "W_final.h"
@@ -130,7 +131,7 @@ void detect_original_pairs_arcs(char *structure, int *p_table, int *arc_table)
 		printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n"); */
         if (st.top != STACK_EMPTY)//0)
         {
-            printf ("The given structure is not valid: %d more left parentheses than right parentheses\n", st.top);
+            fprintf (stderr, "The given structure is not valid: %d more left parentheses than right parentheses\n", st.top);
             exit (1);
         }
 
@@ -210,7 +211,7 @@ void detect_original_PKed_pairs(char *structure, int *p_table)
           }
         if (st.top != STACK_EMPTY || st_brack.top != STACK_EMPTY) //0 || st_brack.top != 0)
         {
-            printf ("The given structure is not valid: %d more left parenthesis than right parentheses\n", st.top);
+            fprintf (stderr, "The given structure is not valid: %d more left parenthesis than right parentheses\n", st.top);
             exit (1);
         }
 }
@@ -496,7 +497,7 @@ int h_pop (stack_ds *st)
 {
     if (st->top <= STACK_EMPTY)//0)
     {
-        printf ("The given structure is not valid: more right parentheses than left parentheses\n");
+        fprintf (stderr, "The given structure is not valid: more right parentheses than left parentheses\n");
         exit (1);
     }
     int result = st->elem[st->top];
@@ -1041,8 +1042,29 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 void simfold_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
 	W_final *simfold = new W_final (sequence, restricted, energy_models);
 	if (simfold == NULL) giveup ("Cannot allocate memory", "method3 Simfold");
-	simfold->call_simfold_emodel();
+	double min_energy = simfold->call_simfold_emodel();
 	simfold->return_structure (structure);
+
+    for (int i=0; i < strlen (sequence); i++)
+    {
+        if ((restricted[i] == '(' || restricted[i] == ')' || restricted[i] == '.') &&
+            (restricted[i] != structure[i]))
+        {
+            fprintf(stderr,"ERROR in SIMFOLD!!! There is something wrong with the structure, doesn't match restricted\n");
+            fprintf(stderr,"  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, min_energy);
+            fprintf(stderr,"ERROR in SIMFOLD!!! There is something wrong with the structure, doesn't match restricted\n");
+            //exit(1);
+        }
+    }
+    // now check if the free energy obtained with simfold_restricted is correct
+    double correct_energy = free_energy_simfold_restricted (sequence, structure, restricted);
+    if (fabs (correct_energy-min_energy) > 1.0)
+    {
+        fprintf (stderr, "ERROR in SIMFOLD!!! The dp energy is different from the energy calculated at the end!!\n");
+        fprintf (stderr, "%s\n%s\n%s\n correct_energy=%.2lf, energy=%.2lf\n", sequence, restricted, structure, correct_energy, min_energy);
+        fprintf (stderr, "ERROR in SIMFOLD!!! The dp energy is different from the energy calculated at the end!!\n");
+        //exit(1);
+    }
 
   delete simfold;
 }

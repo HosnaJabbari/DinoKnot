@@ -242,7 +242,7 @@ int loss (int first, int last)
     if (known_pairings == NULL) return 0;
     if (first > last)
     {
-        printf ("first %d should be <= last %d!!", first, last);
+        fprintf (stderr, "first %d should be <= last %d!!", first, last);
         exit (1);
     }
     int i;
@@ -716,20 +716,20 @@ void check_sequence (char *sequence)
     maxlen = MAXSLEN;
     if (length == 0)
     {
-        printf ("Empty sequence\n");
+        fprintf (stderr, "Empty sequence\n");
         exit (1);
     }
     if (length > MAXSLEN)
     {
-        printf ("Sequence too long; maximum allowed: %d\n", maxlen);
+        fprintf (stderr, "Sequence too long; maximum allowed: %d\n", maxlen);
         exit (1);
     }
     for (i=0; i<length; i++)
     {
         if (!is_nucleotide (sequence[i]))
         {
-            printf ("Sequence not valid: %c found\n", sequence[i]);
-            printf ("Only acgtuACGTU are allowed\n");
+            fprintf (stderr, "Sequence not valid: %c found\n", sequence[i]);
+            fprintf (stderr, "Only acgtuACGTU are allowed\n");
             exit (1);
         }
     }
@@ -823,7 +823,7 @@ PARAMTYPE penalty_by_size (int size, char type)
     }
     else
     {
-        printf ("ERROR! type is not valid, ABORT!\n");
+        fprintf (stderr, "ERROR! type is not valid, ABORT!\n");
         exit(1);
     }
 
@@ -986,7 +986,7 @@ PARAMTYPE penalty_by_size_pmo (int size, char type)
     }
     else
     {
-        printf ("ERROR! type is not valid, ABORT!\n");
+        fprintf (stderr, "ERROR! type is not valid, ABORT!\n");
         exit(1);
     }
 
@@ -1189,7 +1189,7 @@ int pop (stack_ds *st)
 {
     if (st->top <= 0)
     {
-        printf ("The given structure is not valid: more right parentheses than left parentheses\n");
+        fprintf (stderr, "The given structure is not valid: more right parentheses than left parentheses\n");
         exit (1);
     }
         return st->elem[--st->top];
@@ -1232,7 +1232,7 @@ void detect_original_pairs(char *structure, int *p_table) //kevin debug
 
         if (st.top != 0)
         {
-            printf ("The given structure is not valid: %d more left parentheses than right parentheses: %s\n", st.top, structure);
+            fprintf (stderr, "The given structure is not valid: %d more left parentheses than right parentheses: %s\n", st.top, structure);
             exit (1);
         }
 }
@@ -1288,7 +1288,7 @@ void detect_structure_features (char *structure, str_features *f) //kevin debug
                 // first make sure the pair is also angle bracket
                 if (structure[p_table[i]] != '>')
                 {
-                    printf ("ERROR! structure is not valid, position %d should be > and is %c\n%s\n", p_table[i], structure[p_table[i]], structure);
+                    fprintf (stderr, "ERROR! structure is not valid, position %d should be > and is %c\n%s\n", p_table[i], structure[p_table[i]], structure);
                     exit(1);
                 }
                 f[i].type = NONE;
@@ -1309,7 +1309,7 @@ void detect_structure_features (char *structure, str_features *f) //kevin debug
             // just make sure the partner is )
             if (structure[p_table[i]] != ')')
             {
-                printf ("ERROR! structure is not valid, position %d should be ) and is %c\n%s\n", p_table[i], structure[p_table[i]], structure);
+                fprintf (stderr, "ERROR! structure is not valid, position %d should be ) and is %c\n%s\n", p_table[i], structure[p_table[i]], structure);
                 exit(1);
             }
 

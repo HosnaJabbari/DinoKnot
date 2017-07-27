@@ -268,14 +268,14 @@ int main (int argc, char *argv[]) {
 	if(!inputPathFound){
 		//if sequence1 or sequence2 or structure1 or structure2 is missing when input file is not present
 		if(!(sequence1Found && structure1Found && sequence2Found && structure2Found)){
-			printf("--so/--or/--st/--tr is missing\n");
+			fprintf(stderr, "--so/--or/--st/--tr is missing\n");
 			free(inputPath);free(outputPath);
 			printUsage();
 			exit(1);
 		}else{
 			//validate both structures
 			if(!(validateStructure(inputStructure1,inputSequence1))){
-				printf("--or is invalid\n");
+				fprintf(stderr, "--or is invalid\n");
 				free(inputPath);free(outputPath);
 				printUsage();
 				exit(1);
@@ -283,7 +283,7 @@ int main (int argc, char *argv[]) {
 				replaceBrackets(inputStructure1);
 			}
 			if(!(validateStructure(inputStructure2,inputSequence2))){
-				printf("--tr is invalid\n");
+				fprintf(stderr, "--tr is invalid\n");
 				free(inputPath);free(outputPath);
 				printUsage();
 				exit(1);
@@ -294,14 +294,14 @@ int main (int argc, char *argv[]) {
 	}
 
 	if(!type1Found){
-		printf("--t1 is missing\n");
+		fprintf(stderr, "--t1 is missing\n");
 		free(inputPath);free(outputPath);
 		printUsage();
 		exit(1);
 	}
 
 	if(!type2Found){
-		printf("--t2 is missing\n");
+		fprintf(stderr, "--t2 is missing\n");
 		free(inputPath);free(outputPath);
 		printUsage();
 		exit(1);
@@ -407,9 +407,9 @@ int main (int argc, char *argv[]) {
 		if ((restricted[i] == '(' || restricted[i] == ')' || restricted[i] == '.') &&
 			(restricted[i] != structure[i]))
 		{
-			printf ("There is something wrong with the structure, doesn't match restricted\n");
-			printf ("  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, energy);
-			
+			fprintf (stderr, "There is something wrong with the structure, doesn't match restricted\n");
+			fprintf (stderr, "  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, energy);
+
 			 // clean up
    			free(inputPath);
 			free(outputPath);
@@ -418,7 +418,7 @@ int main (int argc, char *argv[]) {
 			destruct_energy_model(model_2);
 			delete model_1;
 			delete model_2;
-			
+
 			exit(1);
 		}
 	}

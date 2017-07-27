@@ -712,7 +712,6 @@ double W_final::call_simfold_emodel(){
     }
     delete [] fres;
     //delete stack_interval;
-
     return energy;
 }
 
@@ -2231,7 +2230,7 @@ void W_final::backtrack_restricted(seq_interval *cur_interval, str_features *fre
 						//insert_node (i+1, j-1, LOOP);
 					else
 					{
-						printf ("NOT GOOD RESTR STACK, i=%d, j=%d\n", i, j);
+						fprintf (stderr, "NOT GOOD RESTR STACK, i=%d, j=%d\n", i, j);
 						exit (0);
 					}
 
@@ -2283,7 +2282,7 @@ void W_final::backtrack_restricted(seq_interval *cur_interval, str_features *fre
 						insert_node (best_ip, best_jp, LOOP);
 					else
 					{
-						printf ("NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
+						fprintf (stderr, "NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
 						exit (0);
 					}
 				}
@@ -2895,7 +2894,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 						//insert_node (i+1, j-1, LOOP);
 					else
 					{
-						printf ("NOT GOOD RESTR STACK, i=%d, j=%d\n", i, j);
+						fprintf (stderr, "NOT GOOD RESTR STACK, i=%d, j=%d\n", i, j);
 						exit (0);
 					}
 
@@ -2952,7 +2951,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 						insert_node (best_ip, best_jp, LOOP);
 					else
 					{
-						printf ("NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
+						fprintf (stderr, "NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
 						exit (0);
 					}
 				}
@@ -3635,7 +3634,7 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 				structure[i] = '(';
 				structure[j] = ')';
 			}else{
-				printf("Base pairing between %d and %d is pseudoknot free and should not happen here!! \n",i,j);
+				fprintf(stderr, "Base pairing between %d and %d is pseudoknot free and should not happen here!! \n",i,j);
 				exit(0);
 				//structure[i] = '[';
 				//structure[j] = ']';
@@ -3657,7 +3656,7 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 					//insert_node (i+1, j-1, LOOP);
 					else
 					{
-						printf ("NOT GOOD RESTR STACK (i+1 and j-1 are not paired!), i=%d, j=%d\n", i, j);
+						fprintf (stderr, "NOT GOOD RESTR STACK (i+1 and j-1 are not paired!), i=%d, j=%d\n", i, j);
 						exit (0);
 					}
 
@@ -3719,7 +3718,7 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 						insert_node (best_ip, best_jp, LOOP);
 					else
 					{
-						printf ("NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
+						fprintf (stderr, "NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
 						exit (0);
 					}
 				}
@@ -4404,7 +4403,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 insert_node (i+1, j-1, LOOP);
             else
             {
-                printf ("NOT GOOD RESTR STACK, i=%d, j=%d\n", i, j);
+                fprintf (stderr, "NOT GOOD RESTR STACK, i=%d, j=%d\n", i, j);
                 exit (0);
             }
 
@@ -4446,7 +4445,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 insert_node (best_ip, best_jp, LOOP);
             else
             {
-                printf ("NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
+                fprintf (stderr, "NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
                 exit (0);
             }
         }
@@ -4904,7 +4903,7 @@ void W_final::backtrack_restricted_pmo (seq_interval *cur_interval, str_features
 						//insert_node (i+1, j-1, LOOP);
 					else
 					{
-						printf ("NOT GOOD RESTR STACK, i=%d, j=%d\n", i, j);
+						fprintf (stderr, "NOT GOOD RESTR STACK, i=%d, j=%d\n", i, j);
 						exit (0);
 					}
 
@@ -4957,7 +4956,7 @@ void W_final::backtrack_restricted_pmo (seq_interval *cur_interval, str_features
 						insert_node (best_ip, best_jp, LOOP);
 					else
 					{
-						printf ("NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
+						fprintf (stderr, "NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
 						exit (0);
 					}
 				}
@@ -5607,7 +5606,7 @@ void W_final::backtrack_restricted_pkonly (seq_interval *cur_interval, str_featu
 				structure[i] = '(';
 				structure[j] = ')';
 			}else{
-				printf("Base pairing between %d and %d is pseudoknot free and should not happen here!! \n",i,j);
+				fprintf(stderr, "Base pairing between %d and %d is pseudoknot free and should not happen here!! \n",i,j);
 				exit(0);
 				//structure[i] = '[';
 				//structure[j] = ']';
@@ -5629,7 +5628,7 @@ void W_final::backtrack_restricted_pkonly (seq_interval *cur_interval, str_featu
 					//insert_node (i+1, j-1, LOOP);
 					else
 					{
-						printf ("NOT GOOD RESTR STACK (i+1 and j-1 are not paired!), i=%d, j=%d\n", i, j);
+						fprintf (stderr, "NOT GOOD RESTR STACK (i+1 and j-1 are not paired!), i=%d, j=%d\n", i, j);
 						exit (0);
 					}
 
@@ -5686,7 +5685,7 @@ void W_final::backtrack_restricted_pkonly (seq_interval *cur_interval, str_featu
 						insert_node (best_ip, best_jp, LOOP);
 					else
 					{
-						printf ("NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
+						fprintf (stderr, "NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
 						exit (0);
 					}
 				}
@@ -6296,7 +6295,7 @@ void W_final::backtrack_restricted_pkonly_pmo (seq_interval *cur_interval, str_f
 				structure[i] = '(';
 				structure[j] = ')';
 			}else{
-				printf("Base pairing between %d and %d is pseudoknot free and should not happen here!! \n",i,j);
+				fprintf(stderr, "Base pairing between %d and %d is pseudoknot free and should not happen here!! \n",i,j);
 				exit(0);
 				//structure[i] = '[';
 				//structure[j] = ']';
@@ -6318,7 +6317,7 @@ void W_final::backtrack_restricted_pkonly_pmo (seq_interval *cur_interval, str_f
 					//insert_node (i+1, j-1, LOOP);
 					else
 					{
-						printf ("NOT GOOD RESTR STACK (i+1 and j-1 are not paired!), i=%d, j=%d\n", i, j);
+						fprintf (stderr, "NOT GOOD RESTR STACK (i+1 and j-1 are not paired!), i=%d, j=%d\n", i, j);
 						exit (0);
 					}
 
@@ -6375,7 +6374,7 @@ void W_final::backtrack_restricted_pkonly_pmo (seq_interval *cur_interval, str_f
 						insert_node (best_ip, best_jp, LOOP);
 					else
 					{
-						printf ("NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
+						fprintf (stderr, "NOT GOOD RESTR INTER, i=%d, j=%d, best_ip=%d, best_jp=%d\n", i, j, best_ip, best_jp);
 						exit (0);
 					}
 				}

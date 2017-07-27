@@ -689,7 +689,7 @@ int structure_type_index (const char input[])
     }
     if (!found)
     {
-        printf ("!!!TYPE NOT found: %s!!!\n", type);
+        fprintf (stderr, "!!!TYPE NOT found: %s!!!\n", type);
         exit(1);
     }
   return i;
@@ -1562,7 +1562,7 @@ double count_types (int link, int *sequence, char *csequence, char *structure, c
 
             if (f[i].num_branches > MAX_BRANCHES)
             {
-                printf ("ERROR! f[i].num_branches=%d, but MAX_BRANCHES=%d\n", f[i].num_branches, MAX_BRANCHES);
+                fprintf (stderr, "ERROR! f[i].num_branches=%d, but MAX_BRANCHES=%d\n", f[i].num_branches, MAX_BRANCHES);
                 exit(1);
             }
             while (l < f[i].bri[0] && !special)
@@ -1732,7 +1732,7 @@ double get_feature_counts_restricted (char *sequence, char *structure, double *c
     for (int i=0; i < num_params; i++)  params_array_double[i] = params_array[i]/100.0;
     if (!check_counts_linear (num_params, params_array_double, c, f, energy))
     {
-        printf ("ERROR in simfold's get_feature_counts_restricted!");
+        fprintf (stderr, "ERROR in simfold's get_feature_counts_restricted!");
         exit(1);
     }
     return energy;
@@ -1854,7 +1854,7 @@ double count_each_structure_type (char *sequence, char *structure, char *restric
         // make sure the structure doesn't have space either
         if (strstr (structure, " ") != NULL)
         {
-            printf ("Structure has space, and sequence not!!\n%s\n%s\n", sequence, structure);
+            fprintf (stderr, "Structure has space, and sequence not!!\n%s\n%s\n", sequence, structure);
             exit (1);
         }
         actual_seq = sequence;
@@ -1869,7 +1869,7 @@ double count_each_structure_type (char *sequence, char *structure, char *restric
         link = space_location - 1;
         if (structure[space_location] != ' ')
         {
-            printf ("Structure doesn't have space at the same place as sequence!!\n%s\n%s\n", sequence, structure);
+            fprintf (stderr, "Structure doesn't have space at the same place as sequence!!\n%s\n%s\n", sequence, structure);
             exit (1);
         }
         actual_seq = new char[len+1];
@@ -2067,7 +2067,7 @@ void check_int11_parameters (int i, int j, int k, int l, int m, int n)
 
         if (fabs(int11_shouldbe - int11[i][j][k][l][m][n]) > 0.01)
         {
-            printf ("DIFFERENCE between what int11 should be (%Lg) and what it is (%Lg) at 5'-%c%c%c/%c%c%c-3\n",
+            fprintf (stderr, "DIFFERENCE between what int11 should be (%Lg) and what it is (%Lg) at 5'-%c%c%c/%c%c%c-3\n",
                     int11_shouldbe,  int11[i][j][k][l][m][n], int_to_nuc(i), int_to_nuc(k), int_to_nuc(m),
                             int_to_nuc(n), int_to_nuc(l), int_to_nuc(j));
             exit(1);
@@ -2118,7 +2118,7 @@ void check_int11_emodel_parameters (int i, int j, int k, int l, int m, int n, en
 
         if (fabs(int11_shouldbe - model->int11[i][j][k][l][m][n]) > 0.01)
         {
-            printf ("DIFFERENCE between what int11 should be (%Lg) and what it is (%Lg) at 5'-%c%c%c/%c%c%c-3\n",
+            fprintf (stderr, "DIFFERENCE between what int11 should be (%Lg) and what it is (%Lg) at 5'-%c%c%c/%c%c%c-3\n",
                     int11_shouldbe,  model->int11[i][j][k][l][m][n], int_to_nuc(i), int_to_nuc(k), int_to_nuc(m),
                             int_to_nuc(n), int_to_nuc(l), int_to_nuc(j));
             exit(1);
@@ -2168,7 +2168,7 @@ void check_int11_pmo_parameters (int i, int j, int k, int l, int m, int n)
 
         if (fabs(int11_shouldbe - int11_pmo[i][j][k][l][m][n]) > 0.01)
         {
-            printf ("DIFFERENCE between what int11 should be (%Lg) and what it is (%Lg) at 5'-%c%c%c/%c%c%c-3\n",
+            fprintf (stderr, "DIFFERENCE between what int11 should be (%Lg) and what it is (%Lg) at 5'-%c%c%c/%c%c%c-3\n",
                     int11_shouldbe,  int11_pmo[i][j][k][l][m][n], int_to_nuc(i), int_to_nuc(k), int_to_nuc(m),
                             int_to_nuc(n), int_to_nuc(l), int_to_nuc(j));
             exit(1);
@@ -2390,7 +2390,7 @@ void extrapolate_parameters_emodel (energy_model *model)
                                                         case 2: model->int22[i][j][k][l][m][n][o][p] += model->misc.internal22_delta_different_size; break;
                                                         case 3: model->int22[i][j][k][l][m][n][o][p] += model->misc.internal22_delta_1stable_1unstable; break;
                                                         case 4: model->int22[i][j][k][l][m][n][o][p] += model->misc.internal22_delta_AC; break;
-                                                        default: printf ("ERROR: result %d for k=%d, l=%d, o=%d, p=%d, ABORT!\n", result, k, l, o, p); exit(1);
+                                                        default: fprintf (stderr, "ERROR: result %d for k=%d, l=%d, o=%d, p=%d, ABORT!\n", result, k, l, o, p); exit(1);
                                                     }
                                                 }
                                             }
@@ -3018,7 +3018,7 @@ void extrapolate_parameters ()
                                                         case 2: int22[i][j][k][l][m][n][o][p] += misc.internal22_delta_different_size; break;
                                                         case 3: int22[i][j][k][l][m][n][o][p] += misc.internal22_delta_1stable_1unstable; break;
                                                         case 4: int22[i][j][k][l][m][n][o][p] += misc.internal22_delta_AC; break;
-                                                        default: printf ("ERROR: result %d for k=%d, l=%d, o=%d, p=%d, ABORT!\n", result, k, l, o, p); exit(1);
+                                                        default: fprintf (stderr, "ERROR: result %d for k=%d, l=%d, o=%d, p=%d, ABORT!\n", result, k, l, o, p); exit(1);
                                                     }
                                                 }
                                             }
@@ -3645,7 +3645,7 @@ void extrapolate_parameters_pmo ()
                                                         case 2: int22_pmo[i][j][k][l][m][n][o][p] += misc_pmo.internal22_delta_different_size; break;
                                                         case 3: int22_pmo[i][j][k][l][m][n][o][p] += misc_pmo.internal22_delta_1stable_1unstable; break;
                                                         case 4: int22_pmo[i][j][k][l][m][n][o][p] += misc_pmo.internal22_delta_AC; break;
-                                                        default: printf ("ERROR: result %d for k=%d, l=%d, o=%d, p=%d, ABORT!\n", result, k, l, o, p); exit(1);
+                                                        default: fprintf (stderr, "ERROR: result %d for k=%d, l=%d, o=%d, p=%d, ABORT!\n", result, k, l, o, p); exit(1);
                                                     }
                                                 }
                                             }
@@ -13700,7 +13700,7 @@ void fill_data_structures_with_new_parameters (char *filename)
                                                         case 2: int22[i][j][k][l][m][n][o][p] += misc.internal22_delta_different_size; break;
                                                         case 3: int22[i][j][k][l][m][n][o][p] += misc.internal22_delta_1stable_1unstable; break;
                                                         case 4: int22[i][j][k][l][m][n][o][p] += misc.internal22_delta_AC; break;
-                                                        default: printf ("ERROR: result %d for k=%d, l=%d, o=%d, p=%d, ABORT!\n", result, k, l, o, p); exit(1);
+                                                        default: fprintf (stderr, "ERROR: result %d for k=%d, l=%d, o=%d, p=%d, ABORT!\n", result, k, l, o, p); exit(1);
                                                     }
                                                 }
                                             }
@@ -14184,7 +14184,7 @@ int get_info_from_file (FILE *file, char *sequence, char *real_structure, char *
         }
         else
         {
-            printf ("Str doesn't follow Seq, Seq is %s\n", sequence);
+            fprintf (stderr, "Str doesn't follow Seq, Seq is %s\n", sequence);
             exit(1);
         }
         fgets (buffer, sizeof(buffer), file);
@@ -14196,7 +14196,7 @@ int get_info_from_file (FILE *file, char *sequence, char *real_structure, char *
         }
         else
         {
-            printf ("Res doesn't follow Str\n");
+            fprintf (stderr, "Res doesn't follow Str\n");
             exit(1);
         }
         fgets (buffer, sizeof(buffer), file);   //====
@@ -14260,7 +14260,7 @@ PFTYPE compute_f (char *input_file)
     f = 0;
     if ((file = fopen (input_file, "r")) == NULL)
     {
-        printf ("Cannot open file %s\n", input_file);
+        fprintf (stderr, "Cannot open file %s\n", input_file);
         exit (0);
     }
 
@@ -14306,7 +14306,7 @@ PFTYPE compute_likelihood_exactly (char *input_file)
     f = 1.0;
     if ((file = fopen (input_file, "r")) == NULL)
     {
-        printf ("Cannot open file %s\n", input_file);
+        fprintf (stderr, "Cannot open file %s\n", input_file);
         exit (0);
     }
 
@@ -14362,7 +14362,7 @@ PFTYPE compute_log_likelihood_smart (char *input_file)
     f = 0.0;
     if ((file = fopen (input_file, "r")) == NULL)
     {
-        printf ("Cannot open file %s\n", input_file);
+        fprintf (stderr, "Cannot open file %s\n", input_file);
         exit (0);
     }
 
@@ -14419,7 +14419,7 @@ void compute_gradient_f (char *input_file, PFTYPE *f_gradient)
     }
     if ((file = fopen (input_file, "r")) == NULL)
     {
-        printf ("Cannot open file %s\n", input_file);
+        fprintf (stderr, "Cannot open file %s\n", input_file);
         exit (0);
     }
     int k;
@@ -14473,7 +14473,7 @@ void compute_gradient_f_smart (char *input_file, PFTYPE *f_gradient)
     }
     if ((file = fopen (input_file, "r")) == NULL)
     {
-        printf ("Cannot open file %s\n", input_file);
+        fprintf (stderr, "Cannot open file %s\n", input_file);
         exit (0);
     }
     int k;
@@ -14534,7 +14534,7 @@ PFTYPE compute_f_and_gradient_f_smart (char *input_file, PFTYPE *f_gradient)
     }
     if ((file = fopen (input_file, "r")) == NULL)
     {
-        printf ("Cannot open file %s\n", input_file);
+        fprintf (stderr, "Cannot open file %s\n", input_file);
         exit (0);
     }
     int k;
@@ -14602,7 +14602,7 @@ PFTYPE compute_f_and_gradient_f (char *input_file, PFTYPE *f_gradient)
     }
     if ((file = fopen (input_file, "r")) == NULL)
     {
-        printf ("Cannot open file %s\n", input_file);
+        fprintf (stderr, "Cannot open file %s\n", input_file);
         exit (0);
     }
     int k;
@@ -14710,7 +14710,7 @@ void compute_counts_vector_LP (char *input_file, double *total_counter)
 
     if ((file = fopen (input_file, "r")) == NULL)
     {
-        printf ("Cannot open file %s\n", input_file);
+        fprintf (stderr, "Cannot open file %s\n", input_file);
         exit (0);
     }
     int k;
@@ -14791,7 +14791,7 @@ void compute_counts_matrix_LP (char *input_file, int train_samples)
 
     if ((file = fopen (input_file, "r")) == NULL)
     {
-        printf ("Cannot open file %s\n", input_file);
+        fprintf (stderr, "Cannot open file %s\n", input_file);
         exit (0);
     }
 
@@ -14807,7 +14807,7 @@ void compute_counts_matrix_LP (char *input_file, int train_samples)
             printf (",\n ");
             if (! compute_counts_matrix_LP_helper (file))
             {
-                printf ("Error in file\n");
+                fprintf (stderr, "Error in file\n");
                 exit(1);
             }
         }
@@ -14819,7 +14819,7 @@ void compute_counts_matrix_LP (char *input_file, int train_samples)
             printf (",\n ");
             if (! compute_counts_matrix_LP_helper (file))
             {
-                printf ("Error in file\n");
+                fprintf (stderr, "Error in file\n");
                 exit(1);
             }
         }
@@ -14962,7 +14962,7 @@ int generate_structure_withbb (char *sequence, char *known_structure, char *give
                         //printf ("first=%d, last=%d, chosen = %d\n", first, last, bb_index2);
                         if (strstr (string_params[bb_index2], "tstacki") == NULL)
                         {
-                            printf ("bbtype was not chosen correctly\n");
+                            fprintf (stderr, "bbtype was not chosen correctly\n");
                             exit(1);
                         }
                         //printf ("The second tstacki chosen was: %s\n", string_params[bb_index2]);
@@ -15168,7 +15168,7 @@ int generate_structure_withoutbb (char *sequence, char *known_structure, char *g
                         //printf ("first=%d, last=%d, chosen = %d\n", first, last, bb_index2);
                         if (strstr (string_params[bb_index2], "tstacki") == NULL)
                         {
-                            printf ("bbtype was not chosen correctly\n");
+                            fprintf (stderr, "bbtype was not chosen correctly\n");
                             exit(1);
                         }
                         //printf ("The second tstacki chosen was: %s\n", string_params[bb_index2]);
@@ -15403,7 +15403,7 @@ int generate_structure_withbb_many_thresholds (char *sequence, char structures[]
                         //printf ("first=%d, last=%d, chosen = %d\n", first, last, bb_index2);
                         if (strstr (string_params[bb_index2], "tstacki") == NULL)
                         {
-                            printf ("bbtype was not chosen correctly\n");
+                            fprintf (stderr, "bbtype was not chosen correctly\n");
                             exit(1);
                         }
                         tried = 1;
@@ -15557,7 +15557,7 @@ void search_bb (char *sequence, double *old_counts, int threshold, int num_param
                         //printf ("first=%d, last=%d, chosen = %d\n", first, last, bb_index2);
                         if (strstr (string_params[bb_index2], "tstacki") == NULL)
                         {
-                            printf ("bbtype was not chosen correctly\n");
+                            fprintf (stderr, "bbtype was not chosen correctly\n");
                             exit(1);
                         }
                         tried = 1;
@@ -16000,7 +16000,7 @@ void fill_data_structures_with_new_parameters_fixed_dangles (char *filename, cha
                                                         case 2: int22[i][j][k][l][m][n][o][p] += misc.internal22_delta_different_size; break;
                                                         case 3: int22[i][j][k][l][m][n][o][p] += misc.internal22_delta_1stable_1unstable; break;
                                                         case 4: int22[i][j][k][l][m][n][o][p] += misc.internal22_delta_AC; break;
-                                                        default: printf ("ERROR: result %d for k=%d, l=%d, o=%d, p=%d, ABORT!\n", result, k, l, o, p); exit(1);
+                                                        default: fprintf (stderr, "ERROR: result %d for k=%d, l=%d, o=%d, p=%d, ABORT!\n", result, k, l, o, p); exit(1);
                                                     }
                                                 }
                                             }
@@ -16908,7 +16908,7 @@ void fill_similarity_rule_with_optical_melting_reference (char *xml_filename)
 
     if ((xml = fopen (xml_filename, "r")) == NULL)
     {
-        printf ("Cannot open file %s\n", xml_filename);
+        fprintf (stderr, "Cannot open file %s\n", xml_filename);
         exit (0);
     }
 

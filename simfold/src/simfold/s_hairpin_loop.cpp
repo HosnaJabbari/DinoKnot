@@ -921,16 +921,16 @@ void s_hairpin_loop::count_get_energy (int i, int j, int* sequence, char *cseque
     PARAMTYPE energy2 = get_energy (i, j, sequence, csequence, NULL);
     if (fabs (energy/100.0-energy2/100.0) > 0.01)
     {
-        printf ("ERROR! The way I compute get_energy and the way I count in s_hairpin_loop.cpp is different!\n");
+        fprintf (stderr, "ERROR! The way I compute get_energy and the way I count in s_hairpin_loop.cpp is different!\n");
 #ifdef DOUBLEPARAMS
         printf ("By counts energy is %.2lf, by get_energy is %.2lf\n", energy/100.0, energy2/100.0);
 #elif LDOUBLEPARAMS
         printf ("By counts energy is %.2Lf, by get_energy is %.2Lf\n", energy/100.0, energy2/100.0);
 #endif
-        printf ("Size is %d ", j-i-1);
+        fprintf (stderr, "Size is %d ", j-i-1);
         for (int myi = i; myi <= j ; myi++)
-            printf ("%c", csequence[myi]);
-        printf ("\n");
+            fprintf (stderr, "%c", csequence[myi]);
+        fprintf (stderr, "\n");
         exit(1);
     }
     else

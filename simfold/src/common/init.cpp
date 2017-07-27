@@ -2141,12 +2141,12 @@ void init_data_emodel (const char *arg, const char *config_file, int what, doubl
     //changed nb_params from 58 to 80 (added 22 files for PMO)
     if (what != RNA && what != DNA && what != PMO)
     {
-        printf ("Please specify what to fold: RNA or DNA\n");
+        fprintf (stderr, "Please specify what to fold: RNA or DNA\n");
         exit(1);
     }
     if (temperature < 0 || temperature > 100)
     {
-        printf ("Temperature must be between 0 and 100 degrees Celsius\n");
+        fprintf (stderr, "Temperature must be between 0 and 100 degrees Celsius\n");
         exit(1);
     }
 
@@ -2639,12 +2639,12 @@ void init_data (const char *arg, char *config_file, int what, double temperature
     //changed nb_params from 58 to 80 (added 22 files for PMO)
     if (what != RNA && what != DNA && what != PMO)
     {
-        printf ("Please specify what to fold: RNA or DNA\n");
+        fprintf (stderr, "Please specify what to fold: RNA or DNA\n");
         exit(1);
     }
     if (temperature < 0 || temperature > 100)
     {
-        printf ("Temperature must be between 0 and 100 degrees Celsius\n");
+        fprintf (stderr, "Temperature must be between 0 and 100 degrees Celsius\n");
         exit(1);
     }
 
@@ -3139,7 +3139,7 @@ void init_data_pmo(const char *arg, char *config_file, double temperature)
 
     if (temperature < 0 || temperature > 100)
     {
-        printf ("Temperature must be between 0 and 100 degrees Celsius\n");
+        fprintf (stderr, "Temperature must be between 0 and 100 degrees Celsius\n");
         exit(1);
     }
 
