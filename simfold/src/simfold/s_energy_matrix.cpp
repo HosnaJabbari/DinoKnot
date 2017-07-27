@@ -221,7 +221,7 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
 // compute the V(i,j) value, if the structure must be restricted
 {
     PARAMTYPE min, min_en[4];
-    int k, min_rank;
+    int k, min_rank = -1;
     char type;
 
     min = INF/2;

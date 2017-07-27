@@ -872,7 +872,7 @@ void W_final::compute_W_restricted_emodel (int j, str_features *fres)
 {
     int m1 = W[j-1];
 	int m2, m3;
-    int must_choose_this_branch;
+    int must_choose_this_branch = 0;
 
 	//AP. This was moved to be checked before the m2 and m3 calculation to save time. Previously it was after the calculation.
 	if (WMB->is_weakly_closed(0,j) < 0){
@@ -897,7 +897,8 @@ void W_final::compute_W_restricted_simfold_emodel (int j, str_features *fres)
 {
     int m1 = W[j-1];
 	int m2;
-    int must_choose_this_branch;
+    int must_choose_this_branch = 0;
+
     m2 = compute_W_br2_restricted_simfold_emodel (j, fres, must_choose_this_branch);
 	if (must_choose_this_branch) {
 		W[j] = m2;
@@ -912,7 +913,7 @@ void W_final::compute_W_restricted_pkonly_emodel (int j, str_features *fres)
 {
     int m1 = W[j-1];
 	int m2, m3;
-    int must_choose_this_branch;
+    int must_choose_this_branch = 0;
 
 	//AP. This was moved to be checked before the m2 and m3 calculation to save time. Previously it was after the calculation.
 	if (WMB->is_weakly_closed(0,j) < 0){
