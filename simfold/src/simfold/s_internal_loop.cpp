@@ -3385,7 +3385,7 @@ void s_internal_loop::count_get_energy (int i, int j, int ip, int jp, int *seque
                             energy += misc.internal22_delta_AC;
                             break;
                         default:
-                            printf ("ERROR: result %d for k=%d, l=%d, o=%d, p=%d, ABORT!\n", result, kk, ll, oo, pp);
+                            fprintf (stderr, "ERROR: result %d for k=%d, l=%d, o=%d, p=%d, ABORT!\n", result, kk, ll, oo, pp);
                             exit(1);
                     }
                     index = structure_type_index (type);
@@ -3713,16 +3713,16 @@ void s_internal_loop::count_get_energy (int i, int j, int ip, int jp, int *seque
 
     if (fabs (energy-energy2) > 0.1)
     {
-        printf ("ERROR! The way I compute get_energy and the way I count in s_internal_loop.cpp is different!\n");
+        fprintf (stderr, "ERROR! The way I compute get_energy and the way I count in s_internal_loop.cpp is different!\n");
 #ifdef DOUBLEPARAMS
         printf ("By counts energy is %.2lf, by get_energy is %.2lf\n", energy, energy2);
 #elif LDOUBLEPARAMS
         printf ("By counts energy is %.2Lf, by get_energy is %.2Lf\n", energy, energy2);
 #endif
         for (int myi=i; myi <= ip; myi++)    printf ("%c", int_to_nuc(sequence[myi]));
-        printf (" ");
+        fprintf (stderr, " ");
         for (int myi=jp; myi <= j; myi++)    printf ("%c", int_to_nuc(sequence[myi]));
-        printf (" size1 = %d, size2 = %d, i = %d, j = %d, ip = %d, jp = %d\n", branch1, branch2, i, j, ip, jp);
+        fprintf (stderr, " size1 = %d, size2 = %d, i = %d, j = %d, ip = %d, jp = %d\n", branch1, branch2, i, j, ip, jp);
         exit(1);
     }
 //     else
