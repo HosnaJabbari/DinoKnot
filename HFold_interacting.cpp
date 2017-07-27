@@ -408,8 +408,8 @@ int main (int argc, char *argv[]) {
 			(restricted[i] != structure[i]))
 		{
 			printf ("There is something wrong with the structure, doesn't match restricted\n");
-			//printf ("  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, energy);
-			//exit(1);
+			printf ("  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, energy);
+			exit(1);
 			break;
 		}
 	}
