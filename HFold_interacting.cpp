@@ -419,7 +419,7 @@ int main (int argc, char *argv[]) {
 			delete model_1;
 			delete model_2;
 
-			exit(1);
+			return 1;
 		}
 	}
 
