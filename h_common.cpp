@@ -1045,6 +1045,9 @@ void simfold_emodel(char *sequence, char *restricted, char *structure, std::vect
 	double min_energy = simfold->call_simfold_emodel();
 	simfold->return_structure (structure);
 
+    // Ian Wark July 28 2017
+    // We would need to make seperate emodel versions of each of the functions that 
+
     for (int i=0; i < strlen (sequence); i++)
     {
         if ((restricted[i] == '(' || restricted[i] == ')' || restricted[i] == '.') &&
@@ -1056,7 +1059,15 @@ void simfold_emodel(char *sequence, char *restricted, char *structure, std::vect
             //exit(1);
         }
     }
+    // Ian Wark July 28 2017
+    // TODO ian
+    // We would need to make seperate emodel versions of each of the functions that this calls and make all the 
+    // changes that we made to the normal calcualtion functions again which if those caluculations are wrong this is just 
+    // going to make the same wrong calculation again and say its right
+    // So whats the point?
+	
     // now check if the free energy obtained with simfold_restricted is correct
+/*
     double correct_energy = free_energy_simfold_restricted (sequence, structure, restricted);
     if (fabs (correct_energy-min_energy) > 1.0)
     {
@@ -1065,6 +1076,7 @@ void simfold_emodel(char *sequence, char *restricted, char *structure, std::vect
         fprintf (stderr, "ERROR in SIMFOLD!!! The dp energy is different from the energy calculated at the end!!\n");
         //exit(1);
     }
+    */
 
   delete simfold;
 }
