@@ -1,26 +1,14 @@
 //created by Kevin Chang 19 June 2017
-#define _XOPEN_SOURCE_EXTENDED  1
-#include <libgen.h>
-#include <boost/regex.hpp>
+#define _XOPEN_SOURCE_EXTENDED  1 // TODO ian what is this for?
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
-#include <time.h>
-#include <unistd.h>
 #include <stack>
 
 #include "externs.h"
 
-
-#include <ctime>
-#include <regex.h>
-
 #include "hfold_validation.h"
 
-
-
-static boost::regex structureRegex;
 
 //change all {} [] to () in structure
 void replaceBrackets(char* structure){
@@ -36,7 +24,6 @@ void replaceBrackets(char* structure){
     }
   }
 }
-
 
 //check if structure is valid
 //check if length match with sequence
@@ -58,7 +45,7 @@ bool validateStructure(char* structure, char* sequence){
 		printf("Length of sequence and corresponding structure must have same length\n");
 		return false;
 	}
-	
+
 	//check if any characters other than ._(){}[]
 	for(char* it = structure; *it; ++it) {
 		char curr = *it;
@@ -71,7 +58,7 @@ bool validateStructure(char* structure, char* sequence){
 			return false;
 		}
 	}
-  
+
 	std::string openBracketArray ("({[");
 	std::string closeBracketArray (")}]");
 	std::stack<char> mystack;
@@ -98,9 +85,9 @@ bool validateStructure(char* structure, char* sequence){
 		printf("Structure is invalid: more left parentheses than right parentheses\n");
 		return false;
 	}
-	return true;        
-    
-	
+	return true;
+
+
 }
 
 //check if sequence is valid with regular expression
@@ -123,7 +110,7 @@ bool validateSequence(const char* string){
     }
   }
 
-  return true;  
+  return true;
 }
 
 
@@ -133,7 +120,7 @@ void addPath(char** output_path, char* input_path){
 	std::string temp_out_path = *output_path;
 	std::string temp_in_path = input_path;
 	std::size_t out_path_found = temp_out_path.rfind("/");
-	
+
 	if(out_path_found == std::string::npos){ //if out path does not contain '/'
 		std::size_t in_path_found = temp_in_path.rfind("/");
 		if(in_path_found != std::string::npos){ //if in path contain '/'
@@ -144,7 +131,7 @@ void addPath(char** output_path, char* input_path){
 			temp_out_path.copy(*output_path, temp_out_path.length(), 0);
 		}
 	}
-	
+
 }
 
 //assume '.' exist, if not found then do nothings
@@ -152,8 +139,8 @@ void addPath(char** output_path, char* input_path){
 void addTimestamp(char** path){
 	std::string temp = *path;
 	//std::cout << temp << '\n';
-	std::size_t found = temp.find_last_of("."); 
-  	
+	std::size_t found = temp.find_last_of(".");
+
 	time_t rawtime;
 	struct tm * timeinfo;
 	char buffer [80];
@@ -208,7 +195,7 @@ bool validateInteractingInputFile(char* path, char* seq1, char* struc1, char* se
         return false;
     }
 
-    
+
     return true;
 }
 
