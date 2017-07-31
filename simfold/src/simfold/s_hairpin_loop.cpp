@@ -321,6 +321,15 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_emodel (int i, int j, str_fe
 		return INF;
     */
 
+    // TODO ian just double check it should be before the sequence[i] == X.
+    // Ian Wark and Kevin July 20 2017
+    // If hairpin crosses the linker it's not a real hairpin
+    // Should only apply 0 + hybrid molecule penalty, so return 0 for now.
+    // We apply our hybrid molecule penalty after this function (as we currently cannot know whether it is a hybrid molecule)
+	if ((linker_pos != 0) && (i < linker_pos) && (j > linker_pos+linker_length-1)) {
+		return 0;
+	}
+
     // if i or j is linker (X), cannot be anything
     if (sequence[i] == X || sequence[j] == X)
 		return INF;
@@ -331,18 +340,7 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_emodel (int i, int j, str_fe
     if (exists_restricted (i, j, fres))
         return INF;
 
-	// This if for the pmo case of when a linker is used to connect two sequences.
 	size = j-i-1;
-
-    // Ian Wark and Kevin July 20 2017
-    // TODO ian should we reduce size by linker_length if crossing
-    // This causes it to be different from HFold, but HFold is not necessarily correct for interacting molecules
-    // The reason doing this thing makes sense, is that the length of the linker will greatly change result
-    // We apply our hybrid molecule penalty after this function
-	if ((linker_pos != 0) && (i < linker_pos) && (j > linker_pos+linker_length-1)) {
-		size -= linker_length;
-	}
-
 
     if (size < 3)
     {
