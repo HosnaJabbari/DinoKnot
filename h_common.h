@@ -95,6 +95,6 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 void structure_intersection (char* G1, char* G_p);
 double method2_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models);
 double method1_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models);
-int is_empty_structure(char* structure);
+int is_empty_structure(char* input_structure, char* output_structure);
 
 #endif /*H_COMMON_H_*/

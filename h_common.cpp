@@ -964,15 +964,16 @@ void find_disjoint_substructure(char* structure, std::vector< std::pair<int,int>
 }
 
 //kevin 24 July
-//is empty if structure does not contain [
-//is not empty if structure contain [
-int is_empty_structure(char* structure){
-	for(int i=0; i<strlen(structure);i++){
-		if(structure[i] == '['){
-			return 0;
+//is not empty when input structure is '_' and output is something else
+int is_empty_structure(char* input_structure, char* output_structure){
+	for(int i=0; i<strlen(input_structure);i++){
+		if(input_structure[i] != output_structure[i]){
+			if(input_structure[i] != '_' && output_structure[i] != '.'){
+				return 1;
+			}
 		}
 	}
-	return 1;
+	return 0;
 }
 
 //kevin 18 July
@@ -1104,8 +1105,8 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 	//printf("done pkonly\n");
 	hfold_pk_min_fold->return_structure (structure);
 	//printf("done hfold_pk_min_fold->return_structure (structure);   %s\n",structure);
-	if(is_empty_structure(structure)){
-    delete hfold_pk_min_fold;
+	if(is_empty_structure(restricted,structure)){
+    	delete hfold_pk_min_fold;
 		return energy;
 	}else{
 		char* G_prime;

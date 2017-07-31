@@ -328,9 +328,7 @@ int main (int argc, char *argv[]) {
 		strcat(sequence, linker);
 	}
 	strcat(sequence, inputSequence2);
-	if(KEVIN_DEBUG){
-		printf("sequence: %s\n",sequence);
-	}
+
 
 	strcpy(restricted, inputStructure1);
 	strcat(restricted, ".....");
@@ -345,31 +343,14 @@ int main (int argc, char *argv[]) {
 	model_1->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
 	model_1->dna_or_rna = model_1_Type; // what to fold: RNA or DNA
 	model_1->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
-	//energy_models.push_back(*model_1);
+	energy_models.push_back(*model_1);
 
 	model_2 = new energy_model();
 	init_energy_model(model_2); // Initializes the data structures in the energy model.
 	model_2->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
 	model_2->dna_or_rna = model_2_Type; // what to fold: RNA or DNA
 	model_2->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
-	//energy_models.push_back(*model);
-
-	//The smallest of the two structures is assumed to be the OLIGO
-	if (strlen(inputSequence1) < strlen(inputSequence2)) {
-		strcpy(structure_one_type,OLIGO);
-		strcpy(structure_two_type,GENE);
-		//kevin 23 June 2017
-		//push to model vector base on lengh of sequence
-		energy_models.push_back(*model_1); //order matters
-		energy_models.push_back(*model_2);
-	} else {
-		strcpy(structure_one_type,GENE);
-		strcpy(structure_two_type,OLIGO);
-		//kevin 23 June 2017
-		//push to model vector base on lengh of sequence
-		energy_models.push_back(*model_2); //order matters
-		energy_models.push_back(*model_1);
-	}
+	energy_models.push_back(*model_2);
 
 	for (auto &energy_model : energy_models) {
 		// initialize the thermodynamic parameters
