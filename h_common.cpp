@@ -1045,9 +1045,8 @@ void simfold_emodel(char *sequence, char *restricted, char *structure, std::vect
 	double min_energy = simfold->call_simfold_emodel();
 	simfold->return_structure (structure);
 
-    // Ian Wark July 28 2017
-    // We would need to make seperate emodel versions of each of the functions that 
-
+	//kevin 31 july took our match restricted match as iterative (interacting) is allowed to overwrite it
+	/*
     for (int i=0; i < strlen (sequence); i++)
     {
         if ((restricted[i] == '(' || restricted[i] == ')' || restricted[i] == '.') &&
@@ -1059,6 +1058,8 @@ void simfold_emodel(char *sequence, char *restricted, char *structure, std::vect
             //exit(1);
         }
     }
+*/
+
     // Ian Wark July 28 2017
     // TODO ian
     // We would need to make seperate emodel versions of each of the functions that this calls and make all the 

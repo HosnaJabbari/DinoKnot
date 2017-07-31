@@ -392,6 +392,8 @@ int main (int argc, char *argv[]) {
 	//kevin july 13 changed to call hfold_interacting_emodel instead of hfold_emodel
 	energy = hfold_interacting_emodel(sequence, restricted, structure, &energy_models);
 
+	//kevin 31 july took our match restricted match as iterative (interacting) is allowed to overwrite it
+	/*
 	// check if restricted is included in structure
 	// Hosna March 7, 2012
 	// for optimality we get the value once, use it many times
@@ -416,7 +418,7 @@ int main (int argc, char *argv[]) {
 			return 1;
 		}
 	}
-
+*/
 
 
 	if(outputPathFound){
