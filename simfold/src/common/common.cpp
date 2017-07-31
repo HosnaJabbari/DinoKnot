@@ -1547,6 +1547,7 @@ void read_parsi_options_from_file (char *filename)
 
 }
 
+//kevin: function should be deprecated todo kevin remove this
 // AP: This function is used to determine what percentage of pmo or rna are needed for each i.j that is passed in.
 void get_pmo_usage_percentages(int i, int j, double *energy_model_one_percentage, double *energy_model_two_percentage) {
 
@@ -1614,5 +1615,13 @@ PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energ
 
 //kevin 31 july Used to calculate the average energy of two models
 PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energy_models){
-    return  (PARAMTYPE) round((energy_models->at(0).energy_value + energy_models->at(1).energy_value)/2);
+    PARAMTYPE energy = INF;
+    if((i < linker_pos) && (j < linker_pos)){ //left of linker
+        energy = (PARAMTYPE) energy_models->at(0).energy_value;
+    }else if((i > linker_pos+linker_length-1) && (j > linker_pos+linker_length-1)){ //right of linker
+        energy = (PARAMTYPE) energy_models->at(1).energy_value;
+    }else if((i < linker_pos) && (j > linker_pos+linker_length-1)){ //cross linker
+        energy = (PARAMTYPE) round((energy_models->at(0).energy_value + energy_models->at(1).energy_value)/2);
+    }
+    return  energy;
 }
