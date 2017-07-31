@@ -1577,6 +1577,7 @@ void get_pmo_usage_percentages(int i, int j, double *energy_model_one_percentage
 	}
 }
 
+/*
 //AP. Used to calculate the average energy depending on where the loop is in the structure.
 PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energy_models) {
 	int size = energy_models->size();
@@ -1585,19 +1586,19 @@ PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energ
 	double energy_model_two_percentage = 0;
 
 	//Used for one sequence and structure with many possible energy models
-	/*for (auto &model : *energy_models) {
-		if (model.energy_value == INF) {
-			size--;
-		} else {
-			energy += model.energy_value;
-		}
-	}
+	//for (auto &model : *energy_models) {
+	//	if (model.energy_value == INF) {
+	//		size--;
+	//	} else {
+	//		energy += model.energy_value;
+	//	}
+	//}
 
-	if (size != 0) {
-		return (PARAMTYPE) (energy / size);
-	} else {
-		return INF;
-	}*/
+	//if (size != 0) {
+	//	return (PARAMTYPE) (energy / size);
+	//} else {
+	//	return INF;
+	//}
 
 	get_pmo_usage_percentages(i, j, &energy_model_one_percentage, &energy_model_two_percentage);
 
@@ -1608,4 +1609,10 @@ PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energ
 	} else {
 		return energy;
 	}
+}
+*/
+
+//kevin 31 july Used to calculate the average energy of two models
+PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energy_models){
+    return  (PARAMTYPE) round((energy_models->at(0).energy_value + energy_models->at(1).energy_value)/2);
 }
