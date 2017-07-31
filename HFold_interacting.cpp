@@ -90,7 +90,6 @@ int main (int argc, char *argv[]) {
 	char inputSequence2[MAXSLEN];
 	char inputStructure1[MAXSLEN];
 	char inputStructure2[MAXSLEN];
-	char inputStructure[MAXSLEN];
 	char* inputPath;
 	inputPath = (char*) malloc(sizeof(char) * 1000);
 
@@ -337,11 +336,6 @@ int main (int argc, char *argv[]) {
 	strcat(restricted, ".....");
 	strcat(restricted, inputStructure2);
 
-	//kevin: added this for output file
-	strcpy(inputStructure, inputStructure1);
-	strcat(inputStructure, "XXXXX");
-	strcat(inputStructure, inputStructure2);
-
 	// Before calling any function in the library, you have to initialize config_file, dna_or_rna, temperature
 	// and to call the function init_data, which loads the thermodynamic parameters into memory
 
@@ -430,7 +424,7 @@ int main (int argc, char *argv[]) {
 		fp = fopen(outputPath,"w");
 		if(fp){
 			fprintf(fp,"Sequence: %s\n",sequence);
-			fprintf(fp,"Input_structure: %s\n",inputStructure);
+			fprintf(fp,"Input_structure: %s\n",restricted);
 			fprintf(fp,"Output_structure: %s\n",structure);
 			fprintf(fp,"Energy: %.2lf\n",energy);
 			fclose(fp);
