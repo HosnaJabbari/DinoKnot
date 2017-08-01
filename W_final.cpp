@@ -3104,7 +3104,6 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 			}
 			for (i=0; i<=j-1; i++)    // no TURN
 			{
-				// TODO ian should this be commented out?
 				//AP
 				//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
 				//	continue;
@@ -3366,7 +3365,6 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 			if (debug)
 				printf ("\t (%d,%d) M_WM\n", i,j);
 
-			// TODO ian should this be commented out?
 			//AP
 			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
 			//	return;
@@ -3621,8 +3619,6 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 			f[i].pair = j;
 			f[j].pair = i;
 
-            // TODO ian should this be commented out?
-
 			//AP
 			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
 			//	return;
@@ -3861,7 +3857,6 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 			}
 			for (i=0; i<=j-1; i++)    // no TURN
 			{
-				// TODO ian should this be commented out?
 				//AP
 				//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
 				//	continue;
@@ -4117,7 +4112,7 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 			if (debug)
 				printf ("\t (%d,%d) M_WM\n", i,j);
 
-			// TODO ian should this be commented out?
+            // AP
 			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
 			//	return;
 
@@ -4565,7 +4560,6 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
         }
         for (i=0; i<=j-1; i++)    // no TURN
         {
-			// TODO ian should this be commented out?
 			//AP
 			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
 			//	continue;
@@ -4719,7 +4713,6 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
       if (debug)
         printf ("\t (%d,%d) M_WM\n", i,j);
 
-      // TODO ian should this be commented out?
         //AP
         //if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
         //	return;

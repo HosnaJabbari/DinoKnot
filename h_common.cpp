@@ -1046,40 +1046,6 @@ void simfold_emodel(char *sequence, char *restricted, char *structure, std::vect
 	double min_energy = simfold->call_simfold_emodel();
 	simfold->return_structure (structure);
 
-	//kevin 31 july took our match restricted match as iterative (interacting) is allowed to overwrite it
-	/*
-    for (int i=0; i < strlen (sequence); i++)
-    {
-        if ((restricted[i] == '(' || restricted[i] == ')' || restricted[i] == '.') &&
-            (restricted[i] != structure[i]))
-        {
-            fprintf(stderr,"ERROR in SIMFOLD!!! There is something wrong with the structure, doesn't match restricted\n");
-            fprintf(stderr,"  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, min_energy);
-            fprintf(stderr,"ERROR in SIMFOLD!!! There is something wrong with the structure, doesn't match restricted\n");
-            //exit(1);
-        }
-    }
-*/
-
-    // Ian Wark July 28 2017
-    // TODO ian
-    // We would need to make seperate emodel versions of each of the functions that this calls and make all the
-    // changes that we made to the normal calcualtion functions again which if those caluculations are wrong this is just
-    // going to make the same wrong calculation again and say its right
-    // So whats the point?
-
-    // now check if the free energy obtained with simfold_restricted is correct
-/*
-    double correct_energy = free_energy_simfold_restricted (sequence, structure, restricted);
-    if (fabs (correct_energy-min_energy) > 1.0)
-    {
-        fprintf (stderr, "ERROR in SIMFOLD!!! The dp energy is different from the energy calculated at the end!!\n");
-        fprintf (stderr, "%s\n%s\n%s\n correct_energy=%.2lf, energy=%.2lf\n", sequence, restricted, structure, correct_energy, min_energy);
-        fprintf (stderr, "ERROR in SIMFOLD!!! The dp energy is different from the energy calculated at the end!!\n");
-        //exit(1);
-    }
-    */
-
   delete simfold;
 }
 

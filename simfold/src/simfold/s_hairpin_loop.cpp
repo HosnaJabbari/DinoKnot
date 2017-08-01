@@ -321,7 +321,6 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_emodel (int i, int j, str_fe
 		return INF;
     */
 
-    // TODO ian just double check it should be before the sequence[i] == X.
     // Ian Wark and Kevin July 20 2017
     // If hairpin crosses the linker it's not a real hairpin
     // Should only apply 0 + hybrid molecule penalty, so return 0 for now.
@@ -329,12 +328,6 @@ PARAMTYPE s_hairpin_loop::compute_energy_restricted_emodel (int i, int j, str_fe
 	if ((linker_pos != 0) && (i < linker_pos) && (j > linker_pos+linker_length-1)) {
 		return 0;
 	}
-
-    // if i or j is linker (X), cannot be anything
-    if (sequence[i] == X || sequence[j] == X)
-		return INF;
-	if (sequence[i+1] == X || sequence[j-1] == X)
-		return INF;
 
     // don't allow the formation of a hairpin if there are restricted base pairs inside
     if (exists_restricted (i, j, fres))

@@ -1,5 +1,4 @@
 //created by Kevin Chang 19 June 2017
-#define _XOPEN_SOURCE_EXTENDED  1 // TODO ian what is this for?
 #include <iostream>
 #include <stdio.h>
 #include <string.h>

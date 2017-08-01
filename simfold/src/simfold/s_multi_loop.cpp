@@ -526,7 +526,6 @@ PARAMTYPE s_multi_loop::compute_energy_restricted_emodel (int i, int j, str_feat
 		return INF;
 */
 
-    // TODO ian comment better
     // Ian Wark and Kevin July 20 2017
     // if i or j is linker (X), cannot be anything
     // Uses i+1 or j-1, so those also cannot be X
