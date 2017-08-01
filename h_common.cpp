@@ -1063,11 +1063,11 @@ void simfold_emodel(char *sequence, char *restricted, char *structure, std::vect
 
     // Ian Wark July 28 2017
     // TODO ian
-    // We would need to make seperate emodel versions of each of the functions that this calls and make all the 
-    // changes that we made to the normal calcualtion functions again which if those caluculations are wrong this is just 
+    // We would need to make seperate emodel versions of each of the functions that this calls and make all the
+    // changes that we made to the normal calcualtion functions again which if those caluculations are wrong this is just
     // going to make the same wrong calculation again and say its right
     // So whats the point?
-	
+
     // now check if the free energy obtained with simfold_restricted is correct
 /*
     double correct_energy = free_energy_simfold_restricted (sequence, structure, restricted);
@@ -1130,32 +1130,7 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	int length = strlen(sequence);
 	char simfold_structure[length];
 
-	//set up for simfold
-	std::vector<energy_model> simfold_energy_models;
-	energy_model *model_1;
-	energy_model *model_2;
-	model_1 = new energy_model();
-	init_energy_model(model_1); // Initializes the data structures in the energy model.
-	model_1->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
-	model_1->dna_or_rna = (*energy_models)[0].dna_or_rna; // what to fold: RNA or DNA
-	model_1->temperature = (*energy_models)[0].temperature; // temperature: any integer or real number between 0 and 100 Celsius
-	simfold_energy_models.push_back(*model_1);
-
-	model_2 = new energy_model();
-	init_energy_model(model_2); // Initializes the data structures in the energy model.
-	model_2->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
-	model_2->dna_or_rna = (*energy_models)[1].dna_or_rna; // what to fold: RNA or DNA
-	model_2->temperature = (*energy_models)[1].temperature; // temperature: any integer or real number between 0 and 100 Celsius
-	simfold_energy_models.push_back(*model_2);
-
-	for (auto &simfold_energy_model : simfold_energy_models) {
-		init_data_emodel ("./simfold", simfold_energy_model.config_file.c_str(), simfold_energy_model.dna_or_rna, simfold_energy_model.temperature, &simfold_energy_model);
-		fill_data_structures_with_new_parameters_emodel ("./simfold/params/turner_parameters_fm363_constrdangles.txt", &simfold_energy_model);
-		fill_data_structures_with_new_parameters_emodel ("./simfold/params/parameters_DP09_chopped.txt", &simfold_energy_model);
-	}
-	//end of setup for simfold
-
-	simfold_emodel(sequence,restricted, simfold_structure, &simfold_energy_models);
+	simfold_emodel(sequence,restricted, simfold_structure, energy_models);
 
 	//printf("G1: %s\nG2: %s\n",restricted,simfold_structure);
 	//^ G' simfold_structure <- SimFold(S sequence, G restricted)
@@ -1169,41 +1144,16 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 
     // clean up
     free(G_updated);
-    destruct_energy_model(model_1);
-    destruct_energy_model(model_2);
-    delete model_1;
-    delete model_2;
+    //destruct_energy_model(model_1);
+    //destruct_energy_model(model_2);
+    //delete model_1;
+    //delete model_2;
 
 	return energy;
 }
 
 //kevin 18 July
 double method4_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
-	//set up for simfold
-	std::vector<energy_model> simfold_energy_models;
-	energy_model *model_1;
-	energy_model *model_2;
-	model_1 = new energy_model();
-	init_energy_model(model_1); // Initializes the data structures in the energy model.
-	model_1->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
-	model_1->dna_or_rna = (*energy_models)[0].dna_or_rna; // what to fold: RNA or DNA
-	model_1->temperature = (*energy_models)[0].temperature; // temperature: any integer or real number between 0 and 100 Celsius
-	simfold_energy_models.push_back(*model_1);
-
-	model_2 = new energy_model();
-	init_energy_model(model_2); // Initializes the data structures in the energy model.
-	model_2->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
-	model_2->dna_or_rna = (*energy_models)[1].dna_or_rna; // what to fold: RNA or DNA
-	model_2->temperature = (*energy_models)[1].temperature; // temperature: any integer or real number between 0 and 100 Celsius
-	simfold_energy_models.push_back(*model_2);
-
-	for (auto &simfold_energy_model : simfold_energy_models) {
-		init_data_emodel ("./simfold", simfold_energy_model.config_file.c_str(), simfold_energy_model.dna_or_rna, simfold_energy_model.temperature, &simfold_energy_model);
-		fill_data_structures_with_new_parameters_emodel ("./simfold/params/turner_parameters_fm363_constrdangles.txt", &simfold_energy_model);
-		fill_data_structures_with_new_parameters_emodel ("./simfold/params/parameters_DP09_chopped.txt", &simfold_energy_model);
-	}
-	//end of setup for simfold
-
 	double energy = 0;
 	int length = strlen(sequence);
 	char* G_updated;
@@ -1231,7 +1181,7 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 		substructure[j+1] = '\0';
 		//^Gk
 
-		simfold_emodel(subsequence, substructure, simfold_structure, &simfold_energy_models);
+		simfold_emodel(subsequence, substructure, simfold_structure, energy_models);
 		//^ SimFold(Sk,Gk,Gk',energy_models)
 		char Gp_k_updated[length];
 		obtainRelaxedStems(substructure, simfold_structure, Gp_k_updated);
@@ -1244,10 +1194,10 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 
     // clean up
     free(G_updated);
-    destruct_energy_model(model_1);
-    destruct_energy_model(model_2);
-	delete model_1;
-	delete model_2;
+    //destruct_energy_model(model_1);
+    //destruct_energy_model(model_2);
+	//delete model_1;
+	//delete model_2;
 
 	return energy;
 }
