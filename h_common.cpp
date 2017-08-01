@@ -1140,13 +1140,13 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 		char substructure[length+1];
 		char simfold_structure[length+1];
 
-		strncpy(subsequence, sequence+i,j+1);
-		subsequence[j+1] = '\0';
+		strncpy(subsequence, sequence+i,j-i+1);
+		subsequence[j-i+1] = '\0';
 		//^Sk
-		strncpy(substructure, restricted+i,j+1);
-		substructure[j+1] = '\0';
+		strncpy(substructure, restricted+i,j-i+1);
+		substructure[j-i+1] = '\0';
 		//^Gk
-
+		//printf("substructure in method4: %s %d %d\n",substructure,i,j);
 		simfold_emodel(subsequence, substructure, simfold_structure, energy_models);
 		//^ SimFold(Sk,Gk,Gk',energy_models)
 		char Gp_k_updated[length];
@@ -1201,22 +1201,22 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 	char method3_structure[strlen(sequence)+1];
 	char method4_structure[strlen(sequence)+1];
 
-
+	printf("method1\n");
 	min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
 	strcpy(structure,method1_structure);
-
+	printf("method2\n");
 	energy = method2_emodel(sequence,restricted,method2_structure,energy_models);
 	if(energy < min_energy){
 		min_energy = energy;
 		strcpy(structure,method2_structure);
 	}
-
+printf("method3\n");
 	energy = method3_emodel(sequence,restricted,method3_structure,energy_models);
 	if(energy < min_energy){
 		min_energy = energy;
 		strcpy(structure,method3_structure);
   }
-
+printf("method4\n");
 	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
 	if(energy < min_energy){
 		min_energy = energy;
