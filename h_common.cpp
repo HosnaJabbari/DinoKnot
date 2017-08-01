@@ -1105,7 +1105,7 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	obtainRelaxedStems(restricted ,simfold_structure, G_updated);
 	//printf("Gupdated %s\n",G_updated);
 	//^Gupdated G_updated<- ObtainRelaxedStems(G restricted,G' simfold_structure)
-	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
+	energy = method2_emodel(sequence, G_updated, structure, energy_models);
 	//printf("method3 energy: %lf\n",energy);
 
     // clean up
@@ -1140,11 +1140,11 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 		char substructure[length+1];
 		char simfold_structure[length+1];
 
-		strncpy(subsequence, sequence+i,j+1);
-		subsequence[j+1] = '\0';
+		strncpy(subsequence, sequence+i,j-i+1);
+		subsequence[j-i+1] = '\0';
 		//^Sk
-		strncpy(substructure, restricted+i,j+1);
-		substructure[j+1] = '\0';
+		strncpy(substructure, restricted+i,j-i+1);
+		substructure[j-i+1] = '\0';
 		//^Gk
 
         // Now that we have split into substructure, linker has moved
@@ -1176,13 +1176,18 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 		char Gp_k_updated[length];
 		obtainRelaxedStems(substructure, simfold_structure, Gp_k_updated);
 		//^obtainRelaxedStems(Gk,Gk',G'kupdated)
-		//todo: add in code here
-		//Gupdated <- Gupdated U G'kupdated
 
 		linker_pos = temp_linker_pos;
+
+        for(int k =i;k<j-i+1;k++){
+			if(G_updated[k] != Gp_k_updated[k]){
+				G_updated[k] = Gp_k_updated[k];
+			}
+		}
+		//^Gupdated <- Gupdated U G'kupdated
 	}
 
-	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
+	energy = method2_emodel(sequence, G_updated, structure, energy_models);
 
     // clean up
     free(G_updated);
@@ -1227,25 +1232,25 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 	char method3_structure[strlen(sequence)+1];
 	char method4_structure[strlen(sequence)+1];
 
-
+	printf("method1\n");
 	min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
 	method_used = 1;
 	strcpy(structure,method1_structure);
-
+	printf("method2\n");
 	energy = method2_emodel(sequence,restricted,method2_structure,energy_models);
 	if(energy < min_energy){
         method_used = 2;
 		min_energy = energy;
 		strcpy(structure,method2_structure);
 	}
-
+printf("method3\n");
 	energy = method3_emodel(sequence,restricted,method3_structure,energy_models);
 	if(energy < min_energy){
         method_used = 3;
 		min_energy = energy;
 		strcpy(structure,method3_structure);
   }
-
+printf("method4\n");
 	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
 	if(energy < min_energy){
         method_used = 4;
