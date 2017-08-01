@@ -1105,7 +1105,7 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	obtainRelaxedStems(restricted ,simfold_structure, G_updated);
 	//printf("Gupdated %s\n",G_updated);
 	//^Gupdated G_updated<- ObtainRelaxedStems(G restricted,G' simfold_structure)
-	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
+	energy = method2_emodel(sequence, G_updated, structure, energy_models);
 	//printf("method3 energy: %lf\n",energy);
 
     // clean up
@@ -1146,17 +1146,22 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 		strncpy(substructure, restricted+i,j-i+1);
 		substructure[j-i+1] = '\0';
 		//^Gk
-		//printf("substructure in method4: %s %d %d\n",substructure,i,j);
+		printf("substructure in method4: %s %s %d %d\n",subsequence,substructure,i,j);
 		simfold_emodel(subsequence, substructure, simfold_structure, energy_models);
 		//^ SimFold(Sk,Gk,Gk',energy_models)
 		char Gp_k_updated[length];
 		obtainRelaxedStems(substructure, simfold_structure, Gp_k_updated);
 		//^obtainRelaxedStems(Gk,Gk',G'kupdated)
-		//todo: add in code here
-		//Gupdated <- Gupdated U G'kupdated
-	}
 
-	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
+		for(int k =i;k<j-i+1;k++){
+			if(G_updated[k] != Gp_k_updated[k]){
+				G_updated[k] = Gp_k_updated[k];
+			}
+		}
+		//^Gupdated <- Gupdated U G'kupdated
+	}
+	
+	energy = method2_emodel(sequence, G_updated, structure, energy_models);
 
     // clean up
     free(G_updated);
