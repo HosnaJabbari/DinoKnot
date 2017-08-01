@@ -1046,7 +1046,7 @@ void simfold_emodel(char *sequence, char *restricted, char *structure, std::vect
 	double min_energy = simfold->call_simfold_emodel();
 	simfold->return_structure (structure);
 
-  delete simfold;
+    delete simfold;
 }
 
 //kevin 24 July
@@ -1147,6 +1147,30 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 		substructure[j+1] = '\0';
 		//^Gk
 
+        // Now that we have split into substructure, linker has moved
+        // so keep older linker location for restoring after
+        int temp_linker_pos = linker_pos;
+
+        // if whole subsequence is left of linker_pos,
+        if((i < linker_pos) && (j < linker_pos)){ //left of linker
+            // set linker_pos to INF. This way subsequence is always considered to left of linker
+            linker_pos = INF;
+        }
+        // if whole subsequence is right of linker_pos
+        else if((i > linker_pos+linker_length-1) && (j > linker_pos+linker_length-1)){ //right of linker
+            // set linker_pos to linker_length.
+            // can't be 0 because ((i > linker_pos+linker_length-1) && (j > linker_pos+linker_length-1)) means any i or j below linker_length incorrectly returns false
+            // This way subsequence is always considered to right of linker
+            linker_pos = -linker_length;
+        }
+        // if subsequence contains linker
+        else if((i < linker_pos) && (j > linker_pos+linker_length-1)){ //cross linker
+            // linker_pos is position of beginning of linker, so just move it over by the beginning of our subsequence
+            linker_pos = linker_pos-i;
+        } else {
+            fprintf(stderr,"ERROR in method 4 setting new linker_pos\n");
+        }
+
 		simfold_emodel(subsequence, substructure, simfold_structure, energy_models);
 		//^ SimFold(Sk,Gk,Gk',energy_models)
 		char Gp_k_updated[length];
@@ -1154,6 +1178,8 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 		//^obtainRelaxedStems(Gk,Gk',G'kupdated)
 		//todo: add in code here
 		//Gupdated <- Gupdated U G'kupdated
+
+		linker_pos = temp_linker_pos;
 	}
 
 	energy = hfold_pkonly_emodel(sequence, G_updated, structure, energy_models);
@@ -1192,7 +1218,7 @@ void structure_intersection (char* G1, char* G_p) {
 
 //kevin 18 July
 //july 24: changed hfold, hfold_pkonly to a method; changed replaced final_structure with method1-4_structure
-double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models, int &method_used){
 
 	double energy = 0;
 	double min_energy = INF;
@@ -1203,22 +1229,26 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 
 
 	min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
+	method_used = 1;
 	strcpy(structure,method1_structure);
 
 	energy = method2_emodel(sequence,restricted,method2_structure,energy_models);
 	if(energy < min_energy){
+        method_used = 2;
 		min_energy = energy;
 		strcpy(structure,method2_structure);
 	}
 
 	energy = method3_emodel(sequence,restricted,method3_structure,energy_models);
 	if(energy < min_energy){
+        method_used = 3;
 		min_energy = energy;
 		strcpy(structure,method3_structure);
   }
 
 	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
 	if(energy < min_energy){
+        method_used = 4;
 		min_energy = energy;
 		strcpy(structure,method4_structure);
 	}

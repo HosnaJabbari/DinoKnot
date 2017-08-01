@@ -368,39 +368,10 @@ int main (int argc, char *argv[]) {
 		fill_data_structures_with_new_parameters_emodel ("./simfold/params/parameters_DP09.txt", &energy_model);
 	}
 
-
+    int method_used;
 	//energy = hfold_emodel(sequence, restricted, structure, &energy_models);
 	//kevin july 13 changed to call hfold_interacting_emodel instead of hfold_emodel
-	energy = hfold_interacting_emodel(sequence, restricted, structure, &energy_models);
-
-	//kevin 31 july took our match restricted match as iterative (interacting) is allowed to overwrite it
-	/*
-	// check if restricted is included in structure
-	// Hosna March 7, 2012
-	// for optimality we get the value once, use it many times
-	int seqLen = strlen (sequence);
-	for (int i=0; i < seqLen; i++)
-	{
-		if ((restricted[i] == '(' || restricted[i] == ')' || restricted[i] == '.') &&
-			(restricted[i] != structure[i]))
-		{
-			fprintf (stderr, "There is something wrong with the structure, doesn't match restricted\n");
-			fprintf (stderr, "  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, energy);
-
-			 // clean up
-   			free(inputPath);
-			free(outputPath);
-
-			destruct_energy_model(model_1);
-			destruct_energy_model(model_2);
-			delete model_1;
-			delete model_2;
-
-			return 1;
-		}
-	}
-*/
-
+	energy = hfold_interacting_emodel(sequence, restricted, structure, &energy_models, method_used);
 
 	if(outputPathFound){
 		FILE* fp;
@@ -410,6 +381,7 @@ int main (int argc, char *argv[]) {
 			fprintf(fp,"Input_structure: %s\n",restricted);
 			fprintf(fp,"Output_structure: %s\n",structure);
 			fprintf(fp,"Energy: %.2lf\n",energy);
+			fprintf(fp,"Method Used: %d",method_used);
 			fclose(fp);
 		}
 	}else{

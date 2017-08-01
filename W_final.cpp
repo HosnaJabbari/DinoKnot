@@ -580,7 +580,6 @@ double W_final::hfold_emodel() { //kevin debug
         }
 	}
 
-
 	// end of addition at March 8, 2012, Hosna
 	for (j= 1; j < nb_nucleotides; j++) {
     	this->compute_W_restricted_emodel(j,fres);
@@ -3108,6 +3107,9 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
 				//	continue;
 
+				if (int_sequence[i] == X || int_sequence[j] == X )
+                    continue;
+
 				// Don't need to make sure i and j don't have to pair with something else
 				//  it's INF, done in fold_sequence_restricted
 				acc = (i-1>0) ? W[i-1] : 0;
@@ -3219,6 +3221,9 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 		// we have some unpaired bases before the start of the WMB
 		for (i=0; i<=j-1; i++)
 		{
+            if (int_sequence[i] == X || int_sequence[j] == X)
+                    continue;
+
 			// Hosna: July 9, 2007
 			// We only chop W to W + WMB when the bases before WMB are free
 			if (i == 0 || (WMB->is_weakly_closed(0,i-1) && WMB->is_weakly_closed(i,j))){
@@ -4534,7 +4539,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
         //if (j <= TURN) return;
 
         PARAMTYPE min = INF, tmp, acc, energy_ij;
-        int best_row, i, best_i;
+        int best_row = -1, best_i = -1;
 
         if (debug)
             printf ("\t(0,%d) FREE\n", j);
@@ -4558,11 +4563,14 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 best_row = 0;
             //}
         }
-        for (i=0; i<=j-1; i++)    // no TURN
+        for (int i=0; i<=j-1; i++)    // no TURN
         {
 			//AP
 			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
 			//	continue;
+
+			if (int_sequence[i] == X || int_sequence[j] == X)
+                continue;
 
             // Don't need to make sure i and j don't have to pair with something else
             //  it's INF, done in fold_sequence_restricted
@@ -4652,6 +4660,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
             if (fres[i].pair <= -1 && fres[j].pair <= -1)
             {
                 energy_ij = V->get_energy(i+1,j-1);
+
                 if (energy_ij < INF)
                 {
                     //AP
@@ -4682,6 +4691,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 }
             }
         }
+
         switch (best_row)
         {
             case 0: insert_node (0, j-1, FREE); break;
@@ -4701,6 +4711,9 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 if (best_i-1 > 0)
                     insert_node (0, best_i-1, FREE);
                 break;
+            default:
+                fprintf(stderr, "ERROR backtrack free has no best row\n");
+                //exit(1);
         }
     }
   else if(cur_interval->type == M_WM)

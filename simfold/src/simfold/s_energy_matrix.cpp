@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <vector>
+#include <iostream>
 // Hosna, March 5, 2012
 // malloc.h is not needed in my mac as stdlib.h does the same
 //#include <malloc.h>
