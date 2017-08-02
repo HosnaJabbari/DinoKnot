@@ -1624,7 +1624,7 @@ PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energ
         energy = (PARAMTYPE) round((energy_models->at(0).energy_value + energy_models->at(1).energy_value)/2);
     }else {
         // TODO ian re-enable
-        fprintf(stderr,"ERROR emodel_energy_function no case picked\n");
+        //fprintf(stderr,"ERROR emodel_energy_function no case picked\n");
     }
 
     return  energy;

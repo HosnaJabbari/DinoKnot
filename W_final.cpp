@@ -652,13 +652,13 @@ double W_final::call_simfold_emodel(){
     if ((fres = new str_features[nb_nucleotides]) == NULL) giveup ("Cannot allocate memory", "str_features");
     // detect the structure features
     detect_structure_features (restricted, fres);
-
+	
     /*
     for (i=0; i < nb_nucleotides; i++)
         if (fres[i].pair != -1)
             printf ("%d pairs %d, type %c\n", i, fres[i].pair, fres[i].type);
     */
-
+	
     for (j=0; j < nb_nucleotides; j++)
     {
         for (i=0; i<j; i++)
@@ -705,6 +705,7 @@ double W_final::call_simfold_emodel(){
         delete cur_interval;    // this should make up for the new in the insert_node
         cur_interval = stack_interval;
     }
+	
     if (debug)
     {
         print_result ();

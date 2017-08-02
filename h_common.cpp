@@ -1120,6 +1120,7 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 
 //kevin 18 July
 double method4_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	int KEVIN_DEBUG = 0;
 	double energy = 0;
 	int length = strlen(sequence);
 	char* G_updated;
@@ -1170,25 +1171,47 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
         } else {
             fprintf(stderr,"ERROR in method 4 setting new linker_pos\n");
         }
-
+		if(KEVIN_DEBUG){
+			printf("substructure: %s\n",substructure);
+		}
 		simfold_emodel(subsequence, substructure, simfold_structure, energy_models);
 		//^ SimFold(Sk,Gk,Gk',energy_models)
 		char Gp_k_updated[length];
+		if(KEVIN_DEBUG){
+			printf("simfold_structure: %s\n",simfold_structure);
+		}
 		obtainRelaxedStems(substructure, simfold_structure, Gp_k_updated);
 		//^obtainRelaxedStems(Gk,Gk',G'kupdated)
-
+		if(KEVIN_DEBUG){
+			printf("Gp_k_updated: %s\n",Gp_k_updated);
+		}
 		linker_pos = temp_linker_pos;
-
-        for(int k =i;k<j-i+1;k++){
-			if(G_updated[k] != Gp_k_updated[k]){
-				G_updated[k] = Gp_k_updated[k];
+		if(KEVIN_DEBUG){
+			printf("before union: %s\n",G_updated);
+		}
+		int m = 0; //index for going through Gp_k_updated
+		if(KEVIN_DEBUG){
+			printf("j=%d %d\n",j,j-i+1);
+		}
+        for(int k =i;k<j;k++){
+			if(KEVIN_DEBUG){
+				printf("%d %c\n",k,G_updated[k]);
 			}
+			if(G_updated[k] != Gp_k_updated[m]){
+				G_updated[k] = Gp_k_updated[m];
+			}
+			m++;
 		}
 		//^Gupdated <- Gupdated U G'kupdated
+		if(KEVIN_DEBUG){
+			printf("after union: %s\n",G_updated);
+		}
 	}
-
+	if(KEVIN_DEBUG){
+		printf("g_updated: \n%s\n%s\n",sequence,G_updated);
+	}
 	energy = method2_emodel(sequence, G_updated, structure, energy_models);
-
+	
     // clean up
     free(G_updated);
     //destruct_energy_model(model_1);
