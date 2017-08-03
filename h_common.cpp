@@ -977,8 +977,8 @@ int is_empty_structure(char* input_structure, char* output_structure){
 }
 
 //kevin 18 July
-int paired_structure(int i, int j, int* pair_index){
-	if( (pair_index[i] == j) && (pair_index[j] == i) ){
+int paired_structure(int i, int j, int pair_index[], int length){
+	if(i >= 0 && j < length && (pair_index[i] == j) && (pair_index[j] == i) ){
 		return 1;
 	}
 	return 0;
@@ -993,13 +993,12 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 	//Gresult <- G1
 	strcpy(Gresult,G1);
 
-	detect_original_pairs(G1,G1_pair);
+	detect_original_pairs(G1, G1_pair);
 	detect_original_pairs(G2, G2_pair);
-/*
-	for(int d=0;d<length;d++){
-		printf("%c %d\n",G2[d],G2_pair[d]);
-	}
-*/
+
+	//for(int d=0;d<length;d++){
+	//	printf("%c %d\n",G1[d],G1_pair[d]);
+	//}
 
 	int i = 0;
 	int j = 0;
@@ -1012,20 +1011,20 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 				//printf("%d %d\n",i,j);
 				if( (G1[i] != G2[i]) && (G1[j] != G2[j]) ){//if ij not in G1
 					//include bulges of size 1
-					if( paired_structure(i-1,j+1,G1_pair) || paired_structure(i+1,j-1,G1_pair) ){
+					if(paired_structure(i-1,j+1,G1_pair,length) || paired_structure(i+1,j-1,G1_pair,length) ){
 						Gresult[i] = G2[i];
 						Gresult[j] = G2[j];
 					//include loops of size 1x1
-					}else if( paired_structure(i-2,j+1,G1_pair) || paired_structure(i-1,j+2,G1_pair) || \
-							paired_structure(i+1,j-2,G1_pair) || paired_structure(i+2,j-1,G1_pair) ){
+					}else if( paired_structure(i-2,j+1,G1_pair,length) || paired_structure(i-1,j+2,G1_pair,length) || \
+							paired_structure(i+1,j-2,G1_pair,length) || paired_structure(i+2,j-1,G1_pair,length) ){
 						Gresult[i] = G2[i];
 						Gresult[j] = G2[j];
 					//include loops of size 1x2 or 2x1
-					}else if( paired_structure(i-2,j+2,G1_pair) || paired_structure(i+2,j-2,G1_pair) ){
+					}else if( paired_structure(i-2,j+2,G1_pair,length) || paired_structure(i+2,j-2,G1_pair,length) ){
 						Gresult[i] = G2[i];
 						Gresult[j] = G2[j];
-					}else if( paired_structure(i-3,j+2,G1_pair) || paired_structure(i-2,j+3,G1_pair) || \
-							paired_structure(i+2,j-3,G1_pair) || paired_structure(i+3,j-2,G1_pair) ){
+					}else if( paired_structure(i-3,j+2,G1_pair,length) || paired_structure(i-2,j+3,G1_pair,length) || \
+							paired_structure(i+2,j-3,G1_pair,length) || paired_structure(i+3,j-2,G1_pair,length) ){
 
 						Gresult[i] = G2[i];
 						Gresult[j] = G2[j];
@@ -1034,8 +1033,6 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 			}
 		}
 	}
-
-
 }
 
 
