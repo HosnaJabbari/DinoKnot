@@ -1106,14 +1106,9 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	//printf("Gupdated %s\n",G_updated);
 	//^Gupdated G_updated<- ObtainRelaxedStems(G restricted,G' simfold_structure)
 	energy = method2_emodel(sequence, G_updated, structure, energy_models);
-	//printf("method3 energy: %lf\n",energy);
 
     // clean up
     free(G_updated);
-    //destruct_energy_model(model_1);
-    //destruct_energy_model(model_2);
-    //delete model_1;
-    //delete model_2;
 
 	return energy;
 }
@@ -1211,13 +1206,9 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 		printf("g_updated: \n%s\n%s\n",sequence,G_updated);
 	}
 	energy = method2_emodel(sequence, G_updated, structure, energy_models);
-	
+
     // clean up
     free(G_updated);
-    //destruct_energy_model(model_1);
-    //destruct_energy_model(model_2);
-	//delete model_1;
-	//delete model_2;
 
 	return energy;
 }
@@ -1255,25 +1246,24 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 	char method3_structure[strlen(sequence)+1];
 	char method4_structure[strlen(sequence)+1];
 
-	printf("method1\n");
 	min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
 	method_used = 1;
 	strcpy(structure,method1_structure);
-	printf("method2\n");
+
 	energy = method2_emodel(sequence,restricted,method2_structure,energy_models);
 	if(energy < min_energy){
         method_used = 2;
 		min_energy = energy;
 		strcpy(structure,method2_structure);
 	}
-printf("method3\n");
+
 	energy = method3_emodel(sequence,restricted,method3_structure,energy_models);
 	if(energy < min_energy){
         method_used = 3;
 		min_energy = energy;
 		strcpy(structure,method3_structure);
   }
-printf("method4\n");
+
 	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
 	if(energy < min_energy){
         method_used = 4;
