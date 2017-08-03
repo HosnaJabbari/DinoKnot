@@ -538,14 +538,13 @@ double W_final::hfold_emodel() { //kevin debug
     // set the VM matrix for VM_final
     vm->set_VM_matrix(VM);
 
-
 	// TODO:
 	// I think I shoud fill simfold tables here, before filling the HFold tables
 	// Hosna, March 8, 2012
 
 	// 1) fill all th ematrices simfold needs (i.e. pk free ones)
 	// This is done similar to s_min_folding::fold_sequence_restricted()
-	for (j=0; j < nb_nucleotides; j++)
+	for (j=1; j < nb_nucleotides; j++)
     {
         for (i=0; i<j; i++)
         {
@@ -573,7 +572,7 @@ double W_final::hfold_emodel() { //kevin debug
 		 */
     }
 
-	for (j=0; j < nb_nucleotides; j++) {
+	for (j=1; j < nb_nucleotides; j++) {
         for (i =j; i >= 0; i--) {//for (i=0; i<=j; i++) {
 			    WMB->compute_energies_emodel(i,j,energy_models); // TODO need to check this one
 			    vm->WM_compute_energy(i,j); // TODO ian does this need an emodel version?
@@ -640,6 +639,7 @@ double W_final::hfold_emodel() { //kevin debug
 
     delete [] h_fres;
     delete [] fres;
+
     return energy;
 }
 
@@ -652,14 +652,14 @@ double W_final::call_simfold_emodel(){
     if ((fres = new str_features[nb_nucleotides]) == NULL) giveup ("Cannot allocate memory", "str_features");
     // detect the structure features
     detect_structure_features (restricted, fres);
-	
+
     /*
     for (i=0; i < nb_nucleotides; i++)
         if (fres[i].pair != -1)
             printf ("%d pairs %d, type %c\n", i, fres[i].pair, fres[i].type);
     */
-	
-    for (j=0; j < nb_nucleotides; j++)
+
+    for (j=1; j < nb_nucleotides; j++)
     {
         for (i=0; i<j; i++)
         {
@@ -705,7 +705,7 @@ double W_final::call_simfold_emodel(){
         delete cur_interval;    // this should make up for the new in the insert_node
         cur_interval = stack_interval;
     }
-	
+
     if (debug)
     {
         print_result ();
@@ -764,7 +764,7 @@ double W_final::hfold_pkonly_emodel(){
 
 	// 1) fill all th ematrices simfold needs (i.e. pk free ones)
 	// This is done similar to s_min_folding::fold_sequence_restricted()
-	for (j=0; j < nb_nucleotides; j++) {
+	for (j=1; j < nb_nucleotides; j++) {
         for (i=0; i<j; i++) {
             // V(i,j) = infinity if i restricted or j restricted and pair of i is not j
             if ((fres[i].pair > -1 && fres[i].pair !=j) || (fres[j].pair > -1 && fres[j].pair != i))
@@ -778,7 +778,7 @@ double W_final::hfold_pkonly_emodel(){
 	    VM->compute_energy_WM_restricted_pkonly_emodel (j, fres, energy_models);
     }
 
-	for (j=0; j < nb_nucleotides; j++) {
+	for (j=1; j < nb_nucleotides; j++) {
 		// Hosna, March 19, 2012
         for (i =j; i >= 0; i--) {
 			//
@@ -3108,7 +3108,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
 				//	continue;
 
-				if (int_sequence[i] == X || int_sequence[j] == X )
+				if (int_sequence[i] == X || int_sequence[i+1] == X || int_sequence[j] == X || int_sequence[j-1] == X)
                     continue;
 
 				// Don't need to make sure i and j don't have to pair with something else
@@ -3866,6 +3866,9 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 				//AP
 				//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
 				//	continue;
+
+				if (int_sequence[i] == X || int_sequence[i+1] == X || int_sequence[j] == X || int_sequence[j-1] == X)
+                    continue;
 
 				// Don't need to make sure i and j don't have to pair with something else
 				//  it's INF, done in fold_sequence_restricted

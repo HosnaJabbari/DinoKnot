@@ -54,7 +54,6 @@ int main (int argc, char *argv[]) {
     char structure[MAXSLEN];
     char restricted[MAXSLEN];
     double energy;
-    char structures[MAXSUBSTR][MAXSLEN];
     double energies[MAXSUBSTR];
 
 	// A vector is used to store the energy models in order to keep generality throughout the rest of the program. This means that you can add extra energy models withour having to change the code of how many energy models to loop through.

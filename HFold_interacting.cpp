@@ -64,8 +64,6 @@ int main (int argc, char *argv[]) {
 	char structure[MAXSLEN];
 	char restricted[MAXSLEN];
 	double energy;
-	char structures[MAXSUBSTR][MAXSLEN];
-	double energies[MAXSUBSTR];
 
 	// A vector is used to store the energy models in order to keep generality throughout the rest of the program. This means that you can add extra energy models withour having to change the code of how many energy models to loop through.
 	std::vector<energy_model> energy_models;
@@ -329,7 +327,6 @@ int main (int argc, char *argv[]) {
 	}
 	strcat(sequence, inputSequence2);
 
-
 	strcpy(restricted, inputStructure1);
 	strcat(restricted, ".....");
 	strcat(restricted, inputStructure2);
@@ -368,7 +365,7 @@ int main (int argc, char *argv[]) {
 		fill_data_structures_with_new_parameters_emodel ("./simfold/params/parameters_DP09.txt", &energy_model);
 	}
 
-    int method_used;
+    int method_used = -1;
 	//energy = hfold_emodel(sequence, restricted, structure, &energy_models);
 	//kevin july 13 changed to call hfold_interacting_emodel instead of hfold_emodel
 	energy = hfold_interacting_emodel(sequence, restricted, structure, &energy_models, method_used);

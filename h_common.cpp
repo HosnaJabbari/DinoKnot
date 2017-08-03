@@ -1057,36 +1057,30 @@ double method1_emodel(char *sequence, char *restricted, char *structure, std::ve
 	energy = hfold_min_fold->hfold_emodel();
 	hfold_min_fold->return_structure (structure);
 
-  delete hfold_min_fold;
+    delete hfold_min_fold;
 	return energy;
 }
 
 //kevin 24 July
 double method2_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
 	double energy = 0;
-	//structure = NULL;
 	W_final *hfold_pk_min_fold = new W_final (sequence, restricted, energy_models);
 	if (hfold_pk_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
 	energy = hfold_pk_min_fold->hfold_pkonly_emodel();
-	//printf("done pkonly\n");
 	hfold_pk_min_fold->return_structure (structure);
-	//printf("done hfold_pk_min_fold->return_structure (structure);   %s\n",structure);
+
 	if(is_empty_structure(restricted,structure)){
     	delete hfold_pk_min_fold;
 		return energy;
 	}else{
-		char* G_prime;
-		G_prime = (char*) malloc(sizeof(char)*strlen(sequence));
+		char G_prime[strlen(structure)];
 		structure_intersection(structure,G_prime);
 
 		energy = method1_emodel(sequence, G_prime, structure, energy_models);
 
-        free(G_prime);
     	delete hfold_pk_min_fold;
-    	//delete hfold_min_fold;
 		return energy;
 	}
-
 
 }
 
@@ -1100,15 +1094,11 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 
 	//printf("G1: %s\nG2: %s\n",restricted,simfold_structure);
 	//^ G' simfold_structure <- SimFold(S sequence, G restricted)
-	char* G_updated;
-	G_updated = (char*) malloc(sizeof(char) * strlen(sequence));
+	char G_updated[strlen(restricted)];
 	obtainRelaxedStems(restricted ,simfold_structure, G_updated);
 	//printf("Gupdated %s\n",G_updated);
 	//^Gupdated G_updated<- ObtainRelaxedStems(G restricted,G' simfold_structure)
 	energy = method2_emodel(sequence, G_updated, structure, energy_models);
-
-    // clean up
-    free(G_updated);
 
 	return energy;
 }
@@ -1118,8 +1108,7 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 	int KEVIN_DEBUG = 0;
 	double energy = 0;
 	int length = strlen(sequence);
-	char* G_updated;
-	G_updated = (char*) malloc(sizeof(char) * strlen(sequence));
+	char G_updated[length];
 	int k = 1;
 	//^k <- 1
 	strcpy(G_updated, restricted);
@@ -1166,49 +1155,22 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
         } else {
             fprintf(stderr,"ERROR in method 4 setting new linker_pos\n");
         }
-		if(KEVIN_DEBUG){
-			printf("substructure: %s\n",substructure);
-		}
 		simfold_emodel(subsequence, substructure, simfold_structure, energy_models);
 		//^ SimFold(Sk,Gk,Gk',energy_models)
 		char Gp_k_updated[length];
-		if(KEVIN_DEBUG){
-			printf("simfold_structure: %s\n",simfold_structure);
-		}
 		obtainRelaxedStems(substructure, simfold_structure, Gp_k_updated);
 		//^obtainRelaxedStems(Gk,Gk',G'kupdated)
-		if(KEVIN_DEBUG){
-			printf("Gp_k_updated: %s\n",Gp_k_updated);
-		}
 		linker_pos = temp_linker_pos;
-		if(KEVIN_DEBUG){
-			printf("before union: %s\n",G_updated);
-		}
 		int m = 0; //index for going through Gp_k_updated
-		if(KEVIN_DEBUG){
-			printf("j=%d %d\n",j,j-i+1);
-		}
         for(int k =i;k<j;k++){
-			if(KEVIN_DEBUG){
-				printf("%d %c\n",k,G_updated[k]);
-			}
 			if(G_updated[k] != Gp_k_updated[m]){
 				G_updated[k] = Gp_k_updated[m];
 			}
 			m++;
 		}
 		//^Gupdated <- Gupdated U G'kupdated
-		if(KEVIN_DEBUG){
-			printf("after union: %s\n",G_updated);
-		}
-	}
-	if(KEVIN_DEBUG){
-		printf("g_updated: \n%s\n%s\n",sequence,G_updated);
 	}
 	energy = method2_emodel(sequence, G_updated, structure, energy_models);
-
-    // clean up
-    free(G_updated);
 
 	return energy;
 }
@@ -1221,6 +1183,7 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 //take the intersection of G1 and G (G1-G) and store in G_p
 void structure_intersection (char* G1, char* G_p) {
 	strcpy(G_p,G1);
+
 	for(int i=0; i< strlen(G1); i++){
 		if(i<linker_pos || i>linker_pos+linker_length-1){
 			if(G1[i] == '.' || G1[i] == '(' || G1[i] == ')'){
@@ -1262,7 +1225,7 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
         method_used = 3;
 		min_energy = energy;
 		strcpy(structure,method3_structure);
-  }
+    }
 
 	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
 	if(energy < min_energy){

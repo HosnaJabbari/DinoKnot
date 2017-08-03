@@ -40,6 +40,7 @@ s_min_folding::s_min_folding (char *sequence)
     //check_sequence (sequence);
     this->sequence = sequence;
     this->known_structure = NULL;
+    this->energy_models = NULL;
     allocate_space();
 }
 

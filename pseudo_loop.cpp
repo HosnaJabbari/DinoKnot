@@ -1835,19 +1835,23 @@ void pseudo_loop::compute_BE(int i, int j, int ip, int jp, h_str_features * fres
 
 //AP
 void pseudo_loop::compute_BE_emodel(int i, int j, int ip, int jp, h_str_features * fres, std::vector<energy_model> *energy_models) {
-	energy_model *model;
-	int iip = index[i]+ip-i;
+	energy_model *model = nullptr;
 
     // Ian Wark July 19 2017
 	// fres[i].pair >= 0 changed to fres[i].pair >= FRES_RESTRICTED_MIN (which equals -1 at time of writing)
 	// otherwise it will create pairs in spots where the restricted structure says there should be no pairs
 
-	if (!( i >= 0 && i <= ip && ip < jp && jp <= j && j < nb_nucleotides && fres[i].pair >= FRES_RESTRICTED_MIN && fres[j].pair >= FRES_RESTRICTED_MIN && fres[ip].pair >= FRES_RESTRICTED_MIN && fres[jp].pair >= FRES_RESTRICTED_MIN && fres[i].pair == j && fres[j].pair == i && fres[ip].pair == jp && fres[jp].pair == ip)) { //impossible cases
+	if (!( i >= 0 && i <= ip && ip < jp && jp <= j && j < nb_nucleotides
+	&& fres[i].pair >= FRES_RESTRICTED_MIN && fres[j].pair >= FRES_RESTRICTED_MIN && fres[ip].pair >= FRES_RESTRICTED_MIN && fres[jp].pair >= FRES_RESTRICTED_MIN
+	&& fres[i].pair == j && fres[j].pair == i && fres[ip].pair == jp && fres[jp].pair == ip)) { //impossible cases
 //		if (debug && i == 1 && ip == 11){
 //			printf("BE(%d,%d,%d,%d): Impossible case!! \n",i,j,ip,jp);
 //		}
 		return;
 	}
+
+	int iip = index[i]+ip-i;
+
 
 	if (BE[iip] != 0){ // computed before
 //		if (debug && i == 6 && ip == 11){

@@ -2267,7 +2267,10 @@ PARAMTYPE s_internal_loop::get_energy_emodel (int i, int j, int ip, int jp, int 
     int branch1, branch2, l;
 
 	//AP
-	if (sequence[i] == 4 || sequence[j] == 4 || sequence[ip] == 4 || sequence[jp] == 4 || sequence[i+1] == 4 || sequence[j+1] == 4 || sequence[ip+1] == 4 || sequence[jp+1] == 4 || sequence[i-1] == 4 || sequence[j-1] == 4 || sequence[ip-1] == 4 || sequence[jp-1] == 4)
+	//if (sequence[i] == X || sequence[j] == X || sequence[ip] == X || sequence[jp] == X || sequence[i+1] == X || sequence[j+1] == X || sequence[ip+1] == X || sequence[jp+1] == X || sequence[i-1] == X || sequence[j-1] == 4 || sequence[ip-1] == 4 || sequence[jp-1] == 4)
+	//	return INF;
+
+    if (sequence[i] == X || sequence[i+1] == X || sequence[ip] == X || sequence[ip+1] == X || sequence[ip-1] == X || sequence[j] == X || sequence[jp] == X || sequence[j-1] == X || sequence[jp-1] == X || sequence[jp+1] == X)
 		return INF;
 
     if (exists_restricted_ptable (i,ip,ptable) || exists_restricted_ptable (jp,j,ptable))
