@@ -1207,12 +1207,12 @@ void detect_original_pairs(char *structure, int *p_table) //kevin debug
 //      That is, a structure like this (<)> is not possible.
 //  - x, which denotes that I should ignore that part. p_table would be -3 in that case/
 {
-        int i, j, struct_len;
+        int j = -1, struct_len = -1;
         stack_ds st;
         init (&st);
         remove_space (structure);
         struct_len = strlen (structure);
-        for (i=0; i < struct_len; i++)
+        for (int i=0; i < struct_len; i++)
           {
             if (structure[i] == '.')
               p_table[i] = -1;

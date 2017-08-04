@@ -977,7 +977,7 @@ int is_empty_structure(char* input_structure, char* output_structure){
 }
 
 //kevin 18 July
-int paired_structure(int i, int j, int pair_index[], int length){
+int paired_structure(int i, int j, int *pair_index, int length){
 	if(i >= 0 && j < length && (pair_index[i] == j) && (pair_index[j] == i) ){
 		return 1;
 	}
@@ -991,13 +991,13 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 	int G2_pair[length];
 
 	//Gresult <- G1
-	strcpy(Gresult,G1);
+	strncpy(Gresult,G1,length);
 
 	detect_original_pairs(G1, G1_pair);
 	detect_original_pairs(G2, G2_pair);
 
 	//for(int d=0;d<length;d++){
-	//	printf("%c %d\n",G1[d],G1_pair[d]);
+	//	printf("%c %d\n",G2[d],G2_pair[d]);
 	//}
 
 	int i = 0;
@@ -1008,7 +1008,6 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 			i = k;
 			j = G2_pair[k];
 			if(i < j){ //for each ij in G2
-				//printf("%d %d\n",i,j);
 				if( (G1[i] != G2[i]) && (G1[j] != G2[j]) ){//if ij not in G1
 					//include bulges of size 1
 					if(paired_structure(i-1,j+1,G1_pair,length) || paired_structure(i+1,j-1,G1_pair,length) ){
@@ -1085,9 +1084,10 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 double method3_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
 	double energy = 0;
 	int length = strlen(sequence);
-	char simfold_structure[length];
+	char simfold_structure[length+1];
 
 	simfold_emodel(sequence,restricted, simfold_structure, energy_models);
+	simfold_structure[length] = '\0';
 
 	//printf("G1: %s\nG2: %s\n",restricted,simfold_structure);
 	//^ G' simfold_structure <- SimFold(S sequence, G restricted)
