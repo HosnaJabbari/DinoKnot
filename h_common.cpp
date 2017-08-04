@@ -1084,16 +1084,14 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 double method3_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
 	double energy = 0;
 	int length = strlen(sequence);
-	char simfold_structure[length+1];
+	char simfold_structure[length];
 
 	simfold_emodel(sequence,restricted, simfold_structure, energy_models);
-	simfold_structure[length] = '\0';
 
-	//printf("G1: %s\nG2: %s\n",restricted,simfold_structure);
 	//^ G' simfold_structure <- SimFold(S sequence, G restricted)
-	char G_updated[strlen(restricted)];
+	char G_updated[length+1];
+	G_updated[length] = '\0';
 	obtainRelaxedStems(restricted ,simfold_structure, G_updated);
-	//printf("Gupdated %s\n",G_updated);
 	//^Gupdated G_updated<- ObtainRelaxedStems(G restricted,G' simfold_structure)
 	energy = method2_emodel(sequence, G_updated, structure, energy_models);
 

@@ -82,8 +82,6 @@ void W_final::space_allocation(){
 		printf("nb_nucleotides = %d \n",this->nb_nucleotides);
 	}
 
-
-
 	// Hosna June 20th, 2007
 	// I don't think we need the following line
 	//vm->set_energy_matrix(s_min_folding::V);
