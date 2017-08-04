@@ -1103,7 +1103,7 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 	int KEVIN_DEBUG = 0;
 	double energy = 0;
 	int length = strlen(sequence);
-	char G_updated[length];
+	char G_updated[length+1];
 	int k = 1;
 	//^k <- 1
 	strcpy(G_updated, restricted);
