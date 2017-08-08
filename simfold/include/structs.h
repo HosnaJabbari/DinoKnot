@@ -21,6 +21,7 @@
 #include "constants.h"
 #include <stdlib.h>
 #include <string>
+#include <vector>
 
 typedef struct
 {
@@ -169,6 +170,12 @@ typedef struct str_features
     char type;                   // type can be 'H', 'S', 'I', 'M' etc
     short int num_branches;
     int bri[MAX_BRANCHES];      // the i of each branch
+
+    // Ian Wark August 8 2017
+    // exists restricted is a very common function
+    // that is ultimately very time consuming
+    // precompute the results and save in this array
+    std::vector< std::vector<int> > exists_restricted_arr;
 
     str_features()
     {
