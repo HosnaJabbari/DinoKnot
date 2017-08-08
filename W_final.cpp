@@ -204,6 +204,8 @@ double W_final::hfold_pkonly(){
     {
         print_result ();
     }
+
+    destruct_str_features(nb_nucleotides, fres);
     delete [] h_fres;
     delete [] fres;
     return energy;
@@ -293,6 +295,7 @@ double W_final::hfold_interacting() {
         print_result ();
     }
 
+    destruct_str_features(nb_nucleotides, fres);
     delete [] h_fres;
     delete [] fres;
     return energy;
@@ -382,6 +385,7 @@ double W_final::hfold_interacting_pkonly() {
         print_result ();
     }
 
+    destruct_str_features(nb_nucleotides, fres);
     delete [] h_fres;
     delete [] fres;
     return energy;
@@ -502,6 +506,8 @@ double W_final::hfold(){
     {
         print_result ();
     }
+
+    destruct_str_features(nb_nucleotides, fres);
     delete [] h_fres;
     delete [] fres;
     return energy;
@@ -635,6 +641,7 @@ double W_final::hfold_emodel() { //kevin debug
         print_result ();
     }
 
+    destruct_str_features(nb_nucleotides, fres);
     delete [] h_fres;
     delete [] fres;
 
@@ -708,6 +715,7 @@ double W_final::call_simfold_emodel(){
     {
         print_result ();
     }
+    destruct_str_features(nb_nucleotides, fres);
     delete [] fres;
     //delete stack_interval;
     return energy;
@@ -830,6 +838,7 @@ double W_final::hfold_pkonly_emodel(){
 */
   	energy /= 100.0;
 
+    destruct_str_features(nb_nucleotides, fres);
     delete [] h_fres;
     delete [] fres;
     return energy;
