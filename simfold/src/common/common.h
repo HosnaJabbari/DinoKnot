@@ -233,4 +233,7 @@ void get_pmo_usage_percentages (int i, int j, double *pmo_percentage, double *rn
 
 PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energy_models);
 
+//kevin 10 Aug 2017
+int is_cross_model(int i, int j);
+
 #endif

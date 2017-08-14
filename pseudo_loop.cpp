@@ -313,6 +313,32 @@ void pseudo_loop::compute_WI(int i, int j , h_str_features *fres){
 		return;
 	}
 
+	//todo kevin check and confirm
+	//14 Aug 2017 kevin and Mahyar
+	//
+	if(sequence[i] == X || sequence[j] == X){
+		int new_ij = -1;
+		if(sequence[i] == X){
+			i++;
+			while(sequence[i] == X){
+				i++;
+			}
+		}
+		if(sequence[j] == X){
+			j--;
+			while(sequence[j] == X){
+				j--;
+			}
+		}
+		if(i >= j){
+			WI[ij] = 0;
+			return;
+		}
+		new_ij = index[i] + j -i;
+		WI[ij] = WI[new_ij];
+		return;
+	}
+	
 	//base cases
 	// if [i,j] is not weakly closed then WI[i,j] = INF
 	if (is_weakly_closed(i,j) == 0){
@@ -393,7 +419,7 @@ void pseudo_loop::compute_WI(int i, int j , h_str_features *fres){
 	// Hosna: July 5th, 2007
 	// Anne said we should put PPS back
 	// change PSM to PSP
-//	if (debug && i == 6 && j == 15){
+//	if (debug && i == 6 && j == 15){newi newj
 //		printf("WI(6,15) is calling WMB \n");
 //	}
 
@@ -1464,6 +1490,32 @@ void pseudo_loop::compute_WIP(int i, int j, h_str_features *fres){
 //			printf("Computing WIP(%d,%d) when arc(%d) = %d and arc(%d) = %d and weakly_closed(%d,%d) = %d \n",i,j,i,fres[i].arc,j,fres[j].arc,i,j,weakly_closed[ij]);
 //		}
 //	}
+
+	//todo kevin check and confirm
+	//14 Aug 2017 kevin and Mahyar
+	//
+	if(sequence[i] == X || sequence[j] == X){
+		int new_ij = -1;
+		if(sequence[i] == X){
+			i++;
+			while(sequence[i] == X){
+				i++;
+			}
+		}
+		if(sequence[j] == X){
+			j--;
+			while(sequence[j] == X){
+				j--;
+			}
+		}
+		if(i >= j){
+			WIP[ij] = INF;
+			return;
+		}
+		new_ij = index[i] + j -i;
+		WIP[ij] = WIP[new_ij];
+	}
+
 	if (fres[i].arc != fres[j].arc || i == j || weakly_closed[ij]== 0){
 		WIP[ij] = INF;
 		return;
@@ -1832,8 +1884,8 @@ void pseudo_loop::compute_BE(int i, int j, int ip, int jp, h_str_features * fres
 //		printf("BE[%d,%d,%d,%d]: m1 = %d, m2 = %d, m3 = %d, m4 = %d, m5 = %d ==> min = %d \n",i,j,ip,jp,m1,m2,m3,m4,m5,BE[iip]);
 //	}
 }
-
-//AP
+//todo kevin confirm
+//AP                              
 void pseudo_loop::compute_BE_emodel(int i, int j, int ip, int jp, h_str_features * fres, std::vector<energy_model> *energy_models) {
 	energy_model *model = nullptr;
 
@@ -1857,6 +1909,13 @@ void pseudo_loop::compute_BE_emodel(int i, int j, int ip, int jp, h_str_features
 //		if (debug && i == 6 && ip == 11){
 //			printf("BE(%d,%d,%d,%d) was calculated before ==> BE=%d\n",i,j,ip,jp,BE[iip]);
 //		}
+		return;
+	}
+
+	//14 Aug 2017 kevin and Mahyar
+	//if i or j or ip or jp is X, return base case which is X
+	if(sequence[i] == X || sequence[j] == X || sequence[ip] == X || sequence[jp] == X ){
+		BE[iip] = INF;
 		return;
 	}
 

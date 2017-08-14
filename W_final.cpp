@@ -579,7 +579,7 @@ double W_final::hfold_emodel() { //kevin debug
 	for (j=1; j < nb_nucleotides; j++) {
         for (i =j; i >= 0; i--) {//for (i=0; i<=j; i++) {
 			    WMB->compute_energies_emodel(i,j,energy_models); // TODO need to check this one
-			    vm->WM_compute_energy(i,j); // TODO ian does this need an emodel version?
+			    vm->WM_compute_energy(i,j); 
         }
 	}
 

@@ -93,15 +93,6 @@ PARAMTYPE s_stacked_pair::compute_energy_emodel (int i, int j, energy_model *mod
 
     local_energy = model->stack[sequence[i]][sequence[j]][sequence[i+1]][sequence[j-1]];
 
-    // TODO
-//     if (sequence[i] == 0 && sequence[j] == 3 && sequence[i+1] == 0 && sequence[j-1] == 3)
-//         local_energy = stack[0][3][0][3];
-//     else if (sequence[j-1] == 0 && sequence[i+1] == 3 && sequence[j] == 0 && sequence[i] == 3)
-//         local_energy = stack[0][3][0][3];
-//     else
-//         local_energy = -100;
-
-
     min = V_energy + local_energy;
 
     // add the loss

@@ -531,18 +531,35 @@ PARAMTYPE s_multi_loop::compute_energy_restricted_emodel (int i, int j, str_feat
     // Uses i+1 or j-1, so those also cannot be X
     if (sequence[i] == X || sequence[j] == X)
         return INF;
-	if (sequence[i+1] == X || sequence[j-1] == X)
-		return INF;
+    
+    //handles i+1 and j-1 are both X, so we have to force haipin to be picked
+    //also prevents i and j to cross each other
+    if(sequence[i+1] == X && sequence[j-1] == X){
+        return INF;
+    }
+
+    //if i+1 is a X, then we have to shift the beginning of k to the index after the X
+    //shift i 
+    if(sequence[i+1] == X){
+        i++;
+        while(sequence[i] == X){
+            i++;
+        }    
+    } 
+
+    //if j-1 is a X, then we have to shift the end of k to the index before the X
+    //shift j 
+    if(sequence[j-1] == X){
+        j--;
+        while(sequence[j] == X){
+            j--;
+        }    
+    }
 
 	// May 16, 2007: Replaced this for loop, because we may have very short restricted branches
     //for (k = i+TURN+1; k <= j-TURN-2; k++)
     for (k = i+2; k <= j-3; k++)
     {
-        // TODO Ian worry is that, are we supposed to do something if k == x?
-        if(sequence[k] == X) {
-            //printf("multiloop k == X \n");
-        }
-
         iplus1k = index[i+1] + k -i-1;
         kplus1jminus1 = index[k+1] + j-1 -k-1;
         iplus2k = index[i+2] + k -i-2;
@@ -558,7 +575,7 @@ PARAMTYPE s_multi_loop::compute_energy_restricted_emodel (int i, int j, str_feat
                 model->dangle_top [sequence [i]]
 								[sequence [j]]
 								[sequence [i+1]] +
-                model->misc.multi_free_base_penalty;
+                model->misc.multi_free_base_penalty; 
             if (tmp < min)
                 min = tmp;
         }
@@ -598,32 +615,59 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
     int i;
     PARAMTYPE tmp;
 	energy_model *model;
-
-    // Ian Wark and Kevin July 20 2017
-    // Cannot have j be paired if it is in the linker
-    // Check for j here to save time if j is not valid
-	if (sequence[j] == X || sequence[j-1] == X) {
-        return;
-	}
+    //Aug 14 kevin and Ian and Mahyar and Hosna
+    //used for handling X cases
+    int temp_ij = -1;
+    int temp_i = 0;
+    int temp_j = 0;
 
     for (i=j-1; i>=0; i--) {
-
-    // Kevin and Ian Wark July 20 2017
-    // commented out because we think this is too general
-    /*
-		//AP
-		if (sequence[i] == X || sequence[j] == X || sequence[i+1] == X || sequence[j+1] == X || sequence[i-1] == X || sequence[j-1] == X)
-			continue;
-    */
-        // Ian Wark and Kevin July 20 2017
-        // Cannot have i be paired if it is in the linker
-        // Check for i here because it has to be in the for loop. j is already valid if we got here
-        if (sequence[i] == X || sequence[i+1] == X )
-			continue;
-
         int ij = index[i]+j-i;
         int iplus1j = index[i+1]+j-i-1;
         int ijminus1 = index[i]+j-1-i;
+
+        //Aug 14 2017 kevin and Ian and Mayhar and Hosna
+        //WM[ij] = INF if i,j both X or ij cross each other
+        if(sequence[i] == X && sequence[j] == X){
+            WM[ij] = INF;
+            continue;
+        }
+
+        //Aug 14 2017 kevin and Ian and Mayhar and Hosna
+        //if i is X, shift i till i is not a X and use that value
+        //if temp_i,j cross each other, WM[ij] = INF
+        if (sequence[i] == X){
+            temp_i = i;
+            while(sequence[temp_i] == X){
+                temp_i++;
+            }
+            if(temp_i < j){
+                temp_ij = index[temp_i]+j-temp_i;
+                WM[ij] = WM[temp_ij]; 
+            }else{
+                WM[ij] = INF;
+            }
+            continue;
+        }
+
+        //Aug 14 2017 kevin and Ian and Mayhar and Hosna
+        //if j is X, shift j till j is not a X and use that value
+        //if i,temp_j cross each other, WM[ij] = INF
+        if (sequence[j] == X) {
+            temp_j = j;
+            while(sequence[temp_j] == X){
+                temp_j--;
+            }
+            if(i < temp_j){
+                temp_ij = index[i]+temp_j-i;
+                WM[ij] = WM[temp_ij];
+            }else{
+                WM[ij] = INF;
+            }
+            continue;
+	    }
+
+        //normal calculations without X
 
 		//AP
 		for (auto &energy_model : *energy_models) {
@@ -633,55 +677,68 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 		    tmp = V->get_energy(i,j) +
 		          AU_penalty_emodel (sequence[i], sequence[j], model) +
 		          model->misc.multi_helix_penalty;
-
 		    if (tmp < model->energy_value) {
 		        model->energy_value = tmp;
 		    }
 
-		    if (fres[i].pair <= -1)
+            if (fres[i].pair <= -1 && fres[j].pair <= -1)
 		    {
-		        tmp = V->get_energy(i+1,j) +
-		                AU_penalty_emodel (sequence[i+1], sequence[j], model) +
-		                model->dangle_bot [sequence[j]]
+		        tmp = V->get_energy(i+1,j-1) +
+		                AU_penalty_emodel (sequence[i+1], sequence[j-1], model) +
+		                model->misc.multi_helix_penalty +
+		                2*model->misc.multi_free_base_penalty;
+                //Aug 14 2017 kevin and Mahyar
+                //modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1,j-1 are not X to avoid seg fault
+                if(sequence[i] != X && sequence[j] != X && sequence[i+1] != X && sequence[j-1] != X){
+                    tmp += model->dangle_bot [sequence[j-1]]
 		                            	[sequence[i+1]]
 		                            	[sequence[i]] +
-		                model->misc.multi_helix_penalty +
-		                model->misc.multi_free_base_penalty;
+		                model->dangle_top [sequence [j-1]]
+		                            	[sequence [i+1]]
+		                            	[sequence [j]];
+                }
 		        if (tmp < model->energy_value)
 		        {
-		            model->energy_value = tmp;
+		                model->energy_value = tmp;
 		        }
+		    }
+
+		    if (fres[i].pair <= -1)
+		    {
+                tmp = V->get_energy(i+1,j) +
+                        AU_penalty_emodel (sequence[i+1], sequence[j], model) +
+                        model->misc.multi_helix_penalty +
+                        model->misc.multi_free_base_penalty;
+                //Aug 14 2017 kevin and Mahyar
+                //modiefied the formula such that we only add dangle_bot when i,j,i+1 are not X to avoid seg fault
+                if(sequence[i] != X && sequence[j] != X && sequence[i+1] != X){
+                    tmp += model->dangle_bot [sequence[j]]
+                                        [sequence[i+1]]
+                                        [sequence[i]];
+                }
+                if (tmp < model->energy_value)
+                {
+                    model->energy_value = tmp;
+                }
+                
+                
 		    }
 		    if (fres[j].pair <= -1)
 		    {
 		        tmp = V->get_energy(i,j-1) +
 		                AU_penalty_emodel (sequence[i], sequence[j-1], model) +
-		                model->dangle_top [sequence [j-1]]
-		                            	[sequence [i]]
-		                            	[sequence [j]] +
 		                model->misc.multi_helix_penalty +
 		                model->misc.multi_free_base_penalty;
+                //Aug 14 2017 kevin and Mahyar
+                //modiefied the formula such that we only add dangle_top when i,j,j-1 are not X to avoid seg fault
+                if(sequence[i] != X && sequence[j] != X && sequence[j-1] != X){
+                    tmp += model->dangle_top [sequence [j-1]]
+		                            	[sequence [i]]
+		                            	[sequence [j]];
+                }
 		        if (tmp < model->energy_value)
 		        {
 		            model->energy_value = tmp;
-		        }
-		    }
-
-		    if (fres[i].pair <= -1 && fres[j].pair <= -1)
-		    {
-		        tmp = V->get_energy(i+1,j-1) +
-		                AU_penalty_emodel (sequence[i+1], sequence[j-1], model) +
-		                model->dangle_bot [sequence[j-1]]
-		                            	[sequence[i+1]]
-		                            	[sequence[i]] +
-		                model->dangle_top [sequence [j-1]]
-		                            	[sequence [i+1]]
-		                            	[sequence [j]] +
-		                model->misc.multi_helix_penalty +
-		                2*model->misc.multi_free_base_penalty;
-		        if (tmp < model->energy_value)
-		        {
-		                model->energy_value = tmp;
 		        }
 		    }
 
@@ -705,9 +762,6 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 
 		    for (int k=i; k < j; k++)
 		    {
-                // TODO ian
-                // Kevin and Ian Wark July 20 2017
-                // k could be a linker. Is this bad ?
                 if (sequence[k] == X)
                     continue;
 
@@ -732,32 +786,59 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_emodel (int j, str_featur
     int i;
     PARAMTYPE tmp = INF;
 	energy_model *model;
-
-	// Ian Wark and Kevin July 20 2017
-    // Cannot have j be paired if it is in the linker
-    // Check for j here to save time if j is not valid
-	if (sequence[j] == X || sequence[j-1] == X) {
-        return;
-	}
+    //Aug 14 kevin and Ian and Mahyar and Hosna
+    //used for handling X cases
+    int temp_ij = -1;
+    int temp_i = 0;
+    int temp_j = 0;
 
     for (i=j-1; i>=0; i--) {
-		    // Kevin and Ian Wark July 20 2017
-            // commented out because we think this is too general
-            /*
-                //AP
-                if (sequence[i] == X || sequence[j] == X || sequence[i+1] == X || sequence[j+1] == X || sequence[i-1] == X || sequence[j-1] == X)
-                    continue;
-            */
-
-        // Ian Wark and Kevin July 20 2017
-        // Cannot have i be paired if it is in the linker
-        // Check for i here because it has to be in the for loop. j is already valid if we got here
-        if (sequence[i] == X || sequence[i+1] == X )
-			continue;
-
         int ij = index[i]+j-i;
         int iplus1j = index[i+1]+j-i-1;
         int ijminus1 = index[i]+j-1-i;
+        
+        //Aug 14 2017 kevin and Ian and Mayhar and Hosna
+        //WM[ij] = INF if i,j both X or ij cross each other
+        if(sequence[i] == X && sequence[j] == X){
+            WM[ij] = INF;
+            continue;
+        }
+
+        //Aug 14 2017 kevin and Ian and Mayhar and Hosna
+        //if i is X, shift i till i is not a X and use that value
+        //if temp_i,j cross each other, WM[ij] = INF
+        if (sequence[i] == X){
+            temp_i = i;
+            while(sequence[temp_i] == X){
+                temp_i++;
+            }
+            if(temp_i < j){
+                temp_ij = index[temp_i]+j-temp_i;
+                WM[ij] = WM[temp_ij]; 
+            }else{
+                WM[ij] = INF;
+            }
+            continue;
+        }
+
+        //Aug 14 2017 kevin and Ian and Mayhar and Hosna
+        //if j is X, shift j till j is not a X and use that value
+        //if i,temp_j cross each other, WM[ij] = INF
+        if (sequence[j] == X) {
+            temp_j = j;
+            while(sequence[temp_j] == X){
+                temp_j--;
+            }
+            if(i < temp_j){
+                temp_ij = index[i]+temp_j-i;
+                WM[ij] = WM[temp_ij];
+            }else{
+                WM[ij] = INF;
+            }
+            continue;
+	    }
+
+        //normal calculations without X
 
 		//AP
 		for (auto &energy_model : *energy_models) {
@@ -779,11 +860,15 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_emodel (int j, str_featur
 		    {
 		        tmp = V->get_energy(i+1,j) +
 				AU_penalty_emodel (sequence[i+1], sequence[j], model) +
-				model->dangle_bot [sequence[j]]
-								[sequence[i+1]]
-								[sequence[i]] +
 				model->misc.multi_helix_penalty +
 				model->misc.multi_free_base_penalty;
+                //Aug 14 2017 kevin and Mahyar
+                //modiefied the formula such that we only add dangle_bot when i,j,i+1 are not X to avoid seg fault
+                if(sequence[i] != X && sequence[i+1] != X && sequence[j] != X){
+                    tmp += model->dangle_bot [sequence[j]]
+								[sequence[i+1]]
+								[sequence[i]];
+                }
 		        if (tmp < model->energy_value)
 		        {
 		            model->energy_value = tmp;
@@ -793,11 +878,15 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_emodel (int j, str_featur
 		    {
 		        tmp = V->get_energy(i,j-1) +
 				AU_penalty_emodel (sequence[i], sequence[j-1], model) +
-				model->dangle_top [sequence [j-1]]
-								[sequence [i]]
-								[sequence [j]] +
 				model->misc.multi_helix_penalty +
 				model->misc.multi_free_base_penalty;
+                //Aug 14 2017 kevin and Mahyar
+                //modiefied the formula such that we only add dangle_top when i,j,j-1 are not X to avoid seg fault
+                if(sequence[i] != X && sequence[j] != X && sequence[j-1] != X){
+                    model->dangle_top [sequence [j-1]]
+								[sequence [i]]
+								[sequence [j]];
+                }
 		        if (tmp < model->energy_value)
 		        {
 		            model->energy_value = tmp;
@@ -808,14 +897,18 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_emodel (int j, str_featur
 		    {
 		        tmp = V->get_energy(i+1,j-1) +
 				AU_penalty_emodel (sequence[i+1], sequence[j-1], model) +
-				model->dangle_bot [sequence[j-1]]
-								[sequence[i+1]]
-								[sequence[i]] +
-				model->dangle_top [sequence [j-1]]
-								[sequence [i+1]]
-								[sequence [j]] +
 				model->misc.multi_helix_penalty +
 				2*model->misc.multi_free_base_penalty;
+                //Aug 14 2017 kevin and Mahyar
+                //modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1,j-1 are not X to avoid seg fault
+                if(sequence[i] != X && sequence[j] != X && sequence[i+1] != X && sequence[j-1] != X){
+                    tmp += model->dangle_bot [sequence[j-1]]
+								[sequence[i+1]]
+								[sequence[i]] +
+				            model->dangle_top [sequence [j-1]]
+								[sequence [i+1]]
+								[sequence [j]];
+                }
 		        if (tmp < model->energy_value)
 		        {
 					model->energy_value = tmp;
@@ -842,6 +935,9 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_emodel (int j, str_featur
 
 		    for (int k=i; k < j; k++)
 		    {
+                if(sequence[k] == X){
+                    continue;
+                }
 		        int ik = index[i]+k-i;
 		        int kplus1j = index[k+1]+j-k-1;
 		        tmp = WM[ik] + WM[kplus1j];

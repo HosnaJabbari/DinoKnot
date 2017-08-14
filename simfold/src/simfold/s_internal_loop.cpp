@@ -906,9 +906,6 @@ PARAMTYPE s_internal_loop::get_energy_str_restricted_emodel (int i, int j, int i
 // 2) i.j is enforced in the restricted structure and we have i.j non-canonical but ip.jp is canonical
 // 3) ip.jp is enforced in the restricted structure and we have i.j canonical but ip.jp is non-canonical
 {
-    // TODO
-    //return 0;
-    //printf ("\n2\n");
 
     PARAMTYPE mmin, ttmp;
     PARAMTYPE penalty_size, asym_penalty, ip_jp_energy, i_j_energy, en;
@@ -931,17 +928,24 @@ PARAMTYPE s_internal_loop::get_energy_str_restricted_emodel (int i, int j, int i
     // if i,j,ip, or jp are linker (X), cannot pair
     if (sequence[i] == X || sequence[j] == X || sequence[ip] == X || sequence[jp] == X)
         return INF;
-    // These if i+1,j-1,jp+1,or ip-1 are X, it seg faults as it tries to grab them
-    // This problem means internal loop relies on these things to be valid bases, so it should be ignored
-    if (sequence[i+1] == X || sequence[j-1] == X || sequence[jp+1] == X || sequence[ip-1] == X)
-        return INF;
-
 
 	if ((sequence[ip]+sequence[jp] == 3 || sequence[ip]+sequence[jp] == 5) && can_pair(sequence[i],sequence[j])) // normal case
 	{
 
 		branch1 = ip-i-1;
 		branch2 = j-jp-1;
+
+        //Aug 10 2017 kevin and Mahyar
+        //return remove linker length from size of branch and return penalty by size to handle the case where the linker is between i,ip and j,jp
+        //will add hybrid penalty outside of the funtion
+        if(is_cross_model(i,ip)){
+            branch1 -= linker_length;
+            return penalty_by_size_emodel (branch1+branch2, 'I', model); 
+        }else if(is_cross_model(jp,j)){
+            branch2 -= linker_length;
+            return penalty_by_size_emodel (branch1+branch2, 'I', model); 
+        }
+
 
 		if (branch1 != 0 || branch2 != 0)
 		{
@@ -1118,6 +1122,17 @@ PARAMTYPE s_internal_loop::get_energy_str_restricted_emodel (int i, int j, int i
 		branch1 = ip-i-1;
 		branch2 = j-jp-1;
 
+        //Aug 10 2017 kevin and Mahyar
+        //return remove linker length from size of branch and return penalty by size to handle the case where the linker is between i,ip and j,jp
+        //will add hybrid penalty outside of the funtion
+        if(is_cross_model(i,ip)){
+            branch1 -= linker_length;
+            return penalty_by_size_emodel (branch1+branch2, 'I', model); 
+        }else if(is_cross_model(jp,j)){
+            branch2 -= linker_length;
+            return penalty_by_size_emodel (branch1+branch2, 'I', model); 
+        }
+        
 		if (branch1 != 0 || branch2 != 0)
 		{
 			// check if it is a bulge loop of size 1
