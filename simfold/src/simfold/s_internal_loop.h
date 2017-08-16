@@ -51,16 +51,10 @@ class s_internal_loop
 	
 		PARAMTYPE compute_energy_restricted_pkonly_emodel (int i, int j, str_features *fres, energy_model *model);
 
-		PARAMTYPE compute_energy_restricted_pmo (int i, int j, str_features *fres);
-        // computes the MFE of the structure closed by a restricted internal loop closed by (i,j)
-	
 		// Hosna, April 18, 2012
 		PARAMTYPE compute_energy_restricted_pkonly (int i, int j, str_features *fres);
 		// computes the MFE of the structure closed by a restricted internal loop closed by (i,j)
 
-		PARAMTYPE compute_energy_restricted_pkonly_pmo (int i, int j, str_features *fres);
-		// computes the MFE of the structure closed by a restricted internal loop closed by (i,j)
-        
         PARAMTYPE get_energy_str (int i, int j, int ip, int jp);
         // returns the free energy of the structure closed by the internal loop (i,j,ip,jp)        
 	
@@ -71,17 +65,11 @@ class s_internal_loop
 		// returns the free energy of the structure closed by the internal loop (i,j,ip,jp)
 		
 		PARAMTYPE get_energy_str_restricted_emodel (int i, int j, int ip, int jp, str_features *fres, energy_model *model);
-		  
-		PARAMTYPE get_energy_str_restricted_pmo (int i, int j, int ip, int jp, str_features *fres);
-		// returns the free energy of the structure closed by the internal loop (i,j,ip,jp)  
-        
+
         static PARAMTYPE get_energy (int i, int j, int ip, int jp, int *sequence, int *ptable=NULL);
         // returns the free energy of the internal loop closed at (i,j,ip,jp)
 
 		static PARAMTYPE get_energy_emodel (int i, int j, int ip, int jp, int *sequence, energy_model *model, int *ptable=NULL);
-
-		static PARAMTYPE get_energy_pmo (int i, int j, int ip, int jp, int *sequence, int *ptable=NULL);
-        // returns the free energy of the internal loop closed at (i,j,ip,jp)
 
         static PARAMTYPE get_energy_00 (int i, int j, int ip, int jp, int *sequence);
         

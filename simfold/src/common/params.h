@@ -79,14 +79,6 @@ void save_parameters_in_array (PARAMTYPE *array);
 // PRE: parameters have been read
 // save all parameters in the given array
 
-void save_parameters_pmo (char *filename);
-  // Mirela: Dec 16, 2003
-  // save all parameters in the given file
-
-void save_parameters_in_array_pmo  (PARAMTYPE *array);
-// PRE: parameters have been read
-// save all parameters in the given array
-
 int create_building_block_strings ();
 // Mirela: Sep 20, 2005
 // For most of the building blocks, write which sequence(s) correspond to each building block
@@ -100,10 +92,6 @@ int create_string_params_emodel (energy_model *model);
 // Mirela: Nov 23, 2003
 // writes each parameter type, excluding duplicates, in a long vector, containing the names of the parameters
 
-
-int create_string_params_pmo ();
-// Mirela: Nov 23, 2003
-// writes each parameter type, excluding duplicates, in a long vector, containing the names of the parameters
 
 int get_num_params ();
 // returns the number of parameters in the model
@@ -213,17 +201,6 @@ void fill_data_structures_with_new_parameters_from_array_emodel (PARAMTYPE *arra
   // PRE: first read the actual standard parameters, to be able to figure out which of them are
   // < INF, and maybe to also keep some old values.
 
-void fill_data_structures_with_new_parameters_pmo (const char *filename);
-  // Mirela: Dec 16, 2003
-  // reads parameters from a file, and writes them in the internal data structures
-  // PRE: first read the actual standard parameters, to be able to figure out which of them are
-  // < INF, and maybe to also keep some old values.
-
-void fill_data_structures_with_new_parameters_from_array_pmo (PARAMTYPE *array);
-  // Mirela: 25 Aug 2008
-  // reads parameters from and array, and writes them in the internal data structures
-  // PRE: first read the actual standard parameters, to be able to figure out which of them are
-  // < INF, and maybe to also keep some old values.
 
 void fill_data_structures_with_new_parameters_double (char *filename);
 
@@ -330,7 +307,6 @@ void fill_similarity_rule_with_optical_melting_reference (char *xml_filename);
 //TODO: Add for energy model
 //void fill_similarity_rules ();
 void fill_similarity_rules_emodel (energy_model *model);
-//void fill_similarity_rules_pmo ();
 
 int get_data_from_buffer (char *buffer, const char *header, const char last_char, char *output);
 // function to get the sequence, structure etc data from the XML lines
@@ -347,7 +323,6 @@ int is_int22_group_4 (int i, int j, int k, int l);
 
 void extrapolate_parameters_emodel (energy_model *model);
 void extrapolate_parameters ();
-void extrapolate_parameters_pmo ();
 // Start from the basic set of parameters, according to the model complexity,
 //      and fill up the remaining structures.
 
@@ -360,7 +335,6 @@ int is_special_internal_6 (int *sequence, int i, int j, int ip, int jp);
 
 PARAMTYPE special_energy_internal (int *sequence, int i, int j, int ip, int jp);
 PARAMTYPE special_energy_internal_emodel (int *sequence, int i, int j, int ip, int jp, energy_model *model);
-PARAMTYPE special_energy_internal_pmo (int *sequence, int i, int j, int ip, int jp);
 // Return the energy obtained when we consider 6 additional parameters for internal loop 3x3 and larger,
 //  as described in Chen_Turner_2006b.
 // the arguments are positions in sequence
@@ -372,8 +346,7 @@ PARAMTYPE count_special_internal (double *counter, int *sequence, int i, int j, 
 
 void check_int11_parameters (int i, int j, int k, int l, int m, int n);
 void check_int11_emodel_parameters (int i, int j, int k, int l, int m, int n, energy_model *model);
-void check_int11_pmo_parameters (int i, int j, int k, int l, int m, int n);
-        // check if int11 is the sum up of experimental addition etc.
+// check if int11 is the sum up of experimental addition etc.
 
 
 #endif

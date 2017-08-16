@@ -48,9 +48,6 @@ class s_multi_loop
 	
 		PARAMTYPE compute_energy_restricted_emodel (int i, int j, str_features *fres, energy_model *model);
 
-		PARAMTYPE compute_energy_restricted_pmo (int i, int j, str_features *fres);
-        // compute the MFE of a multi-loop closed at (i,j), the restricted case
-			
         void compute_energy_WM (int j);
         // compute de MFE of a partial multi-loop closed at (i,j)
         
@@ -61,14 +58,8 @@ class s_multi_loop
 
 		void compute_energy_WM_restricted_pkonly_emodel (int j, str_features *fres, std::vector<energy_model> *energy_models);
 
-		void compute_energy_WM_restricted_pmo (int j, str_features *fres);
-        // compute de MFE of a partial multi-loop closed at (i,j), the restricted case
-	
 		// Hosna, April 18, 2012
 		void compute_energy_WM_restricted_pkonly (int j, str_features *fres);
-		// compute de MFE of a partial multi-loop closed at (i,j), the restricted case
-
-		void compute_energy_WM_restricted_pkonly_pmo (int j, str_features *fres);
 		// compute de MFE of a partial multi-loop closed at (i,j), the restricted case
 
         // May 15, 2007. Added "if (i>=j) return INF;"  below. It was miscalculating the backtracked structure. 

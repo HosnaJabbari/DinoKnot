@@ -36,7 +36,7 @@ int *known_pairings = NULL;    // used for the loss-augmented prediction
 int *pred_pairings = NULL;
 
 char similarity_rule[MAXNUMPARAMS][5000];
-char similarity_rule_pmo[MAXNUMPARAMS][5000];
+
 
 // these variables are used for all models: turner99, parsimonious and lavish
 //  For each of the variables, LAVISH (0) means lavish, PARSI (1) means parsimonious, T99 (2) means turner99 (sometimes they overlap)

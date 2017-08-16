@@ -43,9 +43,6 @@ class s_stacked_pair
 
 		PARAMTYPE compute_energy_emodel (int i, int j, energy_model *model);
 
-		PARAMTYPE compute_energy_pmo (int i, int j);
-        // compute the free energy of the structure closed by this stacked pair
-	
 		// Hosna, March 26, 2012
 		PARAMTYPE compute_energy_restricted (int i, int j, str_features *fres);
 		//  compute the free energy if this is restricted to be a stacked pair closed at (i,j)
@@ -54,24 +51,15 @@ class s_stacked_pair
 
 		PARAMTYPE compute_energy_restricted_pkonly_emodel (int i, int j, str_features *fres, energy_model *model);
 
-		PARAMTYPE compute_energy_restricted_pmo (int i, int j, str_features *fres);
-		//  compute the free energy if this is restricted to be a stacked pair closed at (i,j)
-
 		// Hosna, April 18, 2012
 		PARAMTYPE compute_energy_restricted_pkonly (int i, int j, str_features *fres);
 		//  compute the free energy if this is restricted to be a stacked pair closed at (i,j)
 
-		PARAMTYPE compute_energy_restricted_pkonly_pmo (int i, int j, str_features *fres);
-		//  compute the free energy if this is restricted to be a stacked pair closed at (i,j)
-	
         static PARAMTYPE get_energy (int i, int j, int *sequence);
         // returns the free energy of the stacked pair closed at (i,j) 
 
 		static PARAMTYPE get_energy_emodel (int i, int j, int *sequence, energy_model *model);
 
-		static PARAMTYPE get_energy_pmo (int i, int j, int *sequence);
-        // returns the free energy of the stacked pair closed at (i,j)   
-        
         static PARAMTYPE get_enthalpy (int i, int j, int *sequence);
         // returns the enthalpy of the stacked pair closed at (i,j)
         

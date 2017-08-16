@@ -105,38 +105,6 @@ PARAMTYPE s_stacked_pair::compute_energy_emodel (int i, int j, energy_model *mod
     return min;
 }
 
-PARAMTYPE s_stacked_pair::compute_energy_pmo (int i, int j)
-// compute the free energy of the structure closed by this stacked pair
-{
-    PARAMTYPE min=INF, local_energy, V_energy;
-
-    V_energy = V->get_energy (i+1,j-1);
-
-    local_energy = stack_pmo[sequence[i]]
-                            [sequence[j]]
-                            [sequence[i+1]]
-                            [sequence[j-1]];
-
-    // TODO
-//     if (sequence[i] == 0 && sequence[j] == 3 && sequence[i+1] == 0 && sequence[j-1] == 3)
-//         local_energy = stack[0][3][0][3];
-//     else if (sequence[j-1] == 0 && sequence[i+1] == 3 && sequence[j] == 0 && sequence[i] == 3)
-//         local_energy = stack[0][3][0][3];
-//     else
-//         local_energy = -100;
-
-
-    min = V_energy + local_energy;
-
-    // add the loss
-    if (pred_pairings != NULL)
-    {
-        pred_pairings[i] = j;
-		pred_pairings[j] = i;
-        min = min - loss (i,i) - loss (j,j);
-    }
-    return min;
-}
 
 //Added by Hosna
 PARAMTYPE s_stacked_pair::compute_energy_restricted (int i, int j, str_features *fres)
@@ -190,40 +158,11 @@ PARAMTYPE s_stacked_pair::compute_energy_restricted_pkonly_emodel (int i, int j,
 	}
 }
 
-PARAMTYPE s_stacked_pair::compute_energy_restricted_pmo (int i, int j, str_features *fres)
-// compute the free energy of the structure closed by this stacked pair
-{
-	double pmo_percentage, rna_percentage;
-
-	get_pmo_usage_percentages(i, j, &pmo_percentage, &rna_percentage);
-	if (pmo_percentage == 0 && rna_percentage == 0)
-		return 0;
-
-	if (fres[i].pair == j && fres[j].pair==i && !can_pair(sequence[i],sequence[j])){
-		return V->get_energy (i+1,j-1);
-	}else if (fres[i].pair == j && fres[j].pair==i &&
-			  fres[i+1].pair == j-1 && fres[j-1].pair==i+1 &&
-			  !can_pair(sequence[i+1],sequence[j-1])){
-		return V->get_energy (i+1,j-1);
-	}
-	else{
-		return (PARAMTYPE) (pmo_percentage*compute_energy_pmo(i,j) + rna_percentage*compute_energy(i,j));
-	}
-}
 
 PARAMTYPE s_stacked_pair::compute_energy_restricted_pkonly (int i, int j, str_features *fres)
 {
 	if (fres[i+1].pair ==j-1 && fres[j-1].pair ==i+1){
 		return compute_energy_restricted(i,j,fres);
-	}else{
-		return INF;
-	}
-}
-
-PARAMTYPE s_stacked_pair::compute_energy_restricted_pkonly_pmo (int i, int j, str_features *fres)
-{
-	if (fres[i+1].pair ==j-1 && fres[j-1].pair ==i+1){
-		return compute_energy_restricted_pmo(i,j,fres);
 	}else{
 		return INF;
 	}
@@ -270,25 +209,6 @@ PARAMTYPE s_stacked_pair::get_energy_emodel (int i, int j, int *sequence, energy
     return energy;
 }
 
-PARAMTYPE s_stacked_pair::get_energy_pmo (int i, int j, int *sequence)
-// returns the free energy of the stacked pair closed at (i,j)
-{
-    if (i+1 >= j-1)     return INF;
-    // TODO
-//     if (sequence[i] == 0 && sequence[j] == 3 && sequence[i+1] == 0 && sequence[j-1] == 3)
-//         return stack[0][3][0][3];
-//     else if (sequence[j-1] == 0 && sequence[i+1] == 3 && sequence[j] == 0 && sequence[i] == 3)
-//         return stack[0][3][0][3];
-//     else
-//         return -100;
-
-	PARAMTYPE energy= stack_pmo [sequence[i]]
-								[sequence[j]]
-								[sequence[i+1]]
-								[sequence[j-1]];
-
-    return energy;
-}
 
 
 PARAMTYPE s_stacked_pair::get_enthalpy (int i, int j, int *sequence)

@@ -1260,29 +1260,7 @@ double hfold_pkonly_emodel(char *sequence, char *restricted, char *structure, st
     return energy;
 }
 
-// Hosna, November 16, 2015
-// added function for the interacting version
-double hfold_interacting(char *sequence, char *restricted, char *structure){
-    W_final *min_fold = new W_final (sequence, restricted);
-    if (min_fold == NULL) giveup ("Cannot allocate memory", "HFoldInteracting");
 
-    double energy = min_fold->hfold_interacting();
-    min_fold->return_structure (structure);
-
-    delete min_fold;
-    return energy;
-}
-
-double hfold_interacting_pkonly(char *sequence, char *restricted, char *structure){
-    W_final *min_fold = new W_final (sequence, restricted);
-    if (min_fold == NULL) giveup ("Cannot allocate memory", "HFoldInteracting");
-
-    double energy = min_fold->hfold_interacting_pkonly();
-    min_fold->return_structure (structure);
-
-    delete min_fold;
-    return energy;
-}
 
 //AP. This function is used to print out the data inside an energy model. Used for debugging only.
 void print_emodel(energy_model *model) {

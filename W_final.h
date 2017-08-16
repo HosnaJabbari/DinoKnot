@@ -39,15 +39,6 @@ class W_final: public s_min_folding{
 		//       the space for structure has been allocate
 		// POST: fold sequence, return the MFE structure in structure, and return the MFE
 
-        double hfold_interacting ();
-        // PRE:  the init_data function has been called;
-        //       the space for structure has been allocate
-        // POST: fold sequence, return the MFE structure in structure, and return the MFE
-
-		double hfold_interacting_pkonly ();
-        // PRE:  the init_data function has been called;
-        //       the space for structure has been allocate
-        // POST: fold sequence, return the MFE structure in structure, and return the MFE
 
         void return_structure (char *structure) ;
         // writes the predicted MFE structure into structure
@@ -83,13 +74,7 @@ class W_final: public s_min_folding{
 
 		void backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, str_features *fres);
 
-		void backtrack_restricted_pmo (seq_interval *cur_interval, str_features *fres); //kevin delete
-        // backtrack, the restricted case
-
 		void backtrack_restricted_pkonly (seq_interval *cur_interval, str_features *fres);
-		// backtrack, the restricted case with pk only base pairs
-
-		void backtrack_restricted_pkonly_pmo (seq_interval *cur_interval, str_features *fres);//kevin delete
 		// backtrack, the restricted case with pk only base pairs
 
         void compute_W_restricted (int j, str_features *fres);
@@ -103,14 +88,11 @@ class W_final: public s_min_folding{
 
 		void compute_W_restricted_pkonly_emodel (int j, str_features *fres);
 
-		void compute_W_restricted_pmo (int j, str_features *fres);//kevin delete
-        // fill the W array, the restricted case
 
 		// Hosna, April 3, 2012
 		void compute_W_restricted_pkonly (int j, str_features *fres);
 		// fill the W array, with addition of just pseudoknotted base pairs to the original structure
 
-		void compute_W_restricted_pkonly_pmo (int j, str_features *fres);//kevin delete
 
         int compute_W_br2_restricted (int j, str_features *fres, int &must_choose_this_branch);
 
@@ -121,12 +103,8 @@ class W_final: public s_min_folding{
 
 		int compute_W_br2_restricted_pkonly_emodel (int j, str_features *fres, int &must_choose_this_branch);
 
-		int compute_W_br2_restricted_pmo (int j, str_features *fres, int &must_choose_this_branch);//kevin delete
-
 		// Hosna, April 3, 2012
 		int compute_W_br2_restricted_pkonly (int j, str_features *fres, int &must_choose_this_branch);
-
-		int compute_W_br2_restricted_pkonly_pmo (int j, str_features *fres, int &must_choose_this_branch);		//kevin delete
 
         int compute_W_br3_restricted (int j, str_features *fres);
 

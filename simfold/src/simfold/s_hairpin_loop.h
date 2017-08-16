@@ -38,9 +38,6 @@ class s_hairpin_loop
         
 		PARAMTYPE compute_energy_restricted_emodel (int i, int j, str_features *fres, energy_model *model);
 
-		PARAMTYPE compute_energy_restricted_pmo (int i, int j, str_features *fres);
-        // compute the free energy if this is restricted to be a hairpin loop, closed at (i,j) 
-
         static PARAMTYPE get_energy (int i, int j, int *sequence, char *csequence, int *ptable=NULL);
         // returns the free energy of the hairpin loop closed at (i,j)
         
