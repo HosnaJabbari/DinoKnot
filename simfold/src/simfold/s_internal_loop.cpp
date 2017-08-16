@@ -312,9 +312,11 @@ PARAMTYPE s_internal_loop::compute_energy_restricted_emodel (int i, int j, str_f
 		minq = ip+1;
         for (jp = minq; jp < j; jp++)
         {
-            if (exists_restricted (i,ip,fres) || exists_restricted (jp,j,fres))
+            
+            if (exists_restricted (i,ip,fres) || exists_restricted (jp,j,fres)){ 
                 continue;
-
+            }
+            
             //ttmp = get_energy_str (i, j, ip, jp);
 			// Hosna, March 26, 2012
 			// changed to accommodate non-canonical base pairs in the restricted structure
@@ -326,6 +328,7 @@ PARAMTYPE s_internal_loop::compute_energy_restricted_emodel (int i, int j, str_f
             }
         }
     }
+    
     return mmin;
 }
 

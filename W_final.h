@@ -55,6 +55,7 @@ class W_final: public s_min_folding{
         //kevin
         double call_simfold_emodel();
 
+
     protected:
     	// Hosna: June 18th, 2007:
         // this pointer is the main part of the Hierarchical fold program

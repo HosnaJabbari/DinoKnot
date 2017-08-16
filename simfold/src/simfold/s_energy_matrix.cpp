@@ -35,6 +35,7 @@
 #include "s_hairpin_loop.h"
 #include "s_stacked_pair.h"
 
+#include "../pseudo_loop.h"
 
 s_energy_matrix::s_energy_matrix (int *seq, int length)
 // The constructor
@@ -218,9 +219,10 @@ void s_energy_matrix::compute_energy_restricted (int i, int j, str_features *fre
 }
 
 //AP
-void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_features *fres)
+void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_features *fres, int is_weakly_closed_flag) 
 // compute the V(i,j) value, if the structure must be restricted
 {
+    
     PARAMTYPE min, min_en[4];
     int k, min_rank = -1;
     char type;
@@ -253,34 +255,39 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
                    min_en[0] += START_HYBRID_PENALTY;                                                // add a hybrid molecule penalty
 				}
 			}
+            //16 Aug 2017 kevin
+            //added if is_weakly_closed_flag to make sure there are no base pair going out of region ij, aka is_weakly_closed
+            //have it as a flag instead of doing the check here because is_weakly_closed(int i, int j) is a method from the class pseudo_loop which is out of this class
+            //so we have to do the check before we call this function which is W_final, a class containing a pseudo_loop object
+            if(is_weakly_closed_flag){ 
+                for (auto &energy_model : *energy_models) {
+                    //S->compute_energy (i, j); Hosna, March 26, 2012
+                    energy_model.energy_value = S->compute_energy_restricted_emodel (i, j,fres, &energy_model);
+                }
+                min_en[1] = emodel_energy_function (i, j, energy_models);
 
-			for (auto &energy_model : *energy_models) {
-				//S->compute_energy (i, j); Hosna, March 26, 2012
-	        	energy_model.energy_value = S->compute_energy_restricted_emodel (i, j,fres, &energy_model);
-			}
-			min_en[1] = emodel_energy_function (i, j, energy_models);
+                for (auto &energy_model : *energy_models) {
+                    energy_model.energy_value = VBI->compute_energy_restricted_emodel (i, j, fres, &energy_model);
+                }
+                min_en[2] = emodel_energy_function (i, j, energy_models);
+                // Ian Wark and Kevin Aug 10 2017
+                // Hybrid molecule penalty
+                // This needs to be out here as we cannot tell if the energy models are different in H->compute_energy_restricted_emodel
+                // requires there to be exactly 2 energy models
+                if( is_cross_model(i,j) && ((*energy_models)[0].dna_or_rna != (*energy_models)[1].dna_or_rna)) {    // If cross model and working with a hybrid molecule 
+                    min_en[2] += START_HYBRID_PENALTY;                                                // add a hybrid molecule penalty
+                }
 
-			for (auto &energy_model : *energy_models) {
-	        	energy_model.energy_value = VBI->compute_energy_restricted_emodel (i, j, fres, &energy_model);
-			}
-			min_en[2] = emodel_energy_function (i, j, energy_models);
-            // Ian Wark and Kevin Aug 10 2017
-            // Hybrid molecule penalty
-            // This needs to be out here as we cannot tell if the energy models are different in H->compute_energy_restricted_emodel
-            // requires there to be exactly 2 energy models
-            if( is_cross_model(i,j) && ((*energy_models)[0].dna_or_rna != (*energy_models)[1].dna_or_rna)) {    // If cross model and working with a hybrid molecule 
-                min_en[2] += START_HYBRID_PENALTY;                                                // add a hybrid molecule penalty
-            }
-
-			for (auto &energy_model : *energy_models) {
-	        	energy_model.energy_value = VM->compute_energy_restricted_emodel (i, j, fres, &energy_model);
-			}
-			min_en[3] = emodel_energy_function (i, j, energy_models);
-            //kevin Aug 11 2017
-            //add hybrid penalty for VM when i+1 or j-1 is linker (discussed with Hosna, Mahyar)
-			min_en[3] = emodel_energy_function (i, j, energy_models);
-            if(sequence[i+1] == X || sequence[j-1] == X){ //if linker is in i+1 or j-1
-                min_en[3] += START_HYBRID_PENALTY;      
+                for (auto &energy_model : *energy_models) {
+                    energy_model.energy_value = VM->compute_energy_restricted_emodel (i, j, fres, &energy_model);
+                }
+                min_en[3] = emodel_energy_function (i, j, energy_models);
+                //kevin Aug 11 2017
+                //add hybrid penalty for VM when i+1 or j-1 is linker (discussed with Hosna, Mahyar)
+                min_en[3] = emodel_energy_function (i, j, energy_models);
+                if(sequence[i+1] == X || sequence[j-1] == X){ //if linker is in i+1 or j-1
+                    min_en[3] += START_HYBRID_PENALTY;      
+                }
             }
         }
     }
@@ -294,6 +301,8 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
         }
     }
 
+   // printf ("V(%d,%d) type %c energy %d %d %d %d\n", i, j, type, min_en[0],min_en[1],min_en[2],min_en[3]);
+    
     switch (min_rank)
     {
         case  0: type = HAIRP; break;
@@ -311,7 +320,7 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
 }
 
 //AP
-void s_energy_matrix::compute_energy_restricted_pkonly_emodel (int i, int j, str_features *fres)
+void s_energy_matrix::compute_energy_restricted_pkonly_emodel (int i, int j, str_features *fres, int is_weakly_closed_flag)
 // compute the V(i,j) value, if the structure must be restricted
 {
     PARAMTYPE min, min_en[4];
@@ -343,30 +352,35 @@ void s_energy_matrix::compute_energy_restricted_pkonly_emodel (int i, int j, str
                    min_en[0] += START_HYBRID_PENALTY;                                            
 				}
 			}
+            //16 Aug 2017 kevin
+            //added if is_weakly_closed_flag to make sure there are no base pair going out of region ij, aka is_weakly_closed
+            //have it as a flag instead of doing the check here because is_weakly_closed(int i, int j) is a method from the class pseudo_loop which is out of this class
+            //so we have to do the check before we call this function which is W_final, a class containing a pseudo_loop object
+            if(is_weakly_closed_flag){
+                for (auto &energy_model : *energy_models) {
+                    energy_model.energy_value = S->compute_energy_restricted_pkonly_emodel (i, j, fres, &energy_model);
+                }
+                min_en[1] = emodel_energy_function (i, j, energy_models);
 
-			for (auto &energy_model : *energy_models) {
-	        	energy_model.energy_value = S->compute_energy_restricted_pkonly_emodel (i, j, fres, &energy_model);
-			}
-			min_en[1] = emodel_energy_function (i, j, energy_models);
+                for (auto &energy_model : *energy_models) {
+                    energy_model.energy_value = VBI->compute_energy_restricted_pkonly_emodel (i, j, fres, &energy_model);
+                }
+                min_en[2] = emodel_energy_function (i, j, energy_models);
+                //kevin Aug 11 2017
+                //add hybrid penalty for VBI
+                if( is_cross_model(i,j) && ((*energy_models)[0].dna_or_rna != (*energy_models)[1].dna_or_rna) ) { // If working with a hybrid molecule and this hairpin includes the linker,
+                    min_en[2] += START_HYBRID_PENALTY;      
+                }
 
-			for (auto &energy_model : *energy_models) {
-	        	energy_model.energy_value = VBI->compute_energy_restricted_pkonly_emodel (i, j, fres, &energy_model);
-			}
-			min_en[2] = emodel_energy_function (i, j, energy_models);
-            //kevin Aug 11 2017
-            //add hybrid penalty for VBI
-            if( is_cross_model(i,j) && ((*energy_models)[0].dna_or_rna != (*energy_models)[1].dna_or_rna) ) { // If working with a hybrid molecule and this hairpin includes the linker,
-                min_en[2] += START_HYBRID_PENALTY;      
-            }
-
-			for (auto &energy_model : *energy_models) {
-	        	energy_model.energy_value = VM->compute_energy_restricted_emodel (i, j, fres, &energy_model); // should be left as is, Hosna April 18, 2012
-			}
-            //kevin Aug 11 2017
-            //add hybrid penalty for VM when i+1 or j-1 is linker (discussed with Hosna, Mahyar)
-			min_en[3] = emodel_energy_function (i, j, energy_models);
-            if(sequence[i+1] == X || sequence[j-1] == X){ //if linker is in i+1 or j-1
-                min_en[3] += START_HYBRID_PENALTY;      
+                for (auto &energy_model : *energy_models) {
+                    energy_model.energy_value = VM->compute_energy_restricted_emodel (i, j, fres, &energy_model); // should be left as is, Hosna April 18, 2012
+                }
+                //kevin Aug 11 2017
+                //add hybrid penalty for VM when i+1 or j-1 is linker (discussed with Hosna, Mahyar)
+                min_en[3] = emodel_energy_function (i, j, energy_models);
+                if(sequence[i+1] == X || sequence[j-1] == X){ //if linker is in i+1 or j-1
+                    min_en[3] += START_HYBRID_PENALTY;      
+                }
             }
         }
     }

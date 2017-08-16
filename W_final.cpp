@@ -452,8 +452,6 @@ double W_final::hfold(){
 		 */
     }
 
-
-
 	for (j=0; j < nb_nucleotides; j++)
     {
         for (i =j; i >= 0; i--)//for (i=0; i<=j; i++)
@@ -542,6 +540,9 @@ double W_final::hfold_emodel() { //kevin debug
     // set the VM matrix for VM_final
     vm->set_VM_matrix(VM);
 
+
+
+
 	// TODO:
 	// I think I shoud fill simfold tables here, before filling the HFold tables
 	// Hosna, March 8, 2012
@@ -557,7 +558,9 @@ double W_final::hfold_emodel() { //kevin debug
                 continue;
             if (fres[i].pair == -1 || fres[j].pair == -1)   // i or j MUST be unpaired
                 continue;
-            V->compute_energy_restricted_emodel (i, j, fres);
+			//16 Aug 2017 kevin
+			//added fourth argument to check if ij is weakly closed
+            V->compute_energy_restricted_emodel (i, j, fres,WMB->is_weakly_closed(i,j));
 
         }
 
@@ -653,6 +656,15 @@ double W_final::call_simfold_emodel(){
 	double energy;
     int i, j;
 
+	//16 Aug 2017 kevin
+	//added this block so we can use WMB->weakly closed in V->compute_energy_restricted_emodel 
+	h_str_features *h_fres;
+    if ((h_fres = new h_str_features[nb_nucleotides]) == NULL) giveup ("Cannot allocate memory", "h_str_features");
+    // detect the structure features
+    detect_h_structure_features (restricted, h_fres);
+    WMB->set_features(h_fres);
+    WMB->initialize();
+
     str_features *fres;
     if ((fres = new str_features[nb_nucleotides]) == NULL) giveup ("Cannot allocate memory", "str_features");
     // detect the structure features
@@ -673,7 +685,9 @@ double W_final::call_simfold_emodel(){
                 continue;
             if (fres[i].pair == -1 || fres[j].pair == -1)   // i or j MUST be unpaired
                 continue;
-            V->compute_energy_restricted_emodel (i, j, fres);
+			//16 Aug 2017 kevin
+			//added fourth argument to check if ij is weakly closed
+            V->compute_energy_restricted_emodel (i, j, fres,WMB->is_weakly_closed(i,j));
         }
         // if I put this before V calculation, WM(i,j) cannot be calculated, because it returns infinity
         VM->compute_energy_WM_restricted_emodel (j, fres, energy_models);
@@ -777,7 +791,9 @@ double W_final::hfold_pkonly_emodel(){
                 continue;
             if (fres[i].pair == -1 || fres[j].pair == -1)   // i or j MUST be unpaired
                 continue;
-            V->compute_energy_restricted_pkonly_emodel (i, j, fres);
+			//16 Aug 2017 kevin
+			//added fourth argument to check if ij is weakly closed
+            V->compute_energy_restricted_pkonly_emodel (i, j, fres,WMB->is_weakly_closed(i,j));
         }
 
 	    // if I put this before V calculation, WM(i,j) cannot be calculated, because it returns infinity
@@ -1345,6 +1361,7 @@ int W_final::compute_W_br2_restricted_emodel (int j, str_features *fres, int &mu
 		    acc = (i-1>0) ? W[i-1]: 0;
 
 		    energy_ij = v->get_energy(i,j);
+			
 /*
 			if (energy_ij != INF && j == 23) {//if (energy_ij != INF && j == 165) {
 				acc = (i-1>0) ? W[i-1]: 0;
@@ -1469,7 +1486,7 @@ int W_final::compute_W_br2_restricted_emodel (int j, str_features *fres, int &mu
 		if (tmp != INF) {
 			min = tmp;
 		}
-
+		
     }
     //printf ("Chosen=%d, best_i=%d\n", chosen, best_i);
     return min;
@@ -3078,6 +3095,9 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 		//              	printf("M_WM(%d,%d) branch 3: pushing P_WMB(%d,%d)\n", i,j,i+1,j-1);
 						insert_node(i+1,j-1, P_WMB);
 						break;
+					default:
+						fprintf(stderr, "ERROR backtrack loop has no best row\n");
+						exit(10);
 					}
 				}
 					break;
@@ -3091,12 +3111,12 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				printf("j= %d\n",j);
 			if (j==0) return;
 
-			int min = INF, tmp, best_row, i, best_i, acc, energy_ij;
+			int min = INF, tmp, best_row = -1, i, best_i, acc, energy_ij;
 
 			if (debug)
 				printf ("\t(0,%d) FREE\n", j);
-			if(KEVIN_DEBUG)
-				for (i=0; i < nb_nucleotides; i++){printf("%c i=%d f_type=%c f_pair=%d\n",restricted[i],i,fres[i].type, fres[i].pair);} //kevin debug
+			//if(KEVIN_DEBUG)
+			//	for (i=0; i < nb_nucleotides; i++){printf("%c i=%d f_type=%c f_pair=%d\n",restricted[i],i,fres[i].type, fres[i].pair);} //kevin debug
 			// this case is for j unpaired, so I have to check that.
 			if (fres[j].pair <= -1)
 			{
@@ -3122,7 +3142,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				//  it's INF, done in fold_sequence_restricted
 				acc = (i-1>0) ? W[i-1] : 0;
 				energy_ij = v->get_energy(i,j);
-
+				
 				if (energy_ij < INF)
 				{
 					//AP
@@ -3166,8 +3186,10 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				if (fres[j].pair <= -1)
 				{
 					energy_ij = v->get_energy(i,j-1);
+					
 					if (energy_ij < INF)
 					{
+						
 						//AP
 						for (auto &emodel : *energy_models) {
 							model = &emodel;
@@ -3175,9 +3197,10 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 							model->energy_value += model->dangle_top [int_sequence[j-1]]
 								[int_sequence[i]]
 								[int_sequence[j]];
+							
 						}
 						tmp = emodel_energy_function (i, j, energy_models);
-
+						
 						if (tmp < min)
 						{
 							min = tmp;
@@ -3213,7 +3236,6 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 					}
 				}
 			}
-
 			// Hosna: June 28, 2007
 			// the last branch of W, which is WMB_i,j
 	//        energy_ij = WMB->get_energy(0,j);
@@ -3300,6 +3322,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				}
 			}
 		}
+		
 			switch (best_row)
 			{
 				case 0:
@@ -3364,6 +3387,9 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 					if (best_i >= 0) // Hosna, March 26, 2012, was best_i-1 instead of best_i
 						insert_node (0, best_i, FREE);
 					break;
+				default:
+                	fprintf(stderr, "ERROR backtrack free has no best row\n");
+                	exit(10);
 			}
 		}
 			break;
@@ -3373,7 +3399,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 			int i = cur_interval->i;
 			int j = cur_interval->j;
 			int tmp, min = INF;
-			int best_k, best_row;
+			int best_k = -1, best_row = -1;
 
 			if (debug)
 				printf ("\t (%d,%d) M_WM\n", i,j);
@@ -3526,6 +3552,9 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				case 8:
 					insert_node(i,j,P_WMB);
 					break;
+				default:
+					fprintf(stderr, "ERROR backtrack M_WM has no best row\n");
+					exit(10);
 				}
 			}
 			break;
@@ -3604,6 +3633,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 			break;
 		default:
 			printf("Should not be here!\n"); //This should be removed or changed as it does nothing useful.
+			exit(10);
 	}
 
 }
@@ -3841,6 +3871,9 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 							//              	printf("M_WM(%d,%d) branch 3: pushing P_WMB(%d,%d)\n", i,j,i+1,j-1);
 							insert_node(i+1,j-1, P_WMB);
 							break;
+						default:
+							fprintf(stderr, "ERROR backtrack loop has no best row\n");
+							exit(10);
 					}
 				}
 					break;
@@ -3853,7 +3886,7 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 
 			if (j==0) return;
 
-			int min = INF, tmp, best_row, i, best_i, acc, energy_ij;
+			int min = INF, tmp, best_row = -1, i, best_i, acc, energy_ij;
 
 			if (debug)
 				printf ("\t(0,%d) FREE\n", j);
@@ -4114,6 +4147,9 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 					if (best_i >= 0) // Hosna, March 26, 2012, was best_i-1 instead of best_i
 						insert_node (0, best_i, FREE);
 					break;
+				default:
+					fprintf(stderr, "ERROR backtrack free has no best row\n");
+					exit(10);
 			}
 		}
 			break;
@@ -4123,7 +4159,7 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 			int i = cur_interval->i;
 			int j = cur_interval->j;
 			int tmp, min = INF;
-			int best_k, best_row;
+			int best_k, best_row = -1;
 
 			if (debug)
 				printf ("\t (%d,%d) M_WM\n", i,j);
@@ -4290,6 +4326,9 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 				case 8:
 					insert_node(i,j,P_WMB);
 					break;
+				default:
+					fprintf(stderr, "ERROR backtrack M_WM has no best row\n");
+					exit(10);
 			}
 		}
 			break;
@@ -4381,7 +4420,8 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 		}
 			break;
 		default:
-			printf("Should not be here!\n");
+			fprintf(stderr, "Should not be here!\n");
+			exit(10);
 	}
 }
 
@@ -4464,7 +4504,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
         {
             f[i].type = MULTI;
             f[j].type = MULTI;
-            int k, best_k, best_row;
+            int k, best_k = -1, best_row = -1;
             PARAMTYPE tmp, min = INF;
             for (k = i+1; k <= j-1; k++)
               {
@@ -4539,6 +4579,9 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 insert_node (best_k+1, j-2, M_WM); break;
               case 4: insert_node (i+2, best_k, M_WM);
                 insert_node (best_k+1, j-2, M_WM); break;
+			  default:
+				fprintf(stderr, "ERROR backtrack loop has no best row\n");
+				exit(10);
               }
         }
     }
@@ -4724,7 +4767,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 break;
             default:
                 fprintf(stderr, "ERROR backtrack free has no best row\n");
-                //exit(1);
+                exit(10);
         }
     }
   else if(cur_interval->type == M_WM)
@@ -4732,7 +4775,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
       int i = cur_interval->i;
       int j = cur_interval->j;
       PARAMTYPE tmp, min = INF;
-      int best_k, best_row;
+      int best_k = -1, best_row = -1;
 
       if (debug)
         printf ("\t (%d,%d) M_WM\n", i,j);
@@ -4866,6 +4909,9 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
             if (j-best_k-1 > 0)
               insert_node (best_k+1, j, M_WM);
             break;
+		  default:
+			fprintf(stderr, "ERROR backtrack loop has no best row\n");
+			exit(10);
           }
     }
 }

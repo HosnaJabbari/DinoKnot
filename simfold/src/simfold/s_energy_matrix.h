@@ -60,7 +60,9 @@ class s_energy_matrix
         
         void compute_energy_restricted (int i, int j, str_features *fres);
 
-		void compute_energy_restricted_emodel (int i, int j, str_features *fres);
+        //16 Aug 2017 kevin
+		//added fourth argument to check if ij is weakly closed
+		void compute_energy_restricted_emodel (int i, int j, str_features *fres, int is_weakly_closed_flag);
 
 		void compute_energy_restricted_pmo (int i, int j, str_features *fres);
 	
@@ -68,7 +70,9 @@ class s_energy_matrix
 		// April 18, 2012, Hosna:
 		// this is the necessary change for having the pkonly variation of HFold
 
-		void compute_energy_restricted_pkonly_emodel (int i, int j, str_features *fres);
+        //16 Aug 2017 kevin
+		//added fourth argument to check if ij is weakly closed
+		void compute_energy_restricted_pkonly_emodel (int i, int j, str_features *fres, int is_weakly_closed_flag);
         
 		void compute_energy_restricted_pkonly_pmo (int i, int j, str_features *fres);
 
