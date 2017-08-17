@@ -194,71 +194,9 @@ int enthalpy_nb_triloops = 0;
 int enthalpy_nb_tloops = 0;
 //**********************************************************************//
 
-//**********************************************************************//
-// Energies information for PMO
-PARAMTYPE stack_pmo   [0] [0] [0] [0];
-PARAMTYPE tstackh_pmo [0] [0] [0] [0];
-PARAMTYPE tstacki_pmo [0] [0] [0] [0];
-PARAMTYPE int11_pmo   [0] [0] [0] [0] [0] [0];
-PARAMTYPE int21_pmo   [0] [0] [0] [0] [0] [0] [0];
-PARAMTYPE int22_pmo   [0] [0] [0] [0] [0] [0] [0] [0];
-PARAMTYPE dangle_top_pmo  [0] [0] [0];
-PARAMTYPE dangle_bot_pmo  [0] [0] [0];
-PARAMTYPE internal_penalty_by_size_pmo [1];
-PARAMTYPE bulge_penalty_by_size_pmo [1];
-PARAMTYPE hairpin_penalty_by_size_pmo [1];
-miscinfo misc_pmo;
 
-//#if (MODEL == SIMPLE)
-hairpin_tloop triloop_pmo[0];
-hairpin_tloop tloop_pmo[0];
-int nb_triloops_pmo = 0;
-int nb_tloops_pmo = 0;
 
-//#elif (MODEL == EXTENDED)
-hairpin_tloop special_hl_pmo[0];
-int nb_special_hl_pmo = 0;
 
-// middle of asymmetric internal loops 2x2
-//PARAMTYPE int22mid_pmo[NUCL] [NUCL] [NUCL] [NUCL];    // I'm not using this any more, I'm using int22_experimental_addition_pmo instead
-
-PARAMTYPE int11_experimental_addition_pmo   [0] [0] [0] [0] [0] [0];       // values to be added to the simple 10-parameter model proposed by Davis_Znosko_2007, so that we use the experimental values for these parameters
-PARAMTYPE int21_experimental_addition_pmo   [0] [0] [0] [0] [0] [0] [0];       // values to be added to the simple 6-parameter model proposed by Badhwar_Znosko_2007, so that we use the experimental values for these parameters
-PARAMTYPE int22_experimental_addition_pmo   [0] [0] [0] [0] [0] [0] [0] [0];       // values to be added to the simple 6-parameter model proposed by Christiansen_Znosko_2008, so that we use the experimental values for these parameters
-
-PARAMTYPE internal_asymmetry_initiation_pmo;
-PARAMTYPE internal_asymmetry_slope_pmo;
-PARAMTYPE internal_asymmetry_pmo [0];
-//PARAMTYPE internal_symmetry_pmo [MAXLOOP+1];
-//PARAMTYPE internal_penalty_by_size_2D_pmo[MAXLOOP_I][MAXLOOP_I];
-
-PARAMTYPE bulgeA_pmo;
-PARAMTYPE bulgeC_pmo;
-PARAMTYPE bulgeG_pmo;
-PARAMTYPE bulgeU_pmo;
-PARAMTYPE bulge1_pmo[0] [0] [0] [0] [0];     // bulge of size 1     [i][j][k][ip][jp], where k=i+1, ip=k+1, j=jp+1
-//#endif
-//**********************************************************************//
-
-//**********************************************************************//
-// Enthalpies information for PMO
-PARAMTYPE enthalpy_stack_pmo   [0] [0] [0] [0];
-PARAMTYPE enthalpy_tstackh_pmo [0] [0] [0] [0];
-PARAMTYPE enthalpy_tstacki_pmo [0] [0] [0] [0];
-PARAMTYPE enthalpy_int11_pmo   [0] [0] [0] [0] [0] [0];
-PARAMTYPE enthalpy_int21_pmo   [0] [0] [0] [0] [0] [0] [0];
-PARAMTYPE enthalpy_int22_pmo   [0] [0] [0] [0] [0] [0] [0] [0];
-PARAMTYPE enthalpy_dangle_top_pmo  [0] [0] [0];
-PARAMTYPE enthalpy_dangle_bot_pmo  [0] [0] [0];
-PARAMTYPE enthalpy_internal_penalty_by_size_pmo [1];
-PARAMTYPE enthalpy_bulge_penalty_by_size_pmo [1];
-PARAMTYPE enthalpy_hairpin_penalty_by_size_pmo [1];
-miscinfo enthalpy_misc_pmo;
-hairpin_tloop enthalpy_triloop_pmo[0];
-hairpin_tloop enthalpy_tloop_pmo[0];
-int enthalpy_nb_triloops_pmo = 0;
-int enthalpy_nb_tloops_pmo = 0;
-//**********************************************************************//
 
 // parameters from the configuration file
 //kevin 30 June 2017
@@ -487,8 +425,6 @@ int linker_length = 5;
 char structure_one_type[3];
 char structure_two_type[3];
 
-//AP
-double PMO_RNA_penalty = 0;
 
 
 #endif

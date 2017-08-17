@@ -26,7 +26,6 @@ public:
 	void initialize();
     void compute_energies(int i, int j);
 	void compute_energies_emodel(int i, int j, std::vector<energy_model> *energy_models);
-	void compute_energies_pmo(int i, int j);
     
     int get_energy(int i, int j);
 	// in order to be able to check the border values consistantly
@@ -58,13 +57,11 @@ public:
 
 	void back_track_pkonly_emodel(char *structure, minimum_fold *f, seq_interval *cur_interval, std::vector<energy_model> *energy_models);
 
-	void back_track_pmo(char *structure, minimum_fold *f, seq_interval *cur_interval);
 
 	// Hosna, May 1st, 2012
 	// We need a specific back track function for pkonly case
 	void back_track_pkonly(char *structure, minimum_fold *f, seq_interval *cur_interval);
     
-	void back_track_pkonly_pmo(char *structure, minimum_fold *f, seq_interval *cur_interval);
 
     void set_stack_interval(seq_interval *stack_interval);
     seq_interval *get_stack_interval(){return stack_interval;}
@@ -120,7 +117,6 @@ private:
 		
 	void compute_VP(int i, int j, h_str_features *fres);
 	void compute_VP_emodel(int i, int j, h_str_features *fres, std::vector<energy_model> *energy_models);
-	void compute_VP_pmo(int i, int j, h_str_features *fres);
 	// Hosna: this function is supposed to fill the VP array
 	
 	void compute_WMB(int i, int j, h_str_features *fres);
@@ -132,7 +128,6 @@ private:
 	
 	void compute_BE(int i, int j, int ip, int jp, h_str_features *fres);
 	void compute_BE_emodel(int i, int j, int ip, int jp, h_str_features *fres, std::vector<energy_model> *energy_models);
-	void compute_BE_pmo(int i, int j, int ip, int jp, h_str_features *fres);
 	// Hosna: this function is supposed to fill the BE array
 	
 	void compute_WIP(int i, int j, h_str_features *fres);
@@ -157,10 +152,8 @@ private:
 	// I have to calculate the e_stP in a separate function
 	int get_e_stP(int i, int j);
 	int get_e_stP_emodel(int i, int j, energy_model *model);
-	int get_e_stP_pmo(int i, int j);
 	int get_e_intP(int i,int ip, int jp, int j);
 	int get_e_intP_emodel(int i,int ip, int jp, int j, energy_model *model);
-	int get_e_intP_pmo(int i,int ip, int jp, int j);
   
   	// Hosna: Feb 19th 2007
   	// used for backtracking

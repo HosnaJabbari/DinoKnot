@@ -438,12 +438,14 @@ PARAMTYPE s_multi_loop::compute_energy_restricted_emodel (int i, int j, str_feat
     if (sequence[i] == X || sequence[j] == X)
         return INF;
     
+
+    //14 Aug Kevin and Mahyar
     //handles i+1 and j-1 are both X, so we have to force haipin to be picked
     //also prevents i and j to cross each other
     if(sequence[i+1] == X && sequence[j-1] == X){
         return INF;
     }
-
+    //14 Aug Kevin and Mahyar
     //if i+1 is a X, then we have to shift the beginning of k to the index after the X
     //shift i 
     if(sequence[i+1] == X){
@@ -452,7 +454,7 @@ PARAMTYPE s_multi_loop::compute_energy_restricted_emodel (int i, int j, str_feat
             i++;
         }    
     } 
-
+    //14 Aug Kevin and Mahyar
     //if j-1 is a X, then we have to shift the end of k to the index before the X
     //shift j 
     if(sequence[j-1] == X){
@@ -528,6 +530,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
     int temp_j = 0;
 
     for (i=j-1; i>=0; i--) {
+ 
         int ij = index[i]+j-i;
         int iplus1j = index[i+1]+j-i-1;
         int ijminus1 = index[i]+j-1-i;
@@ -536,6 +539,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
         //WM[ij] = INF if i,j both X or ij cross each other
         if(sequence[i] == X && sequence[j] == X){
             WM[ij] = INF;
+            
             continue;
         }
 
@@ -553,6 +557,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
             }else{
                 WM[ij] = INF;
             }
+           
             continue;
         }
 
@@ -570,11 +575,12 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
             }else{
                 WM[ij] = INF;
             }
+            
             continue;
 	    }
 
         //normal calculations without X
-
+  
 		//AP
 		for (auto &energy_model : *energy_models) {
 			model = &energy_model;
@@ -583,6 +589,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 		    tmp = V->get_energy(i,j) +
 		          AU_penalty_emodel (sequence[i], sequence[j], model) +
 		          model->misc.multi_helix_penalty;
+
 		    if (tmp < model->energy_value) {
 		        model->energy_value = tmp;
 		    }
@@ -593,6 +600,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 		                AU_penalty_emodel (sequence[i+1], sequence[j-1], model) +
 		                model->misc.multi_helix_penalty +
 		                2*model->misc.multi_free_base_penalty;
+                
                 //Aug 14 2017 kevin and Mahyar
                 //modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1,j-1 are not X to avoid seg fault
                 if(sequence[i] != X && sequence[j] != X && sequence[i+1] != X && sequence[j-1] != X){
@@ -603,6 +611,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 		                            	[sequence [i+1]]
 		                            	[sequence [j]];
                 }
+
 		        if (tmp < model->energy_value)
 		        {
 		                model->energy_value = tmp;
@@ -622,6 +631,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
                                         [sequence[i+1]]
                                         [sequence[i]];
                 }
+
                 if (tmp < model->energy_value)
                 {
                     model->energy_value = tmp;
@@ -642,6 +652,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 		                            	[sequence [i]]
 		                            	[sequence [j]];
                 }
+
 		        if (tmp < model->energy_value)
 		        {
 		            model->energy_value = tmp;
@@ -651,6 +662,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 		    if (fres[i].pair <= -1)
 		    {
 		        tmp = WM[iplus1j] + model->misc.multi_free_base_penalty;
+
 		        if (tmp < model->energy_value)
 		        {
 		            model->energy_value = tmp;
@@ -660,6 +672,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 		    if (fres[j].pair <= -1)
 		    {
 		        tmp = WM[ijminus1] + model->misc.multi_free_base_penalty;
+
 		        if (tmp < model->energy_value)
 		        {
 		            model->energy_value = tmp;
@@ -674,6 +687,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 		        int ik = index[i]+k-i;
 		        int kplus1j = index[k+1]+j-k-1;
 		        tmp = WM[ik] + WM[kplus1j];
+
 		        if (tmp < model->energy_value)
 		        {
 		            model->energy_value = tmp;
@@ -682,6 +696,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 		}
 
 		WM[ij] = emodel_energy_function (i, j, energy_models);
+  
     }
 }
 

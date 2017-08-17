@@ -321,6 +321,12 @@ PARAMTYPE s_internal_loop::compute_energy_restricted_emodel (int i, int j, str_f
 			// Hosna, March 26, 2012
 			// changed to accommodate non-canonical base pairs in the restricted structure
 			ttmp = get_energy_str_restricted_emodel (i, j, ip, jp, fres, model);
+            /*
+            if(i==34 && j==64 && ip == 44 && jp == 57){
+                printf("aaaaaaaaaaaa  %d\n",ttmp);
+               
+            }
+            */
 
             if (ttmp < mmin)
             {
@@ -328,11 +334,10 @@ PARAMTYPE s_internal_loop::compute_energy_restricted_emodel (int i, int j, str_f
             }
         }
     }
-    
+
     return mmin;
 }
 
-//AP
 PARAMTYPE s_internal_loop::compute_energy_restricted_pkonly_emodel (int i, int j, str_features *fres, energy_model *model)
 // computes the MFE of the structure closed by a restricted internal loop closed by (i,j)
 {
@@ -833,7 +838,7 @@ PARAMTYPE s_internal_loop::get_energy_str_restricted_emodel (int i, int j, int i
 // 2) i.j is enforced in the restricted structure and we have i.j non-canonical but ip.jp is canonical
 // 3) ip.jp is enforced in the restricted structure and we have i.j canonical but ip.jp is non-canonical
 {
-
+    
     PARAMTYPE mmin, ttmp;
     PARAMTYPE penalty_size, asym_penalty, ip_jp_energy, i_j_energy, en;
     int branch1, branch2, l;
@@ -855,7 +860,11 @@ PARAMTYPE s_internal_loop::get_energy_str_restricted_emodel (int i, int j, int i
     // if i,j,ip, or jp are linker (X), cannot pair
     if (sequence[i] == X || sequence[j] == X || sequence[ip] == X || sequence[jp] == X)
         return INF;
-
+/*     
+    if ((fres[ip].pair >= 0 && fres[ip].pair != jp) || (fres[jp].pair >= 0 && fres[jp].pair != ip)){ 
+        return INF;
+    }
+*/
 	if ((sequence[ip]+sequence[jp] == 3 || sequence[ip]+sequence[jp] == 5) && can_pair(sequence[i],sequence[j])) // normal case
 	{
 
@@ -867,10 +876,21 @@ PARAMTYPE s_internal_loop::get_energy_str_restricted_emodel (int i, int j, int i
         //will add hybrid penalty outside of the funtion
         if(is_cross_model(i,ip)){
             branch1 -= linker_length;
-            return penalty_by_size_emodel (branch1+branch2, 'I', model); 
+            //todo kevin confirm
+            //17 Aug 2017
+            if(sequence[i+1] == X && sequence[ip-1] == X){
+         
+                return V->get_energy(ip,jp);
+            }else{
+                return penalty_by_size_emodel (branch1+branch2, 'I', model); 
+            }
         }else if(is_cross_model(jp,j)){
             branch2 -= linker_length;
-            return penalty_by_size_emodel (branch1+branch2, 'I', model); 
+            if(sequence[jp+1] == X && sequence[j-1] == X){
+                return V->get_energy(ip,jp);
+            }else{
+                return penalty_by_size_emodel (branch1+branch2, 'I', model); 
+            }
         }
 
 
@@ -1054,10 +1074,19 @@ PARAMTYPE s_internal_loop::get_energy_str_restricted_emodel (int i, int j, int i
         //will add hybrid penalty outside of the funtion
         if(is_cross_model(i,ip)){
             branch1 -= linker_length;
-            return penalty_by_size_emodel (branch1+branch2, 'I', model); 
+            if(sequence[i+1] == X && sequence[ip-1] == X){
+                return V->get_energy(ip,jp);
+            }else{
+                return penalty_by_size_emodel (branch1+branch2, 'I', model); 
+            }
+
         }else if(is_cross_model(jp,j)){
             branch2 -= linker_length;
-            return penalty_by_size_emodel (branch1+branch2, 'I', model); 
+            if(sequence[jp+1] == X && sequence[j-1] == X){
+                return V->get_energy(ip,jp);
+            }else{
+                return penalty_by_size_emodel (branch1+branch2, 'I', model); 
+            }
         }
         
 		if (branch1 != 0 || branch2 != 0)
@@ -1261,7 +1290,7 @@ PARAMTYPE s_internal_loop::get_energy_str_restricted_emodel (int i, int j, int i
             for (int kk=jp+1; kk < j; kk++) pred_pairings[kk] = -1;
             mmin = mmin - loss (i,ip-1) - loss (jp+1,j);
         }
-
+        
         return mmin;
     }
     return INF;

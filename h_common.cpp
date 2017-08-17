@@ -1207,6 +1207,7 @@ printf("start method1\n");
 	min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
 	method_used = 1;
 	strcpy(structure,method1_structure);
+	//printf("method1 energy: %lf\n",min_energy);
 
 printf("start method2\n");
 	energy = method2_emodel(sequence,restricted,method2_structure,energy_models);

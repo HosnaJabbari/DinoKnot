@@ -296,13 +296,15 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
     {
         if (min_en[k] < min)
         {
+            
             min = min_en[k];
             min_rank = k;
         }
     }
 
-   // printf ("V(%d,%d) type %c energy %d %d %d %d\n", i, j, type, min_en[0],min_en[1],min_en[2],min_en[3]);
     
+
+
     switch (min_rank)
     {
         case  0: type = HAIRP; break;
@@ -311,12 +313,14 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
         case  3: type = MULTI; break;
         default: type = NONE;
     }
+//printf ("V(%d,%d) %c energy %d %d %d %d\n", i, j, type, min_en[0],min_en[1],min_en[2],min_en[3]);
 
     if (min < INF/2) {
         int ij = index[i]+j-i;
         nodes[ij].energy = min;
         nodes[ij].type = type;
     }
+
 }
 
 //AP
