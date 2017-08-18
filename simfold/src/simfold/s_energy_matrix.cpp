@@ -281,13 +281,16 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
                 for (auto &energy_model : *energy_models) {
                     energy_model.energy_value = VM->compute_energy_restricted_emodel (i, j, fres, &energy_model);
                 }
+                
                 min_en[3] = emodel_energy_function (i, j, energy_models);
+
                 //kevin Aug 11 2017
                 //add hybrid penalty for VM when i+1 or j-1 is linker (discussed with Hosna, Mahyar)
-                min_en[3] = emodel_energy_function (i, j, energy_models);
-                if(sequence[i+1] == X || sequence[j-1] == X){ //if linker is in i+1 or j-1
+                if(sequence[i+1] == X || sequence[j-1] == X && ((*energy_models)[0].dna_or_rna != (*energy_models)[1].dna_or_rna)){ //if linker is in i+1 or j-1
                     min_en[3] += START_HYBRID_PENALTY;      
                 }
+
+
             }
         }
     }

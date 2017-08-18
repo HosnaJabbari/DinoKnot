@@ -423,7 +423,8 @@ PARAMTYPE s_multi_loop::compute_energy_restricted_emodel (int i, int j, str_feat
     int kplus1jminus1;
     int iplus2k;
     int kplus1jminus2;
-
+int print_i = i;
+int print_j = j;
 /*
 	//AP
 	if (sequence[i] == X || sequence[j] == X)
@@ -445,6 +446,8 @@ PARAMTYPE s_multi_loop::compute_energy_restricted_emodel (int i, int j, str_feat
     if(sequence[i+1] == X && sequence[j-1] == X){
         return INF;
     }
+
+/*
     //14 Aug Kevin and Mahyar
     //if i+1 is a X, then we have to shift the beginning of k to the index after the X
     //shift i 
@@ -453,7 +456,15 @@ PARAMTYPE s_multi_loop::compute_energy_restricted_emodel (int i, int j, str_feat
         while(sequence[i] == X){
             i++;
         }    
+        
     } 
+*/
+    //18 Aug 2017 Kevin and Mahyar
+    //changed the above if(sequence[i+1] == X) skipping part to tghe one below to avoid skipping too much for X cases
+    while(sequence[i+1] == X){
+        i++;
+    }
+/*
     //14 Aug Kevin and Mahyar
     //if j-1 is a X, then we have to shift the end of k to the index before the X
     //shift j 
@@ -462,58 +473,93 @@ PARAMTYPE s_multi_loop::compute_energy_restricted_emodel (int i, int j, str_feat
         while(sequence[j] == X){
             j--;
         }    
+        if(print_i==30 && print_j==62){
+            printf("new j: %d\n",j);
+        }
+    }
+*/
+    //18 Aug 2017 Kevin and Mahyar
+    //changed the above if(sequence[j-1] == X) skipping part to tghe one below to avoid skipping too much for X cases
+    while(sequence[j-1] == X){
+        j--;
+
     }
 
 	// May 16, 2007: Replaced this for loop, because we may have very short restricted branches
     //for (k = i+TURN+1; k <= j-TURN-2; k++)
     for (k = i+2; k <= j-3; k++)
     {
+       
+        
+        //printf("k:%d\n",k);
         iplus1k = index[i+1] + k -i-1;
         kplus1jminus1 = index[k+1] + j-1 -k-1;
         iplus2k = index[i+2] + k -i-2;
         kplus1jminus2 = index[k+1] + j-2 -k-1;
 
         tmp = WM[iplus1k] + WM[kplus1jminus1];
+
         if (tmp < min)
             min = tmp;
 
         if (fres[i+1].pair <= -1)
         {
             tmp = WM[iplus2k] + WM[kplus1jminus1] +
-                model->dangle_top [sequence [i]]
-								[sequence [j]]
-								[sequence [i+1]] +
                 model->misc.multi_free_base_penalty; 
+            //Aug 18 2017 kevin and Mahyar
+            //modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1 are not X to avoid seg fault
+            if(sequence[i] != X && sequence[j] != X && sequence[i+1] != X){
+                tmp += model->dangle_top [sequence [i]]
+								[sequence [j]]
+								[sequence [i+1]];
+            }
+
+
             if (tmp < min)
                 min = tmp;
         }
         if (fres[j-1].pair <= -1)
         {
+
             tmp = WM[iplus1k] + WM[kplus1jminus2] +
-                model->dangle_bot [sequence[i]]
-								[sequence[j]]
-								[sequence[j-1]] +
                 model->misc.multi_free_base_penalty;
+            //Aug 18 2017 kevin and Mahyar
+            //modiefied the formula such that we only add dangle_bot,dangle_top when i,j,j-1 are not X to avoid seg fault
+            if(sequence[i] != X && sequence[j] != X && sequence[j-1] != X){
+                tmp += model->dangle_bot [sequence[i]]
+								[sequence[j]]
+								[sequence[j-1]];
+            }
             if (tmp < min)
                 min = tmp;
         }
         if (fres[i+1].pair <= -1 && fres[j-1].pair <= -1)
         {
+
             tmp = WM[iplus2k] + WM[kplus1jminus2] +
-                model->dangle_top [sequence [i]]
+                2 * model->misc.multi_free_base_penalty;
+            //Aug 18 2017 kevin and Mahyar
+            //modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1,j-1 are not X to avoid seg fault
+            if(sequence[i] != X && sequence[j] != X && sequence[i+1] != X && sequence[j-1] != X){
+                tmp += model->dangle_top [sequence [i]]
 								[sequence [j]]
 								[sequence [i+1]] +
-                model->dangle_bot [sequence[i]]
+                        model->dangle_bot [sequence[i]]
 								[sequence[j]]
-								[sequence[j-1]] +
-                2 * model->misc.multi_free_base_penalty;
+								[sequence[j-1]];
+            }
             if (tmp < min)
             	min = tmp;
         }
+        
     }
+
+
 
     min += model->misc.multi_helix_penalty + model->misc.multi_offset +
            AU_penalty_emodel (sequence[i], sequence[j], model);
+
+
     return min;
 }
 
@@ -539,7 +585,6 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
         //WM[ij] = INF if i,j both X or ij cross each other
         if(sequence[i] == X && sequence[j] == X){
             WM[ij] = INF;
-            
             continue;
         }
 

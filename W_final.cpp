@@ -397,8 +397,7 @@ double W_final::hfold_emodel() { //kevin debug
 		 }
 		 */
     }
-
-//printf("end of V, VM type is: %c\n",v->get_type (44,57));
+//exit(999);
 
 	for (j=1; j < nb_nucleotides; j++) {
         for (i =j; i >= 0; i--) {//for (i=0; i<=j; i++) {
@@ -406,12 +405,10 @@ double W_final::hfold_emodel() { //kevin debug
 			    vm->WM_compute_energy(i,j); 
         }
 	}
-
 	// end of addition at March 8, 2012, Hosna
 	for (j= 1; j < nb_nucleotides; j++) {
     	this->compute_W_restricted_emodel(j,fres);
 	}
-
 	if(KEVIN_DEBUG){
 		//printf("fres:\n");
 		//for (i=0; i < nb_nucleotides; i++){printf("%c i=%d f_type=%c f_pair=%d\n",restricted[i],i,fres[i].type, fres[i].pair);} //kevin debug
@@ -438,14 +435,14 @@ double W_final::hfold_emodel() { //kevin debug
 	}
 */
 
-
+//printf("before backtrack\n");
     while ( cur_interval != NULL) {
         stack_interval = stack_interval->next;
         backtrack_restricted_emodel (cur_interval, fres); // TODO do we need to check this one?
         delete cur_interval;    // this should make up for the new in the insert_node
         cur_interval = stack_interval;
     }
-
+//printf("end of backtrack\n");
 	// The energy calculation is now placed after backtrack is run because we need the contents of f[] (aka typedef struct minimum_fold) in order to determine if the final structure is pseudoknoted or not. If it is then we add the start_hybrid_penalty to our final energy and divide it by 100.
     energy = this->W[nb_nucleotides-1]; //nb_nucleotides-1
 
@@ -2432,9 +2429,11 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 								//17 Aug 2017 kevin and Mahyar
 								//changed the above function call to this one so we dont re-caculate it and just look up the value
 								model.energy_value = v->get_energy(ip,jp);
+				
 							}
 							tmp = emodel_energy_function (i, j, energy_models);
-						
+					
+				
 							if (tmp < min)
 							{
 								min = tmp;
@@ -2541,32 +2540,33 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 						}
 
 					}
+					//printf("loop best row: %d, i:%d j:%d\n",best_row,i,j);
 					switch (best_row)
 					{
 					case 1:
-		//              	printf("M_WM(%d,%d) branch 1: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+1,best_k,best_k+1,j-1);
+		              //	printf("M_WM(%d,%d) branch 1: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+1,best_k,best_k+1,j-1);
 						insert_node (i+1, best_k, M_WM);
 						insert_node (best_k+1, j-1, M_WM);
 						break;
 					case 2:
-		//              	printf("M_WM(%d,%d) branch 2: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+2,best_k,best_k+1,j-1);
+		             // 	printf("M_WM(%d,%d) branch 2: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+2,best_k,best_k+1,j-1);
 						insert_node (i+2, best_k, M_WM);
 						insert_node (best_k+1, j-1, M_WM);
 						break;
 					case 3:
-		//              	printf("M_WM(%d,%d) branch 3: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+1,best_k,best_k+1,j-2);
+		             // 	printf("M_WM(%d,%d) branch 3: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+1,best_k,best_k+1,j-2);
 						insert_node (i+1, best_k, M_WM);
 						insert_node (best_k+1, j-2, M_WM);
 						break;
 					case 4:
-		//              	printf("M_WM(%d,%d) branch 4: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+2,best_k,best_k+1,j-2);
+		             // 	printf("M_WM(%d,%d) branch 4: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+2,best_k,best_k+1,j-2);
 						insert_node (i+2, best_k, M_WM);
 						insert_node (best_k+1, j-2, M_WM);
 						break;
 					// Hosna: June 28, 2007
 					// the last branch of VM, which is WMB_(i+1),(j-1)
 					case 5:
-		//              	printf("M_WM(%d,%d) branch 3: pushing P_WMB(%d,%d)\n", i,j,i+1,j-1);
+		             // 	printf("M_WM(%d,%d) branch 3: pushing P_WMB(%d,%d)\n", i,j,i+1,j-1);
 						insert_node(i+1,j-1, P_WMB);
 						break;
 					default:
@@ -2871,6 +2871,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 		case M_WM:
 //  else if(cur_interval->type == M_WM)
 		{
+			
 			int i = cur_interval->i;
 			int j = cur_interval->j;
 			int tmp, min = INF;
@@ -2904,9 +2905,13 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 					model = &emodel;
 					model->energy_value = v->get_energy(i+1,j) +
 						AU_penalty_emodel (int_sequence[i+1], int_sequence[j], model) +
-						model->dangle_bot [int_sequence[j]] [int_sequence[i+1]] [int_sequence[i]] +
 						model->misc.multi_helix_penalty +
 						model->misc.multi_free_base_penalty;
+					//Aug 17 2017 kevin and Mahyar
+                	//modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1 are not X to avoid seg fault
+					if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X){
+						model->energy_value += model->dangle_bot [int_sequence[j]] [int_sequence[i+1]] [int_sequence[i]];
+					}
 				}
 				tmp = emodel_energy_function (i, j, energy_models);
 
@@ -2916,6 +2921,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 					best_row = 2;
 				}
 			}
+		
 			if (fres[j].pair <= -1)
 			{
 				//AP
@@ -2923,9 +2929,13 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 					model = &emodel;
 					model->energy_value = v->get_energy(i,j-1) +
 						AU_penalty_emodel (int_sequence[i], int_sequence[j-1], model) +
-						model->dangle_top [int_sequence[j-1]] [int_sequence[i]] [int_sequence[j]] +
 						model->misc.multi_helix_penalty +
 						model->misc.multi_free_base_penalty;
+					//Aug 17 2017 kevin and Mahyar
+                	//modiefied the formula such that we only add dangle_bot,dangle_top when i,j,j-1 are not X to avoid seg fault
+					if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[j-1] != X){
+						model->energy_value += model->dangle_top [int_sequence[j-1]] [int_sequence[i]] [int_sequence[j]];
+					}
 				}
 				tmp = emodel_energy_function (i, j, energy_models);
 
@@ -2935,6 +2945,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 					best_row = 3;
 				}
 			}
+			
 			if (fres[i].pair <= -1 && fres[j].pair <= -1)
 			{
 				//AP
@@ -2942,10 +2953,14 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 					model = &emodel;
 					model->energy_value = v->get_energy(i+1,j-1) +
 						AU_penalty_emodel (int_sequence[i+1], int_sequence[j-1], model) +
-						model->dangle_bot [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[i]] +
-						model->dangle_top [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[j]] +
 						model->misc.multi_helix_penalty +
 						2*model->misc.multi_free_base_penalty;
+					//Aug 17 2017 kevin and Mahyar
+                	//modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1, j-1 are not X to avoid seg fault
+					if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X && int_sequence[j-1] != X){
+						model->energy_value += model->dangle_bot [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[i]] +
+							model->dangle_top [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[j]];
+					}
 				}
 				tmp = emodel_energy_function (i, j, energy_models);
 
@@ -3002,6 +3017,29 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				best_row = 8;
 			}
 
+//todo kevin confirm
+			int new_j = j;
+			if(int_sequence[new_j] == X){
+				while(int_sequence[new_j-1] == X){
+					new_j--;
+					best_row = 9;
+				}    
+				
+			}
+
+			int new_i = i;
+			if(int_sequence[new_i] == X){
+				while(int_sequence[new_i+1] == X){
+					new_i++;
+					best_row = 9;
+				}    
+			}
+
+			if(new_i >= new_j){
+				best_row = -1; //error
+			}
+//todo kevin confirm end 
+//printf("M_WM best row: %d\n",best_row);
 			switch (best_row)
 				{
 				case 1: insert_node (i, j, LOOP); break;
@@ -3026,6 +3064,9 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				// the last branch of W, which is WMB_i,j
 				case 8:
 					insert_node(i,j,P_WMB);
+					break;
+				case 9://todo kevin confirm
+					insert_node(new_i,new_j,M_WM);
 					break;
 				default:
 					printf("i= %d j=%d\n",i,j);

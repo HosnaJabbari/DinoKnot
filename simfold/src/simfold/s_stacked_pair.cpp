@@ -86,22 +86,23 @@ PARAMTYPE s_stacked_pair::compute_energy_emodel (int i, int j, energy_model *mod
         return INF;
     }
 
-
     PARAMTYPE min=INF, local_energy, V_energy;
 
     V_energy = V->get_energy (i+1,j-1);
 
     local_energy = model->stack[sequence[i]][sequence[j]][sequence[i+1]][sequence[j-1]];
-
+    
     min = V_energy + local_energy;
 
     // add the loss
     if (pred_pairings != NULL)
     {
+        
         pred_pairings[i] = j;
 		pred_pairings[j] = i;
         min = min - loss (i,i) - loss (j,j);
     }
+
     return min;
 }
 
@@ -144,6 +145,7 @@ PARAMTYPE s_stacked_pair::compute_energy_restricted_emodel (int i, int j, str_fe
 		return V->get_energy (i+1,j-1);
 	}
 	else{
+        
 		return compute_energy_emodel(i,j,model);
 	}
 }
