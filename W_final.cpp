@@ -385,7 +385,8 @@ double W_final::hfold_emodel() { //kevin debug
 		
         // if I put this before V calculation, WM(i,j) cannot be calculated, because it returns infinity
         VM->compute_energy_WM_restricted_emodel (j, fres, energy_models);
-
+	
+                 
 		// test V values
 		/*
 		 for (i=0; i<j; i++)
@@ -397,7 +398,8 @@ double W_final::hfold_emodel() { //kevin debug
 		 }
 		 */
     }
-//exit(999);
+
+
 
 	for (j=1; j < nb_nucleotides; j++) {
         for (i =j; i >= 0; i--) {//for (i=0; i<=j; i++) {
@@ -405,6 +407,9 @@ double W_final::hfold_emodel() { //kevin debug
 			    vm->WM_compute_energy(i,j); 
         }
 	}
+
+//exit(999);
+
 	// end of addition at March 8, 2012, Hosna
 	for (j= 1; j < nb_nucleotides; j++) {
     	this->compute_W_restricted_emodel(j,fres);
@@ -2544,29 +2549,29 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 					switch (best_row)
 					{
 					case 1:
-		              //	printf("M_WM(%d,%d) branch 1: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+1,best_k,best_k+1,j-1);
+		        //      	printf("M_WM(%d,%d) branch 1: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+1,best_k,best_k+1,j-1);
 						insert_node (i+1, best_k, M_WM);
 						insert_node (best_k+1, j-1, M_WM);
 						break;
 					case 2:
-		             // 	printf("M_WM(%d,%d) branch 2: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+2,best_k,best_k+1,j-1);
+		  //            	printf("M_WM(%d,%d) branch 2: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+2,best_k,best_k+1,j-1);
 						insert_node (i+2, best_k, M_WM);
 						insert_node (best_k+1, j-1, M_WM);
 						break;
 					case 3:
-		             // 	printf("M_WM(%d,%d) branch 3: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+1,best_k,best_k+1,j-2);
+		   //           	printf("M_WM(%d,%d) branch 3: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+1,best_k,best_k+1,j-2);
 						insert_node (i+1, best_k, M_WM);
 						insert_node (best_k+1, j-2, M_WM);
 						break;
 					case 4:
-		             // 	printf("M_WM(%d,%d) branch 4: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+2,best_k,best_k+1,j-2);
+		//              	printf("M_WM(%d,%d) branch 4: pushing M_WM(%d,%d) and M_WM(%d,%d) \n", i,j,i+2,best_k,best_k+1,j-2);
 						insert_node (i+2, best_k, M_WM);
 						insert_node (best_k+1, j-2, M_WM);
 						break;
 					// Hosna: June 28, 2007
 					// the last branch of VM, which is WMB_(i+1),(j-1)
 					case 5:
-		             // 	printf("M_WM(%d,%d) branch 3: pushing P_WMB(%d,%d)\n", i,j,i+1,j-1);
+		  //            	printf("M_WM(%d,%d) branch 3: pushing P_WMB(%d,%d)\n", i,j,i+1,j-1);
 						insert_node(i+1,j-1, P_WMB);
 						break;
 					default:
@@ -2880,6 +2885,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 			if (debug)
 				printf ("\t (%d,%d) M_WM\n", i,j);
 
+
 			//AP
 			//if (int_sequence[i] == X || int_sequence[j] == X || int_sequence[i+1] == X || int_sequence[j+1] == X || int_sequence[i-1] == X || int_sequence[j-1] == X)
 			//	return;
@@ -2908,7 +2914,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 						model->misc.multi_helix_penalty +
 						model->misc.multi_free_base_penalty;
 					//Aug 17 2017 kevin and Mahyar
-                	//modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1 are not X to avoid seg fault
+                	//modiefied the formula such that we only add dangle_bot when i,j,i+1 are not X to avoid seg fault
 					if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X){
 						model->energy_value += model->dangle_bot [int_sequence[j]] [int_sequence[i+1]] [int_sequence[i]];
 					}
@@ -2932,7 +2938,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 						model->misc.multi_helix_penalty +
 						model->misc.multi_free_base_penalty;
 					//Aug 17 2017 kevin and Mahyar
-                	//modiefied the formula such that we only add dangle_bot,dangle_top when i,j,j-1 are not X to avoid seg fault
+                	//modiefied the formula such that we only add dangle_top when i,j,j-1 are not X to avoid seg fault
 					if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[j-1] != X){
 						model->energy_value += model->dangle_top [int_sequence[j-1]] [int_sequence[i]] [int_sequence[j]];
 					}
@@ -3017,7 +3023,9 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				best_row = 8;
 			}
 
-//todo kevin confirm
+			//18 Aug 2017 kevin and Mahyar
+			//added this to check if j is a X
+			//if it is, move j till it is the first X so the next iteration can handle it properly
 			int new_j = j;
 			if(int_sequence[new_j] == X){
 				while(int_sequence[new_j-1] == X){
@@ -3027,6 +3035,9 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				
 			}
 
+			//18 Aug 2017 kevin and Mahyar
+			//added this to check if i is a X
+			//if it is, move i till it is the last X so the next iteration can handle it properly
 			int new_i = i;
 			if(int_sequence[new_i] == X){
 				while(int_sequence[new_i+1] == X){
@@ -3034,12 +3045,13 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 					best_row = 9;
 				}    
 			}
-
+			//18 Aug 2017 kevin and Mahyar
+			//added this to make sure after we move the new i and j, we do not cross
+			//if it is, error
 			if(new_i >= new_j){
 				best_row = -1; //error
 			}
-//todo kevin confirm end 
-//printf("M_WM best row: %d\n",best_row);
+//printf("M_WM best row: %d, new_i: %d new_j: %d\n",best_row,new_i,new_j);
 			switch (best_row)
 				{
 				case 1: insert_node (i, j, LOOP); break;
@@ -3065,7 +3077,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				case 8:
 					insert_node(i,j,P_WMB);
 					break;
-				case 9://todo kevin confirm
+				case 9: //18 Aug 2017 kevin and Mahyar added this case to jump i or j when encounter X
 					insert_node(new_i,new_j,M_WM);
 					break;
 				default:
@@ -3710,11 +3722,13 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 					model = &emodel;
 					model->energy_value = v->get_energy(i+1,j) +
 						AU_penalty_emodel (int_sequence[i+1], int_sequence[j], model) +
-						model->dangle_bot [int_sequence[j]]
-										[int_sequence[i+1]]
-										[int_sequence[i]] +
 						model->misc.multi_helix_penalty +
 						model->misc.multi_free_base_penalty;
+					//Aug 18 2017 kevin and Mahyar
+                	//modiefied the formula such that we only add dangle_bot when i,j,i+1 are not X to avoid seg fault
+					if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X){
+						model->energy_value += model->dangle_bot [int_sequence[j]] [int_sequence[i+1]] [int_sequence[i]];
+					}
 				}
 				tmp = emodel_energy_function (i, j, energy_models);
 
@@ -3731,11 +3745,13 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 					model = &emodel;
 					model->energy_value = v->get_energy(i,j-1) +
 						AU_penalty_emodel (int_sequence[i], int_sequence[j-1], model) +
-						model->dangle_top [int_sequence[j-1]]
-										[int_sequence[i]]
-										[int_sequence[j]] +
 						model->misc.multi_helix_penalty +
 						model->misc.multi_free_base_penalty;
+					//Aug 18 2017 kevin and Mahyar
+                	//modiefied the formula such that we only add dangle_top when i,j,j-1 are not X to avoid seg fault
+					if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[j-1] != X){
+						model->energy_value += model->dangle_top [int_sequence[j-1]] [int_sequence[i]] [int_sequence[j]];
+					}
 				}
 				tmp = emodel_energy_function (i, j, energy_models);
 
@@ -3752,14 +3768,14 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 					model = &emodel;
 					model->energy_value = v->get_energy(i+1,j-1) +
 						AU_penalty_emodel (int_sequence[i+1], int_sequence[j-1], model) +
-						model->dangle_bot [int_sequence[j-1]]
-										[int_sequence[i+1]]
-										[int_sequence[i]] +
-						model->dangle_top [int_sequence[j-1]]
-										[int_sequence[i+1]]
-										[int_sequence[j]] +
 						model->misc.multi_helix_penalty +
 						2*model->misc.multi_free_base_penalty;
+					//Aug 18 2017 kevin and Mahyar
+                	//modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1, j-1 are not X to avoid seg fault
+					if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X && int_sequence[j-1] != X){
+						model->energy_value += model->dangle_bot [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[i]] +
+							model->dangle_top [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[j]];
+					}
 				}
 				tmp = emodel_energy_function (i, j, energy_models);
 
@@ -3819,6 +3835,36 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 				best_row = 8;
 			}
 
+			//18 Aug 2017 kevin and Mahyar
+			//added this to check if i is a X
+			//if it is, move i till it is the last X so the next iteration can handle it properly
+			int new_j = j;
+			if(int_sequence[new_j] == X){
+				while(int_sequence[new_j-1] == X){
+					new_j--;
+					best_row = 9;
+				}    
+				
+			}
+
+			//18 Aug 2017 kevin and Mahyar
+			//added this to make sure after we move the new i and j, we do not cross
+			//if it is, error
+			int new_i = i;
+			if(int_sequence[new_i] == X){
+				while(int_sequence[new_i+1] == X){
+					new_i++;
+					best_row = 9;
+				}    
+			}
+
+			//18 Aug 2017 kevin and Mahyar
+			//added this to make sure after we move the new i and j, we do not cross
+			//if it is, error
+			if(new_i >= new_j){
+				best_row = -1; //error
+			}
+
 			switch (best_row)
 			{
 				case 1: insert_node (i, j, LOOP); break;
@@ -3843,6 +3889,9 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 					// the last branch of W, which is WMB_i,j
 				case 8:
 					insert_node(i,j,P_WMB);
+					break;
+				case 9: //18 Aug 2017 kevin and Mahyar added this case to jump i or j when encounter X
+					insert_node(new_i,new_j,M_WM);
 					break;
 				default:
 					fprintf(stderr, "ERROR pkonly backtrack M_WM has no best row\n");
@@ -4325,9 +4374,13 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 			model = &emodel;
 			model->energy_value = V->get_energy(i+1,j) +
 				AU_penalty_emodel (int_sequence[i+1], int_sequence[j], model) +
-				model->dangle_bot [int_sequence[j]] [int_sequence[i+1]] [int_sequence[i]] +
 				model->misc.multi_helix_penalty +
 				model->misc.multi_free_base_penalty;
+			//Aug 18 2017 kevin and Mahyar
+			//modiefied the formula such that we only add dangle_bot when i,j,i+1 are not X to avoid seg fault
+			if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X){
+				model->energy_value += model->dangle_bot [int_sequence[j]] [int_sequence[i+1]] [int_sequence[i]];
+			}
 		}
 		tmp = emodel_energy_function (i, j, energy_models);
           if (tmp < min)
@@ -4343,9 +4396,13 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 			model = &emodel;
 			model->energy_value = V->get_energy(i,j-1) +
 				AU_penalty_emodel (int_sequence[i], int_sequence[j-1], model) +
-				model->dangle_top [int_sequence[j-1]] [int_sequence[i]] [int_sequence[j]] +
 				model->misc.multi_helix_penalty +
 				model->misc.multi_free_base_penalty;
+			//Aug 18 2017 kevin and Mahyar
+			//modiefied the formula such that we only add dangle_top when i,j,j-1 are not X to avoid seg fault
+			if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[j-1] != X){
+				model->energy_value += model->dangle_top [int_sequence[j-1]] [int_sequence[i]] [int_sequence[j]];
+			}
 		}
 		tmp = emodel_energy_function (i, j, energy_models);
           if (tmp < min)
@@ -4361,10 +4418,14 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 					model = &emodel;
 					model->energy_value = V->get_energy(i+1,j-1) +
 						AU_penalty_emodel (int_sequence[i+1], int_sequence[j-1], model) +
-						model->dangle_bot [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[i]] +
-						model->dangle_top [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[j]] +
 						model->misc.multi_helix_penalty +
 						2*model->misc.multi_free_base_penalty;
+					//Aug 18 2017 kevin and Mahyar
+                	//modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1, j-1 are not X to avoid seg fault
+					if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X && int_sequence[j-1] != X){
+						model->energy_value += model->dangle_bot [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[i]] +
+							model->dangle_top [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[j]];
+					}
 				}
 				tmp = emodel_energy_function (i, j, energy_models);
           if (tmp < min)
@@ -4410,6 +4471,36 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 best_row = 7;
               }
         }
+		
+		//18 Aug 2017 kevin and Mahyar
+		//added this to check if j is a X
+		//if it is, move j till it is the first X so the next iteration can handle it properly
+		int new_j = j;
+		if(int_sequence[new_j] == X){
+			while(int_sequence[new_j-1] == X){
+				new_j--;
+				best_row = 9;
+			}    
+			
+		}
+
+		//18 Aug 2017 kevin and Mahyar
+		//added this to check if i is a X
+		//if it is, move i till it is the last X so the next iteration can handle it properly
+		int new_i = i;
+		if(int_sequence[new_i] == X){
+			while(int_sequence[new_i+1] == X){
+				new_i++;
+				best_row = 9;
+			}    
+		}
+		//18 Aug 2017 kevin and Mahyar
+		//added this to make sure after we move the new i and j, we do not cross
+		//if it is, error
+		if(new_i >= new_j){
+			best_row = -1; //error
+		}
+
       switch (best_row)
         {
           case 1: insert_node (i, j, LOOP); break;
@@ -4430,6 +4521,9 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
             if (j-best_k-1 > 0)
               insert_node (best_k+1, j, M_WM);
             break;
+		  case 9: //18 Aug 2017 kevin and Mahyar added this case to jump i or j when encounter X
+				insert_node(new_i,new_j,M_WM);
+				break;
 		  default:
 			fprintf(stderr, "ERROR backtrack loop has no best row\n");
 			exit(10);

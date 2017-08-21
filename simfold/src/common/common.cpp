@@ -1431,16 +1431,25 @@ void read_parsi_options_from_file (char *filename)
 
 //kevin 31 july Used to calculate the average energy of two models
 PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energy_models){
+   
     PARAMTYPE energy = INF;
-    if((i < linker_pos) && (j < linker_pos)){ //left of linker
+    int index_of_last_linker_position = linker_pos+linker_length-1;
+
+    //todo kevin confirm 
+    //21 Aug 2017 kevin and Mahyar
+    //changed to handle the energy calculation if one side of the input is on the linker (if we do'nt we returne INF that overwrites the calculated energy already set in matrix)
+    if((i <= linker_pos) && (j < linker_pos) || (i < linker_pos) && (j <= linker_pos)){ //left of linker
         energy = (PARAMTYPE) energy_models->at(0).energy_value;
-    }else if((i > linker_pos+linker_length-1) && (j > linker_pos+linker_length-1)){ //right of linker
+    }else if((i >= index_of_last_linker_position) && (j > index_of_last_linker_position) || (i > index_of_last_linker_position) && (j >= index_of_last_linker_position)){ //right of linker
         energy = (PARAMTYPE) energy_models->at(1).energy_value;
-    }else if((i < linker_pos) && (j > linker_pos+linker_length-1)){ //cross linker
+    }else if((i < linker_pos) && (j > index_of_last_linker_position)){ //cross linker
         energy = (PARAMTYPE) round((energy_models->at(0).energy_value + energy_models->at(1).energy_value)/2);
-    }else {
-        // TODO ian re-enable
+    }else { //when i and j both X
+        energy = INF;
+        //21 Aug 2017 kevin and Mahyar
+        //we dont think this should be an error since we should just return INF instead
         //fprintf(stderr,"ERROR emodel_energy_function no case picked\n");
+       
     }
 
     return  energy;

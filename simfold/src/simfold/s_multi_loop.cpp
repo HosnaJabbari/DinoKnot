@@ -596,13 +596,14 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
             while(sequence[temp_i] == X){
                 temp_i++;
             }
+
             if(temp_i < j){
                 temp_ij = index[temp_i]+j-temp_i;
                 WM[ij] = WM[temp_ij]; 
             }else{
                 WM[ij] = INF;
             }
-           
+
             continue;
         }
 

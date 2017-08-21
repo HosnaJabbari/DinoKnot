@@ -146,11 +146,14 @@ void VM_final::WM_compute_energy(int i, int j){
 
 
 int VM_final::get_energy_WM(int i, int j){
+
 	if (i >= j || wmb->is_weakly_closed(i,j) != 1 ){
 		return INF;
 	}
+    
 	int ij = index[i]+j-i;
-//	printf("hfold's WM(%d,%d) = %d \n", i,j,WM[ij]);
+    
+	//printf("hfold's WM(%d,%d) = %d \n", i,j,WM[ij]);
 	return this->WM[ij];
 
 }

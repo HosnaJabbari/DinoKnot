@@ -63,7 +63,13 @@ class s_multi_loop
 		// compute de MFE of a partial multi-loop closed at (i,j), the restricted case
 
         // May 15, 2007. Added "if (i>=j) return INF;"  below. It was miscalculating the backtracked structure. 
-        PARAMTYPE get_energy_WM (int i, int j) { if (i>=j) return INF; int ij = index[i]+j-i; return WM[ij]; }
+        PARAMTYPE get_energy_WM (int i, int j) { 
+            if (i>=j) 
+                return INF; 
+            int ij = index[i]+j-i; 
+            //printf("address: %d\n",&WM[ij]);
+            return WM[ij]; 
+        }
         // returns the previously computed free energy of WM(i,j)   
 
 
