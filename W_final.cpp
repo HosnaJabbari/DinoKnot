@@ -2406,9 +2406,23 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 					f[i].type = INTER;
 					f[j].type = INTER;
 					// detect the other closing pair
-					int ip, jp, best_ip, best_jp, minq;
+					int ip, jp, best_ip = -1, best_jp = -1, minq;
 					int tmp, min = INF;
-					for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1); ip++)
+
+					//todo kevin confirm
+					//23 Aug 2017 kevin and Mahyar
+					//variable to store linker_length such that we change the range of ip and jp so we can check if i,ip and jp,j is larger than MAXLOOP (aka 30) properly for the cases where X is between i,j
+					//if X is between i,j we treat it as if X does not exist 
+					int skip = 0;			
+					if(is_cross_model(i,j)){
+						skip = linker_length;
+					}
+					
+					
+					//todo kevin confirm
+					//23 Aug 2017 kevin and Mahyar
+					//added +skip to i+MAXLOOP+1
+					for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1+skip); ip++)
 					{
 						// Hosna, August 28, 2012
 						// TODO: cannot understand why we have th efollowing calculations, as it makes the following case be missed!
@@ -2418,9 +2432,17 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 						// in this example int(5,59,11,27) is falsely missed and is equal to INF
 						// So I am changing it to the be jp=ip+1; jp<j; jp++ instead
 						//minq = MAX (j-i+ip-MAXLOOP-2, ip+1);    // without TURN
+						
+/*
+						//todo kevin confirm
+						//23 Aug 2017 kevin and Mahyar
+						//changed minq to new one (copied from simfold backtrack emodel)
+						minq = MAX (j-i+ip-MAXLOOP-2-skip, ip+1);
+*/
 						minq = ip+1;
 						for (jp = minq; jp < j; jp++)
 						{
+							 
 							if (exists_restricted (i,ip,fres) || exists_restricted (jp,j,fres) ) //|| (fres[ip].pair >= 0 && fres[ip].pair != jp))
 								continue;
 							
@@ -3248,6 +3270,25 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 					// Hosna, August 31, 2012
 					// The following restriction misses the long restricted loops, so I am chaning it
 					//for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1) ; ip++)  // the -TURN shouldn't be there
+
+/*
+					//todo kevin confirm
+					//23 Aug 2017 kevin and Mahyar
+					//variable to store linker_length such that we change the range of ip and jp so we can check if i,ip and jp,j is larger than MAXLOOP (aka 30) properly for the cases where X is between i,j
+					//if X is between i,j we treat it as if X does not exist 
+					int skip = 0;
+									
+					if(is_cross_model(i,j)){
+						skip = linker_length;
+				
+					}
+					
+					//todo kevin confirm
+					//23 Aug 2017 kevin and Mahyar
+					//added +skip to i+MAXLOOP+1
+					for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1+skip); ip++)
+
+*/
 					for (ip = i+1; ip <= j-2 ; ip++)  // the -TURN shouldn't be there
 					{
 						// Hosna, August 28, 2012
@@ -3258,11 +3299,20 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 						// in this example int(5,59,11,27) is falsely missed and is equal to INF
 						// So I am changing it to the be jp=ip+1; jp<j; jp++ instead
 						//minq = MAX (j-i+ip-MAXLOOP-2, ip+1);    // without TURN
+/*
+						//todo kevin confirm
+						//23 Aug 2017 kevin and Mayahr
+						//changed minq to new one (copied from simfold backtrack emodel)
+						minq = MAX (j-i+ip-MAXLOOP-2-skip, ip+1);
+*/
 						minq = ip+1;
 						for (jp = minq; jp < j; jp++)
 						{
+							
 							if (exists_restricted (i,ip,fres) || exists_restricted (jp,j,fres))
 								continue;
+								
+
 							//tmp = VBI->get_energy_str (i,j,ip,jp);
 							// Hosna, March 26, 2012
 							// modified to accommodate non-canonical base pairing in restricted structure
@@ -4036,24 +4086,46 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
             f[i].type = INTER;
             f[j].type = INTER;
             // detect the other closing pair
-            int ip, jp, best_ip, best_jp, minq;
+            int ip, jp, best_ip = -1, best_jp = -1, minq;
             PARAMTYPE tmp, min = INF;
-            for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1); ip++)
+
+			//todo kevin confirm
+			//23 Aug 2017 kevin and Mahyar
+			//variable to store linker_length such that we change the range of ip and jp so we can check if i,ip and jp,j is larger than MAXLOOP (aka 30) properly for the cases where X is between i,j
+			//if X is between i,j we treat it as if X does not exist 
+			int skip = 0;
+			
+			if(is_cross_model(i,j)){
+				skip = linker_length;
+				
+			}
+			
+			//todo kevin confirm
+			//23 Aug 2017 kevin and Mahyar
+			//added +skip to i+MAXLOOP+1
+            for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1+skip); ip++)
             {
-                minq = MAX (j-i+ip-MAXLOOP-2, ip+1);
+				//todo kevin confirm
+				//23 Aug 2017 kevin and Mahyar
+				//added -skip to j-i+ip-MAXLOOP-2
+                minq = MAX (j-i+ip-MAXLOOP-2-skip, ip+1);
+
                 for (jp = minq; jp < j; jp++)
                 {
+
                     if (exists_restricted (i,ip,fres) || exists_restricted (jp,j,fres))
                         continue;
+					
                     //AP
                     for (auto &model : *energy_models) {
 						//VBI->get_energy_str_restricted_emodel (i, j, ip, jp, fres, &model);
 						//17 Aug 2017 kevin and Mahyar
 						//changed the above function call to this one so we dont re-caculate it and just look up the value
                         model.energy_value = V->get_energy(ip,jp);  
-				
+						
                     }
                     tmp = emodel_energy_function (i, j, energy_models);
+
                     if (tmp < min)
                     {
                         min = tmp;
