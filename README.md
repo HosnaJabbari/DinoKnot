@@ -97,6 +97,8 @@ This can be useful if you are getting errors about your compiler not having C++1
         sample:
             GCAACGAUGACAUACAUCGCUAGUCGACGC
             (____________________________)
+            GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC
+            (__________________________________________________________)
 
 #### Example:
     assume you are in the directory where the HFold executable is loacted
@@ -115,6 +117,7 @@ This can be useful if you are getting errors about your compiler not having C++1
     4       i/o error
     5       pipe error
     10      backtrack error
+    
     error code with special meaning: http://tldp.org/LDP/abs/html/exitcodes.html
     2	    Misuse of shell builtins (according to Bash documentation)
     126	    Command invoked cannot execute
