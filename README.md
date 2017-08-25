@@ -60,8 +60,8 @@ This can be useful if you are getting errors about your compiler not having C++1
             --or <structure1>
             --st <sequence2>
             --tr <structure2>
-            --t1 <type1>
-            --t2 <type2>
+            --t1 <type_for_sequence1>
+            --t2 <type_for_sequence2>
             -i </path/to/file>
             -o </path/to/file>
 

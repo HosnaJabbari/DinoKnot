@@ -399,7 +399,7 @@ int main (int argc, char *argv[]) {
 }
 
 void printUsage(){
-	printf ("Example: ./HFold_interacting_multimodel --so \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" --or \"(____________________________)\" --st \"GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC\" --tr \"(__________________________________________________________)\" --t1 DNA --t2 DNA\n");
+	//printf ("Example: ./HFold_interacting_multimodel --so \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" --or \"(____________________________)\" --st \"GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC\" --tr \"(__________________________________________________________)\" --t1 DNA --t2 DNA\n");
 	/*
 	printf("Multi-model\n");
 	printf ("Usage: HFold_interacting <sequence_one> <structure_one> <sequence_two> <structure_two>\n");
@@ -408,6 +408,18 @@ void printUsage(){
 	printf ("    () restricted base pair\n");
 	printf ("    _ no restriction\n");
 */
+
+	printf("\nUsage ./HFold_interacting_multimodel --so <sequence1> --or <structure1> --st <sequence2> --tr <structure2> --t1 <type_for_sequence1> --t2 <type_for_sequence1> [-o </path/to/file>]\n");
+	printf("or\n");
+	printf("Usage ./HFold -i </path/to/file> --t1 <type_for_sequence1> --t2 <type_for_sequence1> [-o </path/to/file>]\n");
+	printf ("  Restricted structure symbols:\n");
+	printf ("    () restricted base pair\n");
+	printf ("    _ no restriction\n");
+	printf("Example:\n");
+	printf("./HFold_interacting_multimodel --so \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" --or \"(____________________________)\" --st \"GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC\" --tr \"(__________________________________________________________)\" --t1 RNA --t2 DNA\n");
+	printf("./HFold_interacting_multimodel -i \"/home/username/Desktop/myinputfile.txt\" -o \"/home/username/Desktop/some_folder/outputfile.txt\"\n");
+	printf("Please read README for more details\n");
+
 }
 
 //return code for model type if valid
