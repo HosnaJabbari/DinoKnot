@@ -26,6 +26,9 @@
 #include <unistd.h>
 #include "h_common.h"
 
+// Ian Wark August 30 2017
+#include "shape_data.h"
+
 void printUsage();
 
 int validateModelType(char* type);
@@ -119,6 +122,9 @@ int main (int argc, char *argv[]) {
 				{"tr", required_argument, 0, 'd'},	//structure for sequence2
 				{"t1", required_argument, 0, 'e'},	//type for sequence1
 				{"t2", required_argument, 0, 'f'},	//type for sequence2
+				{"shape", optional_argument, 0, 'g'},
+				{"b", optional_argument, 0, 'h'},
+				{"m", optional_argument, 0, 'm'},
 				{0, 0, 0, 0}
 			};
 		// getopt_long stores the option index here.
@@ -248,6 +254,21 @@ int main (int argc, char *argv[]) {
 					break;
 				}
 				type2Found = true;
+				break;
+			case 'g': //--shape (shape file path)
+				shape.set_shape_file(std::string(optarg));
+				break;
+			case 'h': //--b (shape intercept)
+				if (shape.is_number(optarg))
+					shape.set_b(atof(optarg));
+				else
+				errorFound = true;
+				break;
+			case 'm': //--m (shape slope)
+				if (shape.is_number(optarg))
+					shape.set_m(atof(optarg));
+				else
+					errorFound = true;
 				break;
 			default:
 				errorFound = true;
@@ -417,7 +438,14 @@ void printUsage(){
 	printf ("    _ no restriction\n");
 	printf("Example:\n");
 	printf("./HFold_interacting_multimodel --so \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" --or \"(____________________________)\" --st \"GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC\" --tr \"(__________________________________________________________)\" --t1 RNA --t2 DNA\n");
-	printf("./HFold_interacting_multimodel -i \"/home/username/Desktop/myinputfile.txt\" -o \"/home/username/Desktop/some_folder/outputfile.txt\"\n");
+	printf("./HFold_interacting_multimodel -i \"/home/username/Desktop/myinputfile.txt\" -o \"/home/username/Desktop/some_folder/outputfile.txt\"\n\n");
+
+    printf ("You can also include SHAPE data to be used.\n");
+    printf ("The SHAPE data must be in a file with 1 number per line, starting with the first sequence, 5 lines of 0's, and then the data for the second sequence\n");
+	printf ("--shape (\"filename\") to specify a file for shape data\n");
+    printf ("--b (number) to specify an intercept for the shape data (default is %f)\n",shape.b());
+    printf ("--m (number) to specify a slope for the shape data (default is %f)\n\n",shape.m());
+
 	printf("Please read README for more details\n");
 
 }

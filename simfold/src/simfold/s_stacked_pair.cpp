@@ -16,6 +16,7 @@
  ***************************************************************************/
 
 #include <string.h>
+#include <math.h>
 
 #include "constants.h"
 #include "structs.h"
@@ -25,6 +26,7 @@
 #include "s_stacked_pair.h"
 #include "params.h"
 
+#include "shape_data.h"
 
 s_stacked_pair::s_stacked_pair (int *seq, int length)
 // The constructor
@@ -64,6 +66,28 @@ PARAMTYPE s_stacked_pair::compute_energy (int i, int j)
 
     min = V_energy + local_energy;
 
+    // Ian Wark, August 30 2017
+    // if using shape data, add to min
+    if (shape.use_shape_data()) {
+        // formula is m ln[SHAPE+1]+b
+        float calculated = (shape.m() * log(shape.data(i)+1)) + shape.b();
+
+        if (!isnan(calculated)) {
+            // energies are stored as ints, with the original decimal form multiplied by 100
+            PARAMTYPE to_add = (PARAMTYPE)(calculated*100);
+            min = min + to_add;
+        }
+
+        calculated = (shape.m() * log(shape.data(j)+1)) + shape.b();
+
+        if (!isnan(calculated)) {
+            // energies are stored as ints, with the original decimal form multiplied by 100
+            PARAMTYPE to_add = (PARAMTYPE)(calculated*100);
+            min = min + to_add;
+        }
+
+    }
+
     // add the loss
     if (pred_pairings != NULL)
     {
@@ -91,13 +115,35 @@ PARAMTYPE s_stacked_pair::compute_energy_emodel (int i, int j, energy_model *mod
     V_energy = V->get_energy (i+1,j-1);
 
     local_energy = model->stack[sequence[i]][sequence[j]][sequence[i+1]][sequence[j-1]];
-    
+
     min = V_energy + local_energy;
+
+    // Ian Wark, August 30 2017
+    // if using shape data, add to min
+    if (shape.use_shape_data()) {
+        // formula is m ln[SHAPE+1]+b
+        float calculated = (shape.m() * log(shape.data(i)+1)) + shape.b();
+
+        if (!isnan(calculated)) {
+            // energies are stored as ints, with the original decimal form multiplied by 100
+            PARAMTYPE to_add = (PARAMTYPE)(calculated*100);
+            min = min + to_add;
+        }
+
+        calculated = (shape.m() * log(shape.data(j)+1)) + shape.b();
+
+        if (!isnan(calculated)) {
+            // energies are stored as ints, with the original decimal form multiplied by 100
+            PARAMTYPE to_add = (PARAMTYPE)(calculated*100);
+            min = min + to_add;
+        }
+
+    }
 
     // add the loss
     if (pred_pairings != NULL)
     {
-        
+
         pred_pairings[i] = j;
 		pred_pairings[j] = i;
         min = min - loss (i,i) - loss (j,j);
@@ -145,7 +191,7 @@ PARAMTYPE s_stacked_pair::compute_energy_restricted_emodel (int i, int j, str_fe
 		return V->get_energy (i+1,j-1);
 	}
 	else{
-        
+
 		return compute_energy_emodel(i,j,model);
 	}
 }
