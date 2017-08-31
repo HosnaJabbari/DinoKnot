@@ -473,6 +473,13 @@ double W_final::hfold_emodel() { //kevin debug
     delete [] h_fres;
     delete [] fres;
 
+	if(is_invalid_restriction(restricted,structure)){
+		fprintf(stderr,"ERROR!!! There is something wrong with the structure, doesn't match restricted\n");
+        fprintf(stderr,"  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, energy);
+        fprintf(stderr,"ERROR!!! There is something wrong with the structure, doesn't match restricted\n");
+		exit(11);	
+	}
+
     return energy;
 }
 
@@ -557,6 +564,14 @@ double W_final::call_simfold_emodel(){
     destruct_str_features(nb_nucleotides, fres);
     delete [] fres;
     //delete stack_interval;
+
+	if(is_invalid_restriction(restricted,structure)){
+		fprintf(stderr,"ERROR!!! There is something wrong with the structure, doesn't match restricted\n");
+        fprintf(stderr,"  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, energy);
+        fprintf(stderr,"ERROR!!! There is something wrong with the structure, doesn't match restricted\n");
+		exit(11);	
+	}
+
     return energy;
 }
 
@@ -682,6 +697,14 @@ double W_final::hfold_pkonly_emodel(){
     destruct_str_features(nb_nucleotides, fres);
     delete [] h_fres;
     delete [] fres;
+
+	if(is_invalid_restriction(restricted,structure)){
+		fprintf(stderr,"ERROR!!! There is something wrong with the structure, doesn't match restricted\n");
+        fprintf(stderr,"  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, energy);
+        fprintf(stderr,"ERROR!!! There is something wrong with the structure, doesn't match restricted\n");
+		exit(11);	
+	}
+
     return energy;
 }
 
@@ -2409,7 +2432,6 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 					int ip, jp, best_ip = -1, best_jp = -1, minq;
 					int tmp, min = INF;
 
-					//todo kevin confirm
 					//23 Aug 2017 kevin and Mahyar
 					//variable to store linker_length such that we change the range of ip and jp so we can check if i,ip and jp,j is larger than MAXLOOP (aka 30) properly for the cases where X is between i,j
 					//if X is between i,j we treat it as if X does not exist 
@@ -2419,7 +2441,6 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 					}
 					
 					
-					//todo kevin confirm
 					//23 Aug 2017 kevin and Mahyar
 					//added +skip to i+MAXLOOP+1
 					for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1+skip); ip++)
@@ -2433,13 +2454,12 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 						// So I am changing it to the be jp=ip+1; jp<j; jp++ instead
 						//minq = MAX (j-i+ip-MAXLOOP-2, ip+1);    // without TURN
 						
-/*
-						//todo kevin confirm
+
 						//23 Aug 2017 kevin and Mahyar
 						//changed minq to new one (copied from simfold backtrack emodel)
 						minq = MAX (j-i+ip-MAXLOOP-2-skip, ip+1);
-*/
-						minq = ip+1;
+
+						//minq = ip+1;
 						for (jp = minq; jp < j; jp++)
 						{
 							 
@@ -3271,8 +3291,7 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 					// The following restriction misses the long restricted loops, so I am chaning it
 					//for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1) ; ip++)  // the -TURN shouldn't be there
 
-/*
-					//todo kevin confirm
+
 					//23 Aug 2017 kevin and Mahyar
 					//variable to store linker_length such that we change the range of ip and jp so we can check if i,ip and jp,j is larger than MAXLOOP (aka 30) properly for the cases where X is between i,j
 					//if X is between i,j we treat it as if X does not exist 
@@ -3283,13 +3302,10 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 				
 					}
 					
-					//todo kevin confirm
 					//23 Aug 2017 kevin and Mahyar
 					//added +skip to i+MAXLOOP+1
 					for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1+skip); ip++)
-
-*/
-					for (ip = i+1; ip <= j-2 ; ip++)  // the -TURN shouldn't be there
+					//for (ip = i+1; ip <= j-2 ; ip++)  // the -TURN shouldn't be there
 					{
 						// Hosna, August 28, 2012
 						// TODO: cannot understand why we have th efollowing calculations, as it makes the following case be missed!
@@ -3299,13 +3315,12 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 						// in this example int(5,59,11,27) is falsely missed and is equal to INF
 						// So I am changing it to the be jp=ip+1; jp<j; jp++ instead
 						//minq = MAX (j-i+ip-MAXLOOP-2, ip+1);    // without TURN
-/*
-						//todo kevin confirm
+
 						//23 Aug 2017 kevin and Mayahr
 						//changed minq to new one (copied from simfold backtrack emodel)
 						minq = MAX (j-i+ip-MAXLOOP-2-skip, ip+1);
-*/
-						minq = ip+1;
+
+						//minq = ip+1;
 						for (jp = minq; jp < j; jp++)
 						{
 							
@@ -4089,7 +4104,6 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
             int ip, jp, best_ip = -1, best_jp = -1, minq;
             PARAMTYPE tmp, min = INF;
 
-			//todo kevin confirm
 			//23 Aug 2017 kevin and Mahyar
 			//variable to store linker_length such that we change the range of ip and jp so we can check if i,ip and jp,j is larger than MAXLOOP (aka 30) properly for the cases where X is between i,j
 			//if X is between i,j we treat it as if X does not exist 
@@ -4100,12 +4114,10 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 				
 			}
 			
-			//todo kevin confirm
 			//23 Aug 2017 kevin and Mahyar
 			//added +skip to i+MAXLOOP+1
             for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1+skip); ip++)
             {
-				//todo kevin confirm
 				//23 Aug 2017 kevin and Mahyar
 				//added -skip to j-i+ip-MAXLOOP-2
                 minq = MAX (j-i+ip-MAXLOOP-2-skip, ip+1);

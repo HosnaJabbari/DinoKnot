@@ -251,7 +251,7 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
                 // Hybrid molecule penalty
                 // This needs to be out here as we cannot tell if the energy models are different in H->compute_energy_restricted_emodel
                 // requires there to be exactly 2 energy models
-				if( is_cross_model(i,j) && ((*energy_models)[0].dna_or_rna != (*energy_models)[1].dna_or_rna)) {    // If cross model and working with a hybrid molecule 
+				if( is_cross_model(i,j) ) {    // If cross model and working with a hybrid molecule 
                    min_en[0] += START_HYBRID_PENALTY;                                                // add a hybrid molecule penalty
 				}
 			}
@@ -274,7 +274,7 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
                 // Hybrid molecule penalty
                 // This needs to be out here as we cannot tell if the energy models are different in H->compute_energy_restricted_emodel
                 // requires there to be exactly 2 energy models
-                if( is_cross_model(i,j) && ((*energy_models)[0].dna_or_rna != (*energy_models)[1].dna_or_rna)) {    // If cross model and working with a hybrid molecule 
+                if( is_cross_model(i,j)) {    // If cross model and working with a hybrid molecule 
                     min_en[2] += START_HYBRID_PENALTY;                                                // add a hybrid molecule penalty
                 }
 
@@ -286,7 +286,7 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
 
                 //kevin Aug 11 2017
                 //add hybrid penalty for VM when i+1 or j-1 is linker (discussed with Hosna, Mahyar)
-                if(sequence[i+1] == X || sequence[j-1] == X && ((*energy_models)[0].dna_or_rna != (*energy_models)[1].dna_or_rna)){ //if linker is in i+1 or j-1
+                if(sequence[i+1] == X || sequence[j-1] == X){ //if linker is in i+1 or j-1
                     min_en[3] += START_HYBRID_PENALTY;      
                 }
 
@@ -355,7 +355,7 @@ void s_energy_matrix::compute_energy_restricted_pkonly_emodel (int i, int j, str
                 // Hybrid molecule penalty
                 // This needs to be out here as we cannot tell if the energy models are different in H->compute_energy_restricted_emodel
                 // requires there to be exactly 2 energy models
-				if( is_cross_model(i,j) && ((*energy_models)[0].dna_or_rna != (*energy_models)[1].dna_or_rna) ) {   // If cross model and working with a hybrid molecule
+				if( is_cross_model(i,j)) {   // If cross model and working with a hybrid molecule
                    min_en[0] += START_HYBRID_PENALTY;                                            
 				}
 			}
@@ -375,7 +375,7 @@ void s_energy_matrix::compute_energy_restricted_pkonly_emodel (int i, int j, str
                 min_en[2] = emodel_energy_function (i, j, energy_models);
                 //kevin Aug 11 2017
                 //add hybrid penalty for VBI
-                if( is_cross_model(i,j) && ((*energy_models)[0].dna_or_rna != (*energy_models)[1].dna_or_rna) ) { // If working with a hybrid molecule and this hairpin includes the linker,
+                if( is_cross_model(i,j)) { // If working with a hybrid molecule and this hairpin includes the linker,
                     min_en[2] += START_HYBRID_PENALTY;      
                 }
 
@@ -385,7 +385,7 @@ void s_energy_matrix::compute_energy_restricted_pkonly_emodel (int i, int j, str
                 min_en[3] = emodel_energy_function (i, j, energy_models);
                 //kevin Aug 11 2017
                 //add hybrid penalty for VM when i+1 or j-1 is linker (discussed with Hosna, Mahyar)
-                if(sequence[i+1] == X || sequence[j-1] == X && ((*energy_models)[0].dna_or_rna != (*energy_models)[1].dna_or_rna)){ //if linker is in i+1 or j-1
+                if(sequence[i+1] == X || sequence[j-1] == X ){ //if linker is in i+1 or j-1
                     min_en[3] += START_HYBRID_PENALTY;      
                 }
             }

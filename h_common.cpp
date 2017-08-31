@@ -933,6 +933,7 @@ double hfold_emodel(char *sequence, char *restricted, char *structure, std::vect
 }
 */
 
+//---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
 //kevin 19 july (verified by Mahyar 19 july 2017)
 //count+1 when open bracket, count-1 when close bracket
 //whgen count is 0, we have a substructure
@@ -963,19 +964,24 @@ void find_disjoint_substructure(char* structure, std::vector< std::pair<int,int>
 	}
 }
 
-//kevin 24 July
-//is not empty when input structure is '_' and output is something else
+//---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
+//31 Aug 2017 kevin and Mahyar
+//input[i] is _ or . and it did not turn into a . in the output structure, then it is not empty
 int is_empty_structure(char* input_structure, char* output_structure){
 	for(int i=0; i<strlen(input_structure);i++){
 		if(input_structure[i] != output_structure[i]){
-			if(input_structure[i] != '_' && output_structure[i] != '.'){
-				return 1;
+			if((input_structure[i] == '_' || input_structure[i] == '.' ) && output_structure[i] != '.'){
+				return 0;
 			}
 		}
 	}
-	return 0;
+	return 1;
 }
 
+
+
+
+//---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
 //kevin 18 July
 int paired_structure(int i, int j, int *pair_index, int length){
 	if(i >= 0 && j < length && (pair_index[i] == j) && (pair_index[j] == i) ){
@@ -984,6 +990,7 @@ int paired_structure(int i, int j, int *pair_index, int length){
 	return 0;
 }
 
+//---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
 //kevin 18 July
 void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 	int length = strlen(G1);
@@ -1034,6 +1041,19 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 	}
 }
 
+//---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
+//kevin 30 Aug 2017
+//check if the computed structure matches the restricted structure
+int is_invalid_restriction(char* restricted_structure, char* current_structure){
+	for (int i=0; i < strlen(restricted_structure); i++){
+        if ((restricted_structure[i] == '(' || restricted_structure[i] == ')' || restricted_structure[i] == '.') &&
+            (restricted_structure[i] != current_structure[i])){
+				return 1;
+        }
+    }
+	return 0;
+}
+
 
 //kevin 18 July
 void simfold_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
@@ -1052,17 +1072,18 @@ double method1_emodel(char *sequence, char *restricted, char *structure, std::ve
 	double energy = 0;
 	energy = hfold_min_fold->hfold_emodel();
 	hfold_min_fold->return_structure (structure);
-
+	
     delete hfold_min_fold;
 	return energy;
 }
+
 
 //kevin 24 July
 double method2_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
 	double energy = 0;
 	W_final *hfold_pk_min_fold = new W_final (sequence, restricted, energy_models);
 	if (hfold_pk_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
-	energy = hfold_pk_min_fold->hfold_pkonly_emodel();
+	energy = hfold_pk_min_fold->hfold_pkonly();
 	hfold_pk_min_fold->return_structure (structure);
 
 	if(is_empty_structure(restricted,structure)){
@@ -1070,7 +1091,7 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 		return energy;
 	}else{
 		char G_prime[strlen(structure)];
-		structure_intersection(structure,G_prime);
+		remove_structure_intersection(structure,restricted, G_prime);
 
 		energy = method1_emodel(sequence, G_prime, structure, energy_models);
 
@@ -1169,24 +1190,16 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 	return energy;
 }
 
-//kevin 24 july 2017
-//modification from HFold_iterative: bool find_new_structure (char *input_structure, char *output_structure)
-//changed it from using regex_search and regex_replace to just a for loop
-//changed the name and required arguments to make it more readable and similar to the paper
-//added special case to ignore '.' that is the linker
-//take the intersection of G1 and G (G1-G) and store in G_p
-void structure_intersection (char* G1, char* G_p) {
+//---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
+// Aug 31, 2017 kevin and Mahyar
+//does G_p = G1-G
+void remove_structure_intersection(char* G1, char* G, char* G_p){
 	strcpy(G_p,G1);
-
-	for(int i=0; i< strlen(G1); i++){
-		if(i<linker_pos || i>linker_pos+linker_length-1){
-			if(G1[i] == '.' || G1[i] == '(' || G1[i] == ')'){
-				G_p[i] = '_';
-			}else if(G1[i] == '['){
-				G_p[i] = '(';
-			}else if(G1[i] == ']'){
-				G_p[i] = ')';
-			}
+	for(int i=0; i< strlen(G1); i++){  
+		if (G1[i] != G[i]){
+			continue;
+		}else{
+			G_p[i] = '.';
 		}
 	}
 }

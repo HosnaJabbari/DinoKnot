@@ -876,7 +876,6 @@ PARAMTYPE s_internal_loop::get_energy_str_restricted_emodel (int i, int j, int i
         //will add hybrid penalty outside of the funtion
         if(is_cross_model(i,ip)){
             branch1 -= linker_length;
-            //todo kevin confirm
             //17 Aug 2017
             if(sequence[i+1] == X && sequence[ip-1] == X){
          

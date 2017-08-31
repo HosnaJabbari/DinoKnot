@@ -1435,7 +1435,6 @@ PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energ
     PARAMTYPE energy = INF;
     int index_of_last_linker_position = linker_pos+linker_length-1;
 
-    //todo kevin confirm 
     //21 Aug 2017 kevin and Mahyar
     //changed to handle the energy calculation if one side of the input is on the linker (if we do'nt we returne INF that overwrites the calculated energy already set in matrix)
     if((i <= linker_pos) && (j < linker_pos) || (i < linker_pos) && (j <= linker_pos)){ //left of linker
