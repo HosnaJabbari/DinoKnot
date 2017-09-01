@@ -92,7 +92,7 @@ void find_disjoint_substructure(char* structure, std::vector< std::pair<int,int>
 void simfold_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models);
 double method4_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models);
 //keivn 24 july
-void remove_structure_intersection(char* G1, char* G, char* G_p); //---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
+void remove_structure_intersection(char* G1, char* G0, char* G_p); //---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
 double method2_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models);
 double method1_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models);
 int is_empty_structure(char* input_structure, char* output_structure); //---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------

@@ -1045,11 +1045,20 @@ void obtainRelaxedStems(char* G1, char* G2, char* Gresult){
 //kevin 30 Aug 2017
 //check if the computed structure matches the restricted structure
 int is_invalid_restriction(char* restricted_structure, char* current_structure){
+	std::string openBracketArray ("({[");
+	std::string closeBracketArray (")}]");
+
 	for (int i=0; i < strlen(restricted_structure); i++){
-        if ((restricted_structure[i] == '(' || restricted_structure[i] == ')' || restricted_structure[i] == '.') &&
-            (restricted_structure[i] != current_structure[i])){
+        if(restricted_structure[i] != '_' && restricted_structure[i] != current_structure[i]){
+			if( (openBracketArray.find_first_of(restricted_structure[i]) != -1) && ((openBracketArray.find_first_of(current_structure[i]) != -1)) ){
+				continue;
+			}else if ( (closeBracketArray.find_first_of(restricted_structure[i]) != -1) && ((closeBracketArray.find_first_of(current_structure[i]) != -1)) ){
+				continue;
+			}else{
 				return 1;
-        }
+			}
+		}
+		
     }
 	return 0;
 }
@@ -1193,10 +1202,10 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 //---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
 // Aug 31, 2017 kevin and Mahyar
 //does G_p = G1-G
-void remove_structure_intersection(char* G1, char* G, char* G_p){
+void remove_structure_intersection(char* G1, char* G0, char* G_p){
 	strcpy(G_p,G1);
 	for(int i=0; i< strlen(G1); i++){  
-		if (G1[i] != G[i]){
+		if (G1[i] != G0[i]){
 			continue;
 		}else{
 			G_p[i] = '.';
