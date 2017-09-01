@@ -1059,9 +1059,9 @@ void detect_original_pairs(char *structure, int *p_table) //kevin debug
               p_table[i] = -2;
             else if ((structure[i] == 'x') || (structure[i] == 'X')) //AP
               p_table[i] = -3;
-            else if (structure[i] == '(' || structure[i] == '<')
+            else if (structure[i] == '(' || structure[i] == '[' || structure[i] == '{' || structure[i] == '<')
               push (&st, i);
-            else if (structure[i] == ')' || structure[i] == '>')
+            else if (structure[i] == ')' || structure[i] == ']' || structure[i] == '}' || structure[i] == '>')
               {
                 j = pop (&st);
                 p_table[i] = j;
@@ -1146,7 +1146,7 @@ void detect_structure_features (char *structure, str_features *f) //kevin debug
             }
             // if we got here, it means the base pair was ()
             // just make sure the partner is )
-            if (structure[p_table[i]] != ')')
+            if (!(structure[p_table[i]] == ')' || structure[p_table[i]] == ']' || structure[p_table[i]] == '}'))
             {
                 fprintf (stderr, "ERROR! structure is not valid, position %d should be ) and is %c\n%s\n", p_table[i], structure[p_table[i]], structure);
                 exit(1);
@@ -1431,7 +1431,7 @@ void read_parsi_options_from_file (char *filename)
 
 //kevin 31 july Used to calculate the average energy of two models
 PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energy_models){
-   
+
     PARAMTYPE energy = INF;
     int index_of_last_linker_position = linker_pos+linker_length-1;
 
@@ -1448,7 +1448,7 @@ PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energ
         //21 Aug 2017 kevin and Mahyar
         //we dont think this should be an error since we should just return INF instead
         //fprintf(stderr,"ERROR emodel_energy_function no case picked\n");
-       
+
     }
 
     return  energy;
@@ -1459,7 +1459,7 @@ PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energ
 //return 1 if i and j goes across linker and the model is different
 int is_cross_model(int i, int j){
 	if( (linker_pos != 0) && (i < linker_pos) && (j > linker_pos+linker_length-1) ){
-		return 1;				
+		return 1;
 	}
 	return 0;
 }
