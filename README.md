@@ -116,6 +116,7 @@ This can be useful if you are getting errors about your compiler not having C++1
     3	    thread error
     4       i/o error
     5       pipe error
+    6       positive energy error
     10      backtrack error
     11      error when output structure from hfold/hfold_pkonly/simfold does not match restricted
     
