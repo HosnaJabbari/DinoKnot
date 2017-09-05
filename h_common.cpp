@@ -1259,6 +1259,13 @@ printf("start method4\n");
 		strcpy(structure,method4_structure);
 	}
 
+	if(min_energy > 0){
+		fprintf(stderr, "ERROR: energy > 0\n");
+		fprintf(stderr, "SEQ: %s\n",sequence);
+		fprintf(stderr, "Structure: %s\n",structure);
+		exit(6);
+	}	
+
 	return min_energy;
 }
 
