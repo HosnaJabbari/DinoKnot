@@ -1203,16 +1203,22 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 // Aug 31, 2017 kevin and Mahyar
 //does G_p = G1-G
 void remove_structure_intersection(char* G1, char* G0, char* G_p){
-	strcpy(G_p,G1);
-	for(int i=0; i< strlen(G1); i++){  
-		if (G1[i] != G0[i]){
-			continue;
-		}else{
-			G_p[i] = '.';
+ 	strcpy(G_p,G1);
+ 	for(int i=0; i< strlen(G1); i++){
+		if(G_p[i] == '.'){
+			G_p[i] = '_';
 		}
-	}
-}
-
+		if (G1[i] == G0[i]){
+			G_p[i] = '_';
+		}
+		if (G_p[i] == '[' || G_p[i] == '{'){
+			G_p[i] = '(';
+		}
+		if (G_p[i] == ']' || G_p[i] == '}'){
+			G_p[i] = ')';
+ 		}
+ 	}
+ }
 
 //kevin 18 July
 //july 24: changed hfold, hfold_pkonly to a method; changed replaced final_structure with method1-4_structure
