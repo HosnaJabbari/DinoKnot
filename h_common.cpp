@@ -1076,6 +1076,7 @@ void simfold_emodel(char *sequence, char *restricted, char *structure, std::vect
 
 //kevin 24 July
 double method1_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	//printf("m1\n");
 	W_final *hfold_min_fold = new W_final (sequence, restricted, energy_models);
 	if (hfold_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
 	double energy = 0;
@@ -1089,6 +1090,7 @@ double method1_emodel(char *sequence, char *restricted, char *structure, std::ve
 
 //kevin 24 July
 double method2_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	//printf("m2\n");
 	double energy = 0;
 	W_final *hfold_pk_min_fold = new W_final (sequence, restricted, energy_models);
 	if (hfold_pk_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
@@ -1096,9 +1098,11 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 	hfold_pk_min_fold->return_structure (structure);
 
 	if(is_empty_structure(restricted,structure)){
+		//printf("is empty\n");
     	delete hfold_pk_min_fold;
 		return energy;
 	}else{
+		//printf("is not empty\n");
 		char G_prime[strlen(structure)];
 		remove_structure_intersection(structure,restricted, G_prime);
 
@@ -1115,13 +1119,15 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	double energy = 0;
 	int length = strlen(sequence);
 	char simfold_structure[length];
-
+	//printf("simfold part\n");
 	simfold_emodel(sequence,restricted, simfold_structure, energy_models);
+	//printf("r: %s\ns: %s\n",restricted,simfold_structure);
 	//^ G' simfold_structure <- SimFold(S sequence, G restricted)
 	char G_updated[length+1];
 	G_updated[length] = '\0';
 	obtainRelaxedStems(restricted ,simfold_structure, G_updated);
 	//^Gupdated G_updated<- ObtainRelaxedStems(G restricted,G' simfold_structure)
+	//printf("G_updated: %s\n",G_updated);
 	energy = method2_emodel(sequence, G_updated, structure, energy_models);
 
 	return energy;
@@ -1230,6 +1236,7 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 	char method2_structure[strlen(sequence)+1];
 	char method3_structure[strlen(sequence)+1];
 	char method4_structure[strlen(sequence)+1];
+	
 printf("start method1\n");
 	min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
 	method_used = 1;
@@ -1265,7 +1272,7 @@ printf("start method4\n");
 		fprintf(stderr, "Structure: %s\n",structure);
 		exit(6);
 	}	
-
+	//printf("method used: %d\n",method_used);
 	return min_energy;
 }
 

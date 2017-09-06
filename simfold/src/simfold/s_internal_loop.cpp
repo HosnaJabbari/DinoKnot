@@ -299,7 +299,23 @@ PARAMTYPE s_internal_loop::compute_energy_restricted_emodel (int i, int j, str_f
     int branch1, branch2, l;
     mmin = INF;
 
-    for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1) ; ip++)  // the -TURN shouldn't be there
+//kevin best_ip,best_jp here are for debug printing purpose only
+int best_ip = -999;
+int best_jp = -999;
+
+    //6 Sep 2017 kevin and Mahyar
+    //variable to store linker_length such that we change the range of ip and jp so we can check if i,ip and jp,j is larger than MAXLOOP (aka 30) properly for the cases where X is between i,j
+    //if X is between i,j we treat it as if X does not exist 
+    int skip = 0;
+    
+    if(is_cross_model(i,j)){
+        skip = linker_length;
+        
+    }
+    
+    //6 Sep 2017 kevin and Mahyar
+	//added +skip to i+MAXLOOP+1
+    for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1+skip) ; ip++)  // the -TURN shouldn't be there
     {
         // Hosna, August 28, 2012
 		// TODO: cannot understand why we have th efollowing calculations, as it makes the following case be missed!
@@ -309,14 +325,19 @@ PARAMTYPE s_internal_loop::compute_energy_restricted_emodel (int i, int j, str_f
 		// in this example int(5,59,11,27) is falsely missed and is equal to INF
 		// So I am changing it to the be jp=ip+1; jp<j; jp++ instead
         //minq = MAX (j-i+ip-MAXLOOP-2, ip+1);    // without TURN
-		minq = ip+1;
+        //minq = ip+1;
+
+        //6 Sep 2017 kevin and Mahyar
+		//added -skip to j-i+ip-MAXLOOP-2
+        minq = MAX (j-i+ip-MAXLOOP-2-skip, ip+1);
+		
         for (jp = minq; jp < j; jp++)
         {
             
             if (exists_restricted (i,ip,fres) || exists_restricted (jp,j,fres)){ 
                 continue;
             }
-            
+
             //ttmp = get_energy_str (i, j, ip, jp);
 			// Hosna, March 26, 2012
 			// changed to accommodate non-canonical base pairs in the restricted structure
@@ -331,6 +352,8 @@ PARAMTYPE s_internal_loop::compute_energy_restricted_emodel (int i, int j, str_f
             if (ttmp < mmin)
             {
                 mmin = ttmp;
+                best_ip = ip;
+                best_jp = jp;
             }
         }
     }
@@ -347,10 +370,25 @@ PARAMTYPE s_internal_loop::compute_energy_restricted_pkonly_emodel (int i, int j
     int branch1, branch2, l;
     mmin = INF;
 
+    //6 Sep 2017 kevin and Mahyar
+    //variable to store linker_length such that we change the range of ip and jp so we can check if i,ip and jp,j is larger than MAXLOOP (aka 30) properly for the cases where X is between i,j
+    //if X is between i,j we treat it as if X does not exist 
+    int skip = 0;
+    
+    if(is_cross_model(i,j)){
+        skip = linker_length;
+        
+    }
+    
+
 	// Hosna, August 31, 2012
 	// The following restriction misses the long restricted loops, so I am chaning it
     //for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1) ; ip++)  // the -TURN shouldn't be there
-	for (ip = i+1; ip <= j-2 ; ip++)  // the -TURN shouldn't be there
+	//for (ip = i+1; ip <= j-2 ; ip++)  // the -TURN shouldn't be there
+
+    //6 Sep 2017 kevin and Mahyar
+	//added +skip to i+MAXLOOP+1
+    for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1+skip) ; ip++)
     {
 		// Hosna, August 28, 2012
 		// TODO: cannot understand why we have th efollowing calculations, as it makes the following case be missed!
@@ -360,7 +398,11 @@ PARAMTYPE s_internal_loop::compute_energy_restricted_pkonly_emodel (int i, int j
 		// in this example int(5,59,11,27) is falsely missed and is equal to INF
 		// So I am changing it to the be jp=ip+1; jp<j; jp++ instead
         //minq = MAX (j-i+ip-MAXLOOP-2, ip+1);    // without TURN
-		minq = ip+1;
+		//minq = ip+1;
+
+        //6 Sep 2017 kevin and Mahyar
+		//added -skip to j-i+ip-MAXLOOP-2
+        minq = MAX (j-i+ip-MAXLOOP-2-skip, ip+1);
         for (jp = minq; jp < j; jp++) {
             if (exists_restricted (i,ip,fres) || exists_restricted (jp,j,fres)){
 				continue;
@@ -860,11 +902,13 @@ PARAMTYPE s_internal_loop::get_energy_str_restricted_emodel (int i, int j, int i
     // if i,j,ip, or jp are linker (X), cannot pair
     if (sequence[i] == X || sequence[j] == X || sequence[ip] == X || sequence[jp] == X)
         return INF;
-/*     
+
+    //kevin and Mahyar 6 Sep 2017
+    //check ip/jp is restricted and if the ip/jp is not the corresponding pair, return INF
     if ((fres[ip].pair >= 0 && fres[ip].pair != jp) || (fres[jp].pair >= 0 && fres[jp].pair != ip)){ 
         return INF;
     }
-*/
+
 	if ((sequence[ip]+sequence[jp] == 3 || sequence[ip]+sequence[jp] == 5) && can_pair(sequence[i],sequence[j])) // normal case
 	{
 
