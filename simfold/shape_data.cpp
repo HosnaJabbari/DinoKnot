@@ -30,9 +30,19 @@ void shape_info::set_data(std::string filename) {
     std::ifstream infile;
     infile.open(filename, std::ifstream::in);
 
+    // Vector is double the size it needs to be because otherwise there is problems with memory
+    // and for reasons I don't understand it gives bad results at large sequence sizes. 
+    // This happens when data_[i] is set down below, and it doesn't matter whether you actually use
+    // the data_, simply setting it causes the program to have bad output.
+    // I checked, and it doesn't set anything past sequence_length()-1, so I have no idea why this works.
+    // sequence_length()+1 didn't work, neither did sequence_length()+20, but *2 did. I checked, 
+    // and it doesn't set anything past sequence_length()-1, so I have no idea why this works. 
+    // Ultimately, a single-dimensional vector of doubles is tiny compared to the rest of the program,
+    // and I've spent too much time on this already, so I'm leaving it - Ian Wark September 12 2017
+    data_.resize(sequence_length()*2);
+
     // first line may be the sequence
     std::string input;
-    char first_char;
 
     // continue until there is a line that is a number
     while (infile >> input && !is_number(input)) {}
@@ -42,12 +52,11 @@ void shape_info::set_data(std::string filename) {
         exit(-1);
     }
 
-    // the first number is in input
-    // it starts from 1
-    data_.push_back(stof(input));
+    bool valid = true;
+
     // go through where each word is a shape data number
-    int i = 1;
-    while (infile >> input) {
+    int i = 0;
+    while (valid) {
         if (i > sequence_length()) {
             printf("SHAPE data file error: length greater than sequence length (sequence length = %d)\n",sequence_length());
             exit(-1);
@@ -57,8 +66,11 @@ void shape_info::set_data(std::string filename) {
             exit(-1);
         }
 
-        data_.push_back(stof(input));
+
+        data_[i] = std::stod(input);
         ++i;
+
+        valid = static_cast<bool>(infile >> input);
     }
 
     if (i != sequence_length()) {

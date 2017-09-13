@@ -441,12 +441,15 @@ void printUsage(){
 	printf("./HFold_interacting_multimodel -i \"/home/username/Desktop/myinputfile.txt\" -o \"/home/username/Desktop/some_folder/outputfile.txt\"\n\n");
 
     printf ("You can also include SHAPE data to be used.\n");
-    printf ("The SHAPE data must be in a file with 1 number per line, starting with the first sequence, 5 lines of 0's, and then the data for the second sequence\n");
-	printf ("--shape (\"filename\") to specify a file for shape data\n");
+    printf ("The SHAPE data must be in a file with 1 number per line, starting with the first so sequence, 5 lines of 0's, and then the data for the second st sequence\n");
+    printf ("--shape (\"filename\") to specify a file for shape data\n");
     printf ("--b (number) to specify an intercept for the shape data (default is %f)\n",shape.b());
     printf ("--m (number) to specify a slope for the shape data (default is %f)\n\n",shape.m());
 
-	printf("Please read README for more details\n");
+    printf ("Example:\n");
+    printf ("./HFold_interacting_multimodel --so \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" --or \"(____________________________)\" --st \"GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC\" --tr \"(__________________________________________________________)\" --t1 RNA --t2 DNA --shape \"shapefile\" --b -0.4 --m 1.3\n\n");
+
+	printf("Please read README for more details\n\n");
 
 }
 

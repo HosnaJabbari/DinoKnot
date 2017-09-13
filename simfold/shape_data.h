@@ -6,8 +6,6 @@
 class shape_info
 {
 private:
-    /// TODO should maybe be changed/changeable
-    /// Also, they should be with the other values, not here
     float b_ = -0.6; // intercept
     float m_ = 1.8; // slope
     int seq_len_ = -1;
