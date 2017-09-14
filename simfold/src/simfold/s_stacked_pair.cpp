@@ -233,6 +233,29 @@ PARAMTYPE s_stacked_pair::get_energy (int i, int j, int *sequence)
 							[sequence[i+1]]
 							[sequence[j-1]];
 
+        // Ian Wark, August 30 2017
+    // if using shape data, add to min
+    if (shape.use_shape_data()) {
+        // formula is m ln[SHAPE+1]+b
+        float calculated = (shape.m() * log(shape.data(i)+1)) + shape.b();
+
+        if (!isnan(calculated)) {
+            // energies are stored as ints, with the original decimal form multiplied by 100
+            PARAMTYPE to_add = (PARAMTYPE)(calculated*100);
+            energy = energy + to_add;
+        }
+
+        calculated = (shape.m() * log(shape.data(j)+1)) + shape.b();
+
+        if (!isnan(calculated)) {
+            // energies are stored as ints, with the original decimal form multiplied by 100
+            PARAMTYPE to_add = (PARAMTYPE)(calculated*100);
+            energy = energy + to_add;
+        }
+
+    }
+
+
     return energy;
 }
 

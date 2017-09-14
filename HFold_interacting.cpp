@@ -122,9 +122,9 @@ int main (int argc, char *argv[]) {
 				{"tr", required_argument, 0, 'd'},	//structure for sequence2
 				{"t1", required_argument, 0, 'e'},	//type for sequence1
 				{"t2", required_argument, 0, 'f'},	//type for sequence2
-				{"shape", optional_argument, 0, 'g'},
-				{"b", optional_argument, 0, 'h'},
-				{"m", optional_argument, 0, 'm'},
+				{"shape", required_argument, 0, 'g'},
+				{"b", required_argument, 0, 'h'},
+				{"m", required_argument, 0, 'm'},
 				{0, 0, 0, 0}
 			};
 		// getopt_long stores the option index here.
@@ -255,7 +255,14 @@ int main (int argc, char *argv[]) {
 				}
 				type2Found = true;
 				break;
-			case 'g': //--shape (shape file path)
+			case 'g': //--shape (shape file path) 
+                                if(!(sequence1Found && sequence2Found)) {
+                                       fprintf(stderr, "Must define sequence before shape file\n");
+                                       errorFound = true;
+                                       break;
+                                }
+                                // important that this is before set_shape_file
+                                shape.set_sequence_length(strlen(inputSequence1)+strlen(linker)+strlen(inputSequence2));
 				shape.set_shape_file(std::string(optarg));
 				break;
 			case 'h': //--b (shape intercept)
