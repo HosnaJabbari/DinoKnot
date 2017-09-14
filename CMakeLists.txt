@@ -22,6 +22,10 @@ set(HFold_interacting_multimodel_SOURCE
     hfold_interacting.h HFold_interacting.cpp
 )
 
+# pass SIMFOLD_HOME to binary
+set(SIMFOLD_HOME ${CMAKE_SOURCE_DIR}/simfold)
+add_definitions("-DSIMFOLD_HOME=\"${SIMFOLD_HOME}\"")
+
 # get pthread library
 find_package (Threads)
 
