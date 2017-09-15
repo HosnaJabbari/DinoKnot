@@ -60,7 +60,7 @@ void usage (const char *prog)
     printf ("Examples:\n");
     printf ("\t%s -s \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" -n 10 \n", prog);
     printf ("\t%s -s \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" -n 10 -r \"(____________________________)\"\n", prog);
-    printf ("\t%s -s \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" -p params/CG_best_parameters_ISMB2007.txt\n");
+    printf ("\t%s -s \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" -p params/CG_best_parameters_ISMB2007.txt\n",prog);
     exit (0);
 }
 
@@ -85,7 +85,7 @@ void get_arguments (int argc, char *argv[])
                 if (strcmp (optarg, "DNA") == 0)        dna_or_rna = DNA;
                 else if (strcmp (optarg, "RNA") == 0)   dna_or_rna = RNA;
                 else    errflag = 1;
-                break;            
+                break;
             case 's':
                 strcpy (sequence, optarg);
                 break;
@@ -94,7 +94,7 @@ void get_arguments (int argc, char *argv[])
                 break;
             case 'k':
                 strcpy (known_structure, optarg);
-                break;                
+                break;
             case 'n':
                 num_subopt = atoi (optarg);
                 break;
@@ -119,56 +119,56 @@ void get_arguments (int argc, char *argv[])
 
 int main (int argc, char *argv[])
 {
-	char structure[MAXSLEN];    
+	char structure[MAXSLEN];
     double energy;
     char structures[MAXSUBSTR][MAXSLEN];
-    double energies[MAXSUBSTR];    
+    double energies[MAXSUBSTR];
     int actual_num_str;
     //debug = 1;
 
     get_arguments (argc, argv);
-    
+
     // Before calling any function in the library, you have to initialize config_file, dna_or_rna, temperature
     //     and to call the function init_data, which loads the thermodynamic parameters into memory
-    
+
     // configuration file, the path should be relative to the location of this executable
     char config_file[200];
     strcpy (config_file, "params/multirnafold.conf");
-    
+
     // initialize the thermodynamic parameters
     // call init_data only once for the same dna_or_rna and same temperature
-    // if one of them changes, call init_data again   
-    
+    // if one of them changes, call init_data again
+
     // TODO: get the filename from the user
     //read_parsi_options_from_file ("../FeatureSimilarity/model-79_all-parsi.txt");
-    
-    
+
+
     // temperature: any integer or real number between 0 and 100
     // represents degrees Celsius
     double temperature;
-    temperature = 37; 
-    
+    temperature = 37;
+
     // initialize the thermodynamic parameters
     // call init_data only once for the same dna_or_rna and same temperature
-    // if one of them changes, call init_data again   
-    init_data (argv[0], config_file, dna_or_rna, temperature);         
-    
-    
+    // if one of them changes, call init_data again
+    init_data (argv[0], config_file, dna_or_rna, temperature);
+
+
     /*
     // TODO
-    fill_data_structures_with_new_parameters ("../FeatureSimilarity/initial_parameters_79.txt");   
-    
-    num_params = create_string_params();    
+    fill_data_structures_with_new_parameters ("../FeatureSimilarity/initial_parameters_79.txt");
+
+    num_params = create_string_params();
     save_paramtypes ("types.txt");
     set_starters();
     creating_model = 1;
     fill_similarity_rule_with_optical_melting_reference ("../RNA-thermodynamic-database/RNA-thermo-db_v1.3.xml");
     creating_model = 0;
-    fill_data_structures_with_new_parameters ("../FeatureSimilarity/initial_parameters_79.txt");   
+    fill_data_structures_with_new_parameters ("../FeatureSimilarity/initial_parameters_79.txt");
     num_params = create_string_params();
     */
-    
-    //init_data (argv[0], config_file, dna_or_rna, temperature);         
+
+    //init_data (argv[0], config_file, dna_or_rna, temperature);
 
     if (dna_or_rna == RNA && temperature == 37.0)
     {
@@ -178,22 +178,22 @@ int main (int argc, char *argv[])
             fill_data_structures_with_new_parameters ("params/turner_parameters_fm363_constrdangles.txt");
     }
     //misc.terminal_AU_penalty = 0.0;
-	
+
 	// Hosna, Sep 5, 2012
 	// in HotKnots and ComputeEnergy package the most up-to-date parameters set is DP09.txt
 	// so we add it here to have a simfold compatible with Hotknots and new HFold
-	
+
 	// Hosna, Sep 10, 2012
 	// when I fill the structures with DP09 parameters, I get a segmentation fault for 108 base sequence!!!!
-	// So I chopped the parameter set to only hold the exact number as the turner_parameters_fm363_constrdangles.txt, 
+	// So I chopped the parameter set to only hold the exact number as the turner_parameters_fm363_constrdangles.txt,
 	// but still getting seg fault!
 	 fill_data_structures_with_new_parameters ("params/parameters_DP09_chopped.txt");
 
 
-    /*char structure[MAXSLEN];    
+    /*char structure[MAXSLEN];
     double energy;
     char structures[MAXSUBSTR][MAXSLEN];
-    double energies[MAXSUBSTR];    
+    double energies[MAXSUBSTR];
     int actual_num_str;
 	std::vector<energy_model> energy_models;
 	energy_model *model;
@@ -204,49 +204,49 @@ int main (int argc, char *argv[])
 	energy_models.push_back(*model);
 
     get_arguments (argc, argv);
-    
+
     // Before calling any function in the library, you have to initialize config_file, dna_or_rna, temperature
     //     and to call the function init_data, which loads the thermodynamic parameters into memory
-    
+
     // configuration file, the path should be relative to the location of this executable
     char config_file[200];
     strcpy (config_file, "params/multirnafold.conf");
-    
+
     // initialize the thermodynamic parameters
     // call init_data only once for the same dna_or_rna and same temperature
-    // if one of them changes, call init_data again   
-    
+    // if one of them changes, call init_data again
+
     // TODO: get the filename from the user
     //read_parsi_options_from_file ("../FeatureSimilarity/model-79_all-parsi.txt");
-    
-    
+
+
     // temperature: any integer or real number between 0 and 100
     // represents degrees Celsius
     double temperature;
-    temperature = 37; 
-    
+    temperature = 37;
+
 	for (auto &energy_model : energy_models) {
 		// initialize the thermodynamic parameters
 		// call init_data only once for the same dna_or_rna and same temperature
-		// if one of them changes, call init_data again   
-		init_data_emodel (argv[0], config_file, dna_or_rna, temperature, &energy_model);         
-		
-		
+		// if one of them changes, call init_data again
+		init_data_emodel (argv[0], config_file, dna_or_rna, temperature, &energy_model);
+
+
 		/*
 		// TODO
-		fill_data_structures_with_new_parameters ("../FeatureSimilarity/initial_parameters_79.txt");   
-		
-		num_params = create_string_params();    
+		fill_data_structures_with_new_parameters ("../FeatureSimilarity/initial_parameters_79.txt");
+
+		num_params = create_string_params();
 		save_paramtypes ("types.txt");
 		set_starters();
 		creating_model = 1;
 		fill_similarity_rule_with_optical_melting_reference ("../RNA-thermodynamic-database/RNA-thermo-db_v1.3.xml");
 		creating_model = 0;
-		fill_data_structures_with_new_parameters ("../FeatureSimilarity/initial_parameters_79.txt");   
+		fill_data_structures_with_new_parameters ("../FeatureSimilarity/initial_parameters_79.txt");
 		num_params = create_string_params();
 		*\
-		
-		//init_data (argv[0], config_file, dna_or_rna, temperature);         
+
+		//init_data (argv[0], config_file, dna_or_rna, temperature);
 
 		if (dna_or_rna == RNA && temperature == 37.0)
 		{
@@ -256,14 +256,14 @@ int main (int argc, char *argv[])
 		        fill_data_structures_with_new_parameters_emodel ("params/turner_parameters_fm363_constrdangles.txt", &energy_model);
 		}
 		//misc.terminal_AU_penalty = 0.0;
-	
+
 		// Hosna, Sep 5, 2012
 		// in HotKnots and ComputeEnergy package the most up-to-date parameters set is DP09.txt
 		// so we add it here to have a simfold compatible with Hotknots and new HFold
-	
+
 		// Hosna, Sep 10, 2012
 		// when I fill the structures with DP09 parameters, I get a segmentation fault for 108 base sequence!!!!
-		// So I chopped the parameter set to only hold the exact number as the turner_parameters_fm363_constrdangles.txt, 
+		// So I chopped the parameter set to only hold the exact number as the turner_parameters_fm363_constrdangles.txt,
 		// but still getting seg fault!
 		fill_data_structures_with_new_parameters_emodel ("params/parameters_DP09_chopped.txt", &energy_model);
 	}*/
@@ -288,15 +288,15 @@ int main (int argc, char *argv[])
             for (int i=0; i < actual_num_str; i++)
             {
                 printf ("S %d: %s  %.2lf\n", i, structures[i], energies[i]);
-            }        
-        }        
+            }
+        }
     }
     else
     {
         // only the MFE structure
         if (num_subopt == 1)
         {
-            if (strlen (known_structure) == strlen (sequence))                
+            if (strlen (known_structure) == strlen (sequence))
             {
                 energy = simfold_loss_augmented (sequence, known_structure, structure);
                 printf ("KNO: %s  %.2lf\n", known_structure, free_energy_simfold (sequence, known_structure));
@@ -306,7 +306,7 @@ int main (int argc, char *argv[])
             {
                 energy = simfold (sequence, structure);
                 printf ("MFE: %s  %.2lf\n", structure, energy);
-            }            
+            }
         }
         else    // also suboptimal structures
         {
@@ -319,7 +319,7 @@ int main (int argc, char *argv[])
             }
         }
     }
-    
+
 	/*for (auto &energy_model : energy_models) {
 		destruct_energy_model(&energy_model);
 		//delete &energy_model;
@@ -329,5 +329,5 @@ int main (int argc, char *argv[])
 
     return 0;
 }
-    
-  
+
+

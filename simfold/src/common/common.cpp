@@ -1047,10 +1047,15 @@ void detect_original_pairs(char *structure, int *p_table) //kevin debug
 //  - x, which denotes that I should ignore that part. p_table would be -3 in that case/
 {
         int j = -1, struct_len = -1;
-        stack_ds st;
-        init (&st);
+
         remove_space (structure);
         struct_len = strlen (structure);
+
+        // for some reason only in interacting version this segfaults sometimes doing it normally
+        // stack_ds st;
+        stack_ds *st = new stack_ds;
+        init (st);
+
         for (int i=0; i < struct_len; i++)
           {
             if (structure[i] == '.')
@@ -1060,20 +1065,22 @@ void detect_original_pairs(char *structure, int *p_table) //kevin debug
             else if ((structure[i] == 'x') || (structure[i] == 'X')) //AP
               p_table[i] = -3;
             else if (structure[i] == '(' || structure[i] == '[' || structure[i] == '{' || structure[i] == '<')
-              push (&st, i);
+              push (st, i);
             else if (structure[i] == ')' || structure[i] == ']' || structure[i] == '}' || structure[i] == '>')
               {
-                j = pop (&st);
+                j = pop (st);
                 p_table[i] = j;
                 p_table[j] = i;
               }
           }
 
-        if (st.top != 0)
+        if (st->top != 0)
         {
-            fprintf (stderr, "The given structure is not valid: %d more left parentheses than right parentheses: %s\n", st.top, structure);
+            fprintf (stderr, "The given structure is not valid: %d more left parentheses than right parentheses: %s\n", st->top, structure);
             exit (1);
         }
+
+        delete st;
 }
 
 
@@ -1113,6 +1120,7 @@ void detect_structure_features (char *structure, str_features *f) //kevin debug
     int nb_nucleotides;
 
     nb_nucleotides = strlen(structure);
+
     detect_original_pairs (structure, p_table);
 
     for (i=0; i < nb_nucleotides; i++)
