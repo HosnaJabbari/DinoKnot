@@ -1,4 +1,0 @@
-Sequence: GCAACGAUGACAUACAUCGCUAGUCGACGCXXXXXGCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC
-Input_structure: (____________________________)XXXXX(__________________________________________________________)
-Output_structure: (...[[[[[.....[[[[[..........).....(...]]]]].....]]]]]...[[[[[[......[[[[[.....]]]]]...]]]]]].)
-Energy: -9.50
