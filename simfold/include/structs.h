@@ -21,6 +21,7 @@
 #include "constants.h"
 #include <stdlib.h>
 #include <string>
+#include <vector>
 
 typedef struct
 {
@@ -174,7 +175,7 @@ typedef struct str_features
     // exists restricted is a very common function
     // that is ultimately very time consuming
     // precompute the results and save in this array
-    int **exists_restricted_arr;
+    std::vector< std::vector<int> > exists_restricted_arr;
 
     str_features()
     {
@@ -182,6 +183,7 @@ typedef struct str_features
         type = NONE;
         num_branches = 0;
     }
+
 } str_features;
 
 

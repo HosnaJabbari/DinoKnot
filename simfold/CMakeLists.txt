@@ -12,6 +12,10 @@ SET(SOURCE
   shape_data.cpp
 )
 
+# pass SIMFOLD_HOME to binary
+set(SIMFOLD_HOME ${CMAKE_SOURCE_DIR}/simfold)
+add_definitions("-DSIMFOLD_HOME=\"${SIMFOLD_HOME}\"")
+
 # set location to make .a file
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 # set location to make executable file

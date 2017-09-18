@@ -294,7 +294,6 @@ void pseudo_loop::compute_WI(int i, int j , h_str_features *fres){
 		return;
 	}
 
-	//todo kevin check and confirm
 	//14 Aug 2017 kevin and Mahyar
 	//
 	if(sequence[i] == X || sequence[j] == X){
@@ -1225,7 +1224,6 @@ void pseudo_loop::compute_WIP(int i, int j, h_str_features *fres){
 //		}
 //	}
 
-	//todo kevin check and confirm
 	//14 Aug 2017 kevin and Mahyar
 	//
 	if(sequence[i] == X || sequence[j] == X){
@@ -1618,7 +1616,7 @@ void pseudo_loop::compute_BE(int i, int j, int ip, int jp, h_str_features * fres
 //		printf("BE[%d,%d,%d,%d]: m1 = %d, m2 = %d, m3 = %d, m4 = %d, m5 = %d ==> min = %d \n",i,j,ip,jp,m1,m2,m3,m4,m5,BE[iip]);
 //	}
 }
-//todo kevin confirm
+
 //AP                              
 void pseudo_loop::compute_BE_emodel(int i, int j, int ip, int jp, h_str_features * fres, std::vector<energy_model> *energy_models) {
 	energy_model *model = nullptr;
@@ -1646,7 +1644,6 @@ void pseudo_loop::compute_BE_emodel(int i, int j, int ip, int jp, h_str_features
 		return;
 	}
 
-	//14 Aug 2017 kevin and Mahyar
 	//if i or j or ip or jp is X, return base case which is X
 	if(sequence[i] == X || sequence[j] == X || sequence[ip] == X || sequence[jp] == X ){
 		BE[iip] = INF;

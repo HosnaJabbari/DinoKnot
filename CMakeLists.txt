@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# only continue if we know we already have boost
 # create simfold library
 add_subdirectory(simfold)
 
@@ -21,6 +20,10 @@ set(HFold_interacting_multimodel_SOURCE
     hfold_validation.h hfold_validation.cpp
     hfold_interacting.h HFold_interacting.cpp
 )
+
+# pass SIMFOLD_HOME to binary
+set(SIMFOLD_HOME ${CMAKE_SOURCE_DIR}/simfold)
+add_definitions("-DSIMFOLD_HOME=\"${SIMFOLD_HOME}\"")
 
 # get pthread library
 find_package (Threads)

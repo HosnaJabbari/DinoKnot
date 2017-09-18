@@ -365,14 +365,14 @@ int main (int argc, char *argv[]) {
 	// To add more energy models, just copy this block of code and change the parameters as needed.
 	model_1 = new energy_model();
 	init_energy_model(model_1); // Initializes the data structures in the energy model.
-	model_1->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
+	model_1->config_file = SIMFOLD_HOME "/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
 	model_1->dna_or_rna = model_1_Type; // what to fold: RNA or DNA
 	model_1->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
 	energy_models.push_back(*model_1);
 
 	model_2 = new energy_model();
 	init_energy_model(model_2); // Initializes the data structures in the energy model.
-	model_2->config_file = "./simfold/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
+	model_2->config_file = SIMFOLD_HOME "/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
 	model_2->dna_or_rna = model_2_Type; // what to fold: RNA or DNA
 	model_2->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
 	energy_models.push_back(*model_2);
@@ -385,12 +385,12 @@ int main (int argc, char *argv[]) {
 
 		// Hosna, July 18, 2012
 		// In simfold we have the following for RNA && temp=37
-		fill_data_structures_with_new_parameters_emodel ("./simfold/params/turner_parameters_fm363_constrdangles.txt", &energy_model);
+		fill_data_structures_with_new_parameters_emodel (SIMFOLD_HOME "/params/turner_parameters_fm363_constrdangles.txt", &energy_model);
 
 		// Hosna, July 25, 2012
 		// in HotKnots and ComputeEnergy package the most up-to-date parameters set is DP09.txt
 		// so we add it here
-		fill_data_structures_with_new_parameters_emodel ("./simfold/params/parameters_DP09.txt", &energy_model);
+		fill_data_structures_with_new_parameters_emodel (SIMFOLD_HOME "/params/parameters_DP09.txt", &energy_model);
 	}
 
     int method_used = -1;

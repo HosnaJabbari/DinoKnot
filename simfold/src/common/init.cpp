@@ -2100,7 +2100,6 @@ void init_data_emodel (const char *arg, const char *config_file, int what, doubl
 
     // get the path of the configuration directory
     strcpy (conf, config_file);
-    sprintf (conf, "%s%s", path, config_file);
 
     len = strlen(conf);
     index = -1;
@@ -2598,7 +2597,6 @@ void init_data (const char *arg, char *config_file, int what, double temperature
 
     // get the path of the configuration directory
     strcpy (conf, config_file);
-    sprintf (conf, "%s%s", path, config_file);
 
     len = strlen(conf);
     index = -1;
