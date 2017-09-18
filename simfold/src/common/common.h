@@ -167,7 +167,6 @@ void detect_structure_features (char *structure, str_features *f);
 // PRE:  None
 // POST: The variable f is filled with structure features, i.e. what type of elementary structure
 //       this base is closing (such as stacked pair, hairpin loop etc.)
-void destruct_str_features (int nb_nucleotides, str_features *f);
 
 int complementary_bases (char b1, char b2);
 // returns 1 if b1 and b2 are complementary bases

@@ -205,7 +205,6 @@ double W_final::hfold_pkonly(){
         print_result ();
     }
 
-    destruct_str_features(nb_nucleotides, fres);
     delete [] h_fres;
     delete [] fres;
     return energy;
@@ -327,7 +326,6 @@ double W_final::hfold(){
         print_result ();
     }
 
-    destruct_str_features(nb_nucleotides, fres);
     delete [] h_fres;
     delete [] fres;
     return energy;
@@ -382,11 +380,11 @@ double W_final::hfold_emodel() { //kevin debug
             V->compute_energy_restricted_emodel (i, j, fres,WMB->is_weakly_closed(i,j));
 
         }
-		
+
         // if I put this before V calculation, WM(i,j) cannot be calculated, because it returns infinity
         VM->compute_energy_WM_restricted_emodel (j, fres, energy_models);
-	
-                 
+
+
 		// test V values
 		/*
 		 for (i=0; i<j; i++)
@@ -404,7 +402,7 @@ double W_final::hfold_emodel() { //kevin debug
 	for (j=1; j < nb_nucleotides; j++) {
         for (i =j; i >= 0; i--) {//for (i=0; i<=j; i++) {
 			    WMB->compute_energies_emodel(i,j,energy_models); // TODO need to check this one
-			    vm->WM_compute_energy(i,j); 
+			    vm->WM_compute_energy(i,j);
         }
 	}
 
@@ -469,7 +467,6 @@ double W_final::hfold_emodel() { //kevin debug
         print_result ();
     }
 
-    destruct_str_features(nb_nucleotides, fres);
     delete [] h_fres;
     delete [] fres;
 
@@ -477,7 +474,7 @@ double W_final::hfold_emodel() { //kevin debug
 		fprintf(stderr,"ERROR!!! There is something wrong with the structure, doesn't match restricted\n");
         fprintf(stderr,"  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, energy);
         fprintf(stderr,"ERROR!!! There is something wrong with the structure, doesn't match restricted\n");
-		exit(11);	
+		exit(11);
 	}
 
     return energy;
@@ -489,7 +486,7 @@ double W_final::call_simfold_emodel(){
     int i, j;
 
 	//16 Aug 2017 kevin
-	//added this block so we can use WMB->weakly closed in V->compute_energy_restricted_emodel 
+	//added this block so we can use WMB->weakly closed in V->compute_energy_restricted_emodel
 	h_str_features *h_fres;
     if ((h_fres = new h_str_features[nb_nucleotides]) == NULL) giveup ("Cannot allocate memory", "h_str_features");
     // detect the structure features
@@ -561,15 +558,16 @@ double W_final::call_simfold_emodel(){
     {
         print_result ();
     }
-    destruct_str_features(nb_nucleotides, fres);
+
     delete [] fres;
+    delete [] h_fres;
     //delete stack_interval;
 
 	if(is_invalid_restriction(restricted,structure)){
 		fprintf(stderr,"ERROR!!! There is something wrong with the structure, doesn't match restricted\n");
         fprintf(stderr,"  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, energy);
         fprintf(stderr,"ERROR!!! There is something wrong with the structure, doesn't match restricted\n");
-		exit(11);	
+		exit(11);
 	}
 
     return energy;
@@ -694,7 +692,6 @@ double W_final::hfold_pkonly_emodel(){
 */
   	energy /= 100.0;
 
-    destruct_str_features(nb_nucleotides, fres);
     delete [] h_fres;
     delete [] fres;
 
@@ -702,7 +699,7 @@ double W_final::hfold_pkonly_emodel(){
 		fprintf(stderr,"ERROR!!! There is something wrong with the structure, doesn't match restricted\n");
         fprintf(stderr,"  %s\n  %s\n  %s\t%.2lf\n", sequence, restricted, structure, energy);
         fprintf(stderr,"ERROR!!! There is something wrong with the structure, doesn't match restricted\n");
-		exit(11);	
+		exit(11);
 	}
 
     return energy;
@@ -1164,7 +1161,7 @@ int W_final::compute_W_br2_restricted_emodel (int j, str_features *fres, int &mu
 		    acc = (i-1>0) ? W[i-1]: 0;
 
 		    energy_ij = v->get_energy(i,j);
-			
+
 /*
 			if (energy_ij != INF && j == 23) {//if (energy_ij != INF && j == 165) {
 				acc = (i-1>0) ? W[i-1]: 0;
@@ -1289,7 +1286,7 @@ int W_final::compute_W_br2_restricted_emodel (int j, str_features *fres, int &mu
 		if (tmp != INF) {
 			min = tmp;
 		}
-		
+
     }
     //printf ("Chosen=%d, best_i=%d\n", chosen, best_i);
     return min;
@@ -2434,13 +2431,13 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 
 					//23 Aug 2017 kevin and Mahyar
 					//variable to store linker_length such that we change the range of ip and jp so we can check if i,ip and jp,j is larger than MAXLOOP (aka 30) properly for the cases where X is between i,j
-					//if X is between i,j we treat it as if X does not exist 
-					int skip = 0;			
+					//if X is between i,j we treat it as if X does not exist
+					int skip = 0;
 					if(is_cross_model(i,j)){
 						skip = linker_length;
 					}
-					
-					
+
+
 					//23 Aug 2017 kevin and Mahyar
 					//added +skip to i+MAXLOOP+1
 					for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1+skip); ip++)
@@ -2453,7 +2450,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 						// in this example int(5,59,11,27) is falsely missed and is equal to INF
 						// So I am changing it to the be jp=ip+1; jp<j; jp++ instead
 						//minq = MAX (j-i+ip-MAXLOOP-2, ip+1);    // without TURN
-						
+
 
 						//23 Aug 2017 kevin and Mahyar
 						//changed minq to new one (copied from simfold backtrack emodel)
@@ -2462,25 +2459,25 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 						//minq = ip+1;
 						for (jp = minq; jp < j; jp++)
 						{
-							 
+
 							if (exists_restricted (i,ip,fres) || exists_restricted (jp,j,fres) ) //|| (fres[ip].pair >= 0 && fres[ip].pair != jp))
 								continue;
-							
+
 							//tmp = VBI->get_energy_str (i,j,ip,jp);
 							// Hosna, March 26, 2012
 							// modified to accommodate non-canonical base pairing in restricted structure
 							//AP
 							for (auto &model : *energy_models) {
-		
+
 								//model.energy_value = VBI->get_energy_str_restricted_emodel (i, j, ip, jp, fres, &model);
 								//17 Aug 2017 kevin and Mahyar
 								//changed the above function call to this one so we dont re-caculate it and just look up the value
 								model.energy_value = v->get_energy(ip,jp);
-				
+
 							}
 							tmp = emodel_energy_function (i, j, energy_models);
-					
-				
+
+
 							if (tmp < min)
 							{
 								min = tmp;
@@ -2490,7 +2487,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 						}
 					}
 					if (best_ip < best_jp){
-						
+
 						insert_node (best_ip, best_jp, LOOP);
 					}
 					else
@@ -2628,7 +2625,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 		case FREE:
 		{
 			int j = cur_interval->j;
-			
+
 			if (j==0) return;
 
 			int min = INF, tmp, best_row = -1, i, best_i, acc, energy_ij;
@@ -2641,7 +2638,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 			if (fres[j].pair <= -1)
 			{
 				tmp = W[j-1];
-				
+
 				if (tmp < min)
 				{
 					min = tmp;
@@ -2661,7 +2658,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				//  it's INF, done in fold_sequence_restricted
 				acc = (i-1>0) ? W[i-1] : 0;
 				energy_ij = v->get_energy(i,j);
-				
+
 				if (energy_ij < INF)
 				{
 					//AP
@@ -2705,10 +2702,10 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				if (fres[j].pair <= -1)
 				{
 					energy_ij = v->get_energy(i,j-1);
-					
+
 					if (energy_ij < INF)
 					{
-						
+
 						//AP
 						for (auto &emodel : *energy_models) {
 							model = &emodel;
@@ -2716,10 +2713,10 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 							model->energy_value += model->dangle_top [int_sequence[j-1]]
 								[int_sequence[i]]
 								[int_sequence[j]];
-							
+
 						}
 						tmp = emodel_energy_function (i, j, energy_models);
-						
+
 						if (tmp < min)
 						{
 							min = tmp;
@@ -2731,7 +2728,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				if (fres[i].pair <= -1 && fres[j].pair <= -1)
 				{
 					energy_ij = v->get_energy(i+1,j-1);
-					
+
 					if (energy_ij < INF)
 					{
 						//AP
@@ -2746,7 +2743,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 								[int_sequence[j]];
 						}
 						tmp = emodel_energy_function (i, j, energy_models);
-						
+
 						if (tmp < min)
 						{
 							min = tmp;
@@ -2842,7 +2839,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				}
 			}
 		}
-		
+
 			switch (best_row)
 			{
 				case 0:
@@ -2873,9 +2870,9 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				case 4:
 					if(KEVIN_DEBUG)
 						printf("W(%d) case 4: inserting Loop(%d,%d) and Free (0,%d)\n",j,best_i+1,j-1,best_i);
-		
+
 					insert_node (best_i+1, j-1, LOOP);
-				
+
 					if (best_i >= 0) // Hosna, March 26, 2012, was best_i-1 instead of best_i
 						insert_node (0, best_i, FREE);
 					break;
@@ -2918,7 +2915,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 		case M_WM:
 //  else if(cur_interval->type == M_WM)
 		{
-			
+
 			int i = cur_interval->i;
 			int j = cur_interval->j;
 			int tmp, min = INF;
@@ -2969,7 +2966,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 					best_row = 2;
 				}
 			}
-		
+
 			if (fres[j].pair <= -1)
 			{
 				//AP
@@ -2993,7 +2990,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 					best_row = 3;
 				}
 			}
-			
+
 			if (fres[i].pair <= -1 && fres[j].pair <= -1)
 			{
 				//AP
@@ -3073,8 +3070,8 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				while(int_sequence[new_j-1] == X){
 					new_j--;
 					best_row = 9;
-				}    
-				
+				}
+
 			}
 
 			//18 Aug 2017 kevin and Mahyar
@@ -3085,7 +3082,7 @@ void W_final::backtrack_restricted_emodel(seq_interval *cur_interval, str_featur
 				while(int_sequence[new_i+1] == X){
 					new_i++;
 					best_row = 9;
-				}    
+				}
 			}
 			//18 Aug 2017 kevin and Mahyar
 			//added this to make sure after we move the new i and j, we do not cross
@@ -3294,14 +3291,14 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 
 					//23 Aug 2017 kevin and Mahyar
 					//variable to store linker_length such that we change the range of ip and jp so we can check if i,ip and jp,j is larger than MAXLOOP (aka 30) properly for the cases where X is between i,j
-					//if X is between i,j we treat it as if X does not exist 
+					//if X is between i,j we treat it as if X does not exist
 					int skip = 0;
-									
+
 					if(is_cross_model(i,j)){
 						skip = linker_length;
-				
+
 					}
-					
+
 					//23 Aug 2017 kevin and Mahyar
 					//added +skip to i+MAXLOOP+1
 					for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1+skip); ip++)
@@ -3323,10 +3320,10 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 						//minq = ip+1;
 						for (jp = minq; jp < j; jp++)
 						{
-							
+
 							if (exists_restricted (i,ip,fres) || exists_restricted (jp,j,fres))
 								continue;
-								
+
 
 							//tmp = VBI->get_energy_str (i,j,ip,jp);
 							// Hosna, March 26, 2012
@@ -3512,7 +3509,7 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 				acc = (i-1>0) ? W[i-1] : 0;
 				// pkonly condition:
 				energy_ij = (fres[j].pair == i && fres[i].pair== j)? v->get_energy(i,j): INF;
-			
+
 				if (energy_ij < INF)
 				{
 					//AP
@@ -3908,8 +3905,8 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 				while(int_sequence[new_j-1] == X){
 					new_j--;
 					best_row = 9;
-				}    
-				
+				}
+
 			}
 
 			//18 Aug 2017 kevin and Mahyar
@@ -3920,7 +3917,7 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 				while(int_sequence[new_i+1] == X){
 					new_i++;
 					best_row = 9;
-				}    
+				}
 			}
 
 			//18 Aug 2017 kevin and Mahyar
@@ -4106,14 +4103,14 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 
 			//23 Aug 2017 kevin and Mahyar
 			//variable to store linker_length such that we change the range of ip and jp so we can check if i,ip and jp,j is larger than MAXLOOP (aka 30) properly for the cases where X is between i,j
-			//if X is between i,j we treat it as if X does not exist 
+			//if X is between i,j we treat it as if X does not exist
 			int skip = 0;
-			
+
 			if(is_cross_model(i,j)){
 				skip = linker_length;
-				
+
 			}
-			
+
 			//23 Aug 2017 kevin and Mahyar
 			//added +skip to i+MAXLOOP+1
             for (ip = i+1; ip <= MIN(j-2,i+MAXLOOP+1+skip); ip++)
@@ -4127,14 +4124,14 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 
                     if (exists_restricted (i,ip,fres) || exists_restricted (jp,j,fres))
                         continue;
-					
+
                     //AP
                     for (auto &model : *energy_models) {
 						//VBI->get_energy_str_restricted_emodel (i, j, ip, jp, fres, &model);
 						//17 Aug 2017 kevin and Mahyar
 						//changed the above function call to this one so we dont re-caculate it and just look up the value
-                        model.energy_value = V->get_energy(ip,jp);  
-						
+                        model.energy_value = V->get_energy(ip,jp);
+
                     }
                     tmp = emodel_energy_function (i, j, energy_models);
 
@@ -4555,7 +4552,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                 best_row = 7;
               }
         }
-		
+
 		//18 Aug 2017 kevin and Mahyar
 		//added this to check if j is a X
 		//if it is, move j till it is the first X so the next iteration can handle it properly
@@ -4564,8 +4561,8 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 			while(int_sequence[new_j-1] == X){
 				new_j--;
 				best_row = 9;
-			}    
-			
+			}
+
 		}
 
 		//18 Aug 2017 kevin and Mahyar
@@ -4576,7 +4573,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 			while(int_sequence[new_i+1] == X){
 				new_i++;
 				best_row = 9;
-			}    
+			}
 		}
 		//18 Aug 2017 kevin and Mahyar
 		//added this to make sure after we move the new i and j, we do not cross
@@ -4856,7 +4853,7 @@ void W_final::backtrack_restricted_pkonly (seq_interval *cur_interval, str_featu
 				acc = (i-1>0) ? W[i-1] : 0;
 				// pkonly condition:
 				energy_ij = (fres[j].pair == i && fres[i].pair== j)? v->get_energy(i,j): INF;
-			
+
 				if (energy_ij < INF)
 				{
 					tmp = energy_ij + AU_penalty (int_sequence[i],int_sequence[j]) + acc;

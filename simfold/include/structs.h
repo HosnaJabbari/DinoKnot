@@ -174,7 +174,8 @@ typedef struct str_features
     // exists restricted is a very common function
     // that is ultimately very time consuming
     // precompute the results and save in this array
-    int **exists_restricted_arr;
+    int **exists_restricted_arr = nullptr;
+    int nb_nucleotides = -1;
 
     str_features()
     {
@@ -182,6 +183,19 @@ typedef struct str_features
         type = NONE;
         num_branches = 0;
     }
+
+    ~str_features()
+    {
+        if (exists_restricted_arr != nullptr) {
+            for (int i = 0; i < nb_nucleotides; ++i) {
+                delete [] exists_restricted_arr[i];
+            }
+            delete [] exists_restricted_arr;
+
+            exists_restricted_arr = nullptr;
+        }
+    }
+
 } str_features;
 
 

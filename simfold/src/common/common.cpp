@@ -1235,6 +1235,7 @@ void detect_structure_features (char *structure, str_features *f) //kevin debug
 
     // Allocate the vectors
     //f->exists_restricted_arr.resize(nb_nucleotides);
+    f->nb_nucleotides = nb_nucleotides;
     f->exists_restricted_arr = new int*[nb_nucleotides];
     for (int i = 0; i < nb_nucleotides; ++i) {
         //f->exists_restricted_arr[i].resize(nb_nucleotides);
@@ -1256,31 +1257,7 @@ void detect_structure_features (char *structure, str_features *f) //kevin debug
         }
     }
 
-    /*
-    for (i=0; i < nb_nucleotides; i++)
-    {
-        if (f[i].pair > i)
-        {
-            printf ("%d - pair: %d type: %c ", i, f[i].pair, f[i].type);
-            if (f[i].type == INTER)
-                printf ("(%d,%d)", f[i].bri[0], f[f[i].bri[0]].pair);
-            else if (f[i].type == MULTI)
-                for (j=0; j < f[i].num_branches; j++)
-                    printf ("(%d,%d) ", f[i].bri[j], f[f[i].bri[j]].pair);
-            printf ("\n");
-        }
-    }
-    */
 }
-
-void destruct_str_features(int nb_nucleotides, str_features *f) {
-    for (int i = 0; i < nb_nucleotides; ++i) {
-        delete [] f->exists_restricted_arr[i];
-    }
-    delete [] f->exists_restricted_arr;
-
-}
-
 
 int complementary_bases (char b1, char b2)
 // returns 1 if b1 and b2 are complementary bases
