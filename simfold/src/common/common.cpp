@@ -1235,11 +1235,10 @@ void detect_structure_features (char *structure, str_features *f) //kevin debug
 
     // Allocate the vectors
     //f->exists_restricted_arr.resize(nb_nucleotides);
-    f->nb_nucleotides = nb_nucleotides;
-    f->exists_restricted_arr = new int*[nb_nucleotides];
+    f->exists_restricted_arr.resize(nb_nucleotides);
     for (int i = 0; i < nb_nucleotides; ++i) {
         //f->exists_restricted_arr[i].resize(nb_nucleotides);
-        f->exists_restricted_arr[i] = new int[nb_nucleotides];
+        f->exists_restricted_arr[i].resize(nb_nucleotides);
 
         // compute whether there are any restricted base pairs between i and j
         for (int j = i; j < nb_nucleotides; ++j) {

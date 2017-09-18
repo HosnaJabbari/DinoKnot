@@ -561,7 +561,6 @@ double W_final::call_simfold_emodel(){
 
     delete [] fres;
     delete [] h_fres;
-    //delete stack_interval;
 
 	if(is_invalid_restriction(restricted,structure)){
 		fprintf(stderr,"ERROR!!! There is something wrong with the structure, doesn't match restricted\n");
