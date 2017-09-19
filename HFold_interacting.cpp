@@ -113,10 +113,10 @@ int main (int argc, char *argv[]) {
 	while (1){
 		static struct option long_options[] =
 			{
-				{"so", required_argument, 0, 'a'}, 	//sequence1
-				{"or", required_argument, 0, 'b'},	//structure for sequence1
-				{"st", required_argument, 0, 'c'},	//sequence2
-				{"tr", required_argument, 0, 'd'},	//structure for sequence2
+				{"s1", required_argument, 0, 'a'}, 	//sequence1
+				{"r1", required_argument, 0, 'b'},	//structure for sequence1
+				{"s2", required_argument, 0, 'c'},	//sequence2
+				{"r2", required_argument, 0, 'd'},	//structure for sequence2
 				{"t1", required_argument, 0, 'e'},	//type for sequence1
 				{"t2", required_argument, 0, 'f'},	//type for sequence2
 				{0, 0, 0, 0}
@@ -133,66 +133,66 @@ int main (int argc, char *argv[]) {
 
 		switch (option)
 			{
-			case 'a': //--so (sequence1)
+			case 'a': //--s1 (sequence1)
 				if(sequence1Found){
-					printf("--so is duplicated\n");
+					printf("--s1 is duplicated\n");
 					errorFound = true;
 					break;
 				}
 				if(inputPathFound){
-					printf("Cannot combine -i with --so/--or/--st/--tr \n");
+					printf("Cannot combine -i with --s1/--r1/--s2/--r2 \n");
 					errorFound = true;
 					break;
 				}
 				strcpy(inputSequence1,optarg);
 				if(!validateSequence(inputSequence1)){
-					printf("--so is invalid\n");
+					printf("--s1 is invalid\n");
 					errorFound = true;
 					break;
 				}
 				sequence1Found = true;
 				break;
-			case 'b': //--or (structure1)
+			case 'b': //--r1 (structure1)
 				if(structure1Found){
-					printf("--or is duplicated\n");
+					printf("--r1 is duplicated\n");
 					errorFound = true;
 					break;
 				}
 				if(inputPathFound){
-					printf("Cannot combine -i with --so/--or/--st/--tr \n");
+					printf("Cannot combine -i with --s1/--r1/--s2/--r2 \n");
 					errorFound = true;
 					break;
 				}
 				strcpy(inputStructure1,optarg);
 				structure1Found = true;
 				break;
-			case 'c': //--st (sequence2)
+			case 'c': //--s2 (sequence2)
 				if(sequence2Found){
-					printf("--st is duplicated\n");
+					printf("--s2 is duplicated\n");
 					errorFound = true;
 					break;
 				}
 				if(inputPathFound){
-					printf("Cannot combine -i with --so/--or/--st/--tr \n");
+					printf("Cannot combine -i with --s1/--r1/--s2/--r2 \n");
 					errorFound = true;
 					break;
 				}
 				strcpy(inputSequence2,optarg);
 				if(!validateSequence(inputSequence2)){
-					printf("--st is invalid\n");
+					printf("--s2 is invalid\n");
 					errorFound = true;
 					break;
 				}
 				sequence2Found = true;
 				break;
-			case 'd': //--tr (structure2)
+			case 'd': //--r2 (structure2)
 				if(structure2Found){
-					printf("--tr is duplicated\n");
+					printf("--r2 is duplicated\n");
 					errorFound = true;
 					break;
 				}
 				if(inputPathFound){
-					printf("Cannot combine -i with --so/--or/--st/--tr \n");
+					printf("Cannot combine -i with --s1/--r1/--s2/--r2 \n");
 					errorFound = true;
 					break;
 				}
@@ -201,7 +201,7 @@ int main (int argc, char *argv[]) {
 				break;
 			case 'i':
 				if(sequence1Found || structure1Found || sequence2Found || structure2Found){
-					printf("Cannot combine -i with --so/--or/--st/--tr \n");
+					printf("Cannot combine -i with --s1/--r1/--s2/--r2 \n");
 					errorFound = true;
 					break;
 				}
@@ -265,14 +265,14 @@ int main (int argc, char *argv[]) {
 	if(!inputPathFound){
 		//if sequence1 or sequence2 or structure1 or structure2 is missing when input file is not present
 		if(!(sequence1Found && structure1Found && sequence2Found && structure2Found)){
-			fprintf(stderr, "--so/--or/--st/--tr is missing\n");
+			fprintf(stderr, "--s1/--r1/--s2/--r2 is missing\n");
 			free(inputPath);free(outputPath);
 			printUsage();
 			exit(1);
 		}else{
 			//validate both structures
 			if(!(validateStructure(inputStructure1,inputSequence1))){
-				fprintf(stderr, "--or is invalid\n");
+				fprintf(stderr, "--r1 is invalid\n");
 				free(inputPath);free(outputPath);
 				printUsage();
 				exit(1);
@@ -280,7 +280,7 @@ int main (int argc, char *argv[]) {
 				replaceBrackets(inputStructure1);
 			}
 			if(!(validateStructure(inputStructure2,inputSequence2))){
-				fprintf(stderr, "--tr is invalid\n");
+				fprintf(stderr, "--r2 is invalid\n");
 				free(inputPath);free(outputPath);
 				printUsage();
 				exit(1);
@@ -399,24 +399,14 @@ int main (int argc, char *argv[]) {
 }
 
 void printUsage(){
-	//printf ("Example: ./HFold_interacting_multimodel --so \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" --or \"(____________________________)\" --st \"GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC\" --tr \"(__________________________________________________________)\" --t1 DNA --t2 DNA\n");
-	/*
-	printf("Multi-model\n");
-	printf ("Usage: HFold_interacting <sequence_one> <structure_one> <sequence_two> <structure_two>\n");
-	printf ("Example: HFold_interacting \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" \"(____________________________)\" \"GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC\" \"(__________________________________________________________)\"\n");
-	printf ("  Restricted structure symbols:\n");
-	printf ("    () restricted base pair\n");
-	printf ("    _ no restriction\n");
-*/
-
-	printf("\nUsage ./HFold_interacting_multimodel --so <sequence1> --or <structure1> --st <sequence2> --tr <structure2> --t1 <type_for_sequence1> --t2 <type_for_sequence1> [-o </path/to/file>]\n");
+	printf("\nUsage ./HFold_interacting_multimodel --s1 <sequence1> --r2 <restricted_structure1> --s1 <sequence_2> --r2 <restricted_structure2> --t1 <type_for_sequence1> --t2 <type_for_sequence1> [-o </path/to/file>]\n");
 	printf("or\n");
 	printf("Usage ./HFold -i </path/to/file> --t1 <type_for_sequence1> --t2 <type_for_sequence1> [-o </path/to/file>]\n");
 	printf ("  Restricted structure symbols:\n");
 	printf ("    () restricted base pair\n");
 	printf ("    _ no restriction\n");
 	printf("Example:\n");
-	printf("./HFold_interacting_multimodel --so \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" --or \"(____________________________)\" --st \"GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC\" --tr \"(__________________________________________________________)\" --t1 RNA --t2 DNA\n");
+	printf("./HFold_interacting_multimodel --s1 \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" --r1 \"(____________________________)\" --s2 \"GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC\" --r2 \"(__________________________________________________________)\" --t1 RNA --t2 DNA\n");
 	printf("./HFold_interacting_multimodel -i \"/home/username/Desktop/myinputfile.txt\" -o \"/home/username/Desktop/some_folder/outputfile.txt\"\n");
 	printf("Please read README for more details\n");
 
