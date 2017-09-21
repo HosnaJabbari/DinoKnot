@@ -168,7 +168,7 @@
 
 // Hosna November 16, 2015
 // Kevin and Ian July 20 2017 moved from h_global
-#define START_HYBRID_PENALTY 310.0
+//#define START_HYBRID_PENALTY 310.0
 
 #endif
 

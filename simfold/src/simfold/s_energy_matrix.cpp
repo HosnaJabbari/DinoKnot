@@ -232,7 +232,7 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
     min_en[1] = INF;
     min_en[2] = INF;
     min_en[3] = INF;
-
+    
 	// Hosna, March 26, 2012
 	// if the restricted base pairs are non-canonical then checking for can_pair only will cause missing those base pairs
 	if (can_pair (sequence[i], sequence[j]) || (fres[i].pair == j && fres[j].pair ==i)) {
@@ -252,7 +252,8 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
                 // This needs to be out here as we cannot tell if the energy models are different in H->compute_energy_restricted_emodel
                 // requires there to be exactly 2 energy models
 				if( is_cross_model(i,j) ) {    // If cross model and working with a hybrid molecule 
-                   min_en[0] += START_HYBRID_PENALTY;                                                // add a hybrid molecule penalty
+                   min_en[0] += START_HYBRID_PENALTY;  
+                   //printf("added penalty\n");                                              // add a hybrid molecule penalty
 				}
 			}
             //16 Aug 2017 kevin
@@ -275,7 +276,8 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
                 // This needs to be out here as we cannot tell if the energy models are different in H->compute_energy_restricted_emodel
                 // requires there to be exactly 2 energy models
                 if( is_cross_model(i,j)) {    // If cross model and working with a hybrid molecule 
-                    min_en[2] += START_HYBRID_PENALTY;                                                // add a hybrid molecule penalty
+                    min_en[2] += START_HYBRID_PENALTY;  
+                    //printf("added penalty\n");                                              // add a hybrid molecule penalty
                 }
 
                 for (auto &energy_model : *energy_models) {
@@ -287,7 +289,8 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
                 //kevin Aug 11 2017
                 //add hybrid penalty for VM when i+1 or j-1 is linker (discussed with Hosna, Mahyar)
                 if(sequence[i+1] == X || sequence[j-1] == X){ //if linker is in i+1 or j-1
-                    min_en[3] += START_HYBRID_PENALTY;      
+                    min_en[3] += START_HYBRID_PENALTY;
+                    //printf("added penalty\n");      
                 }
 
 

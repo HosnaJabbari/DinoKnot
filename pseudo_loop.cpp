@@ -507,6 +507,12 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 			int WI_ipus1_BPminus = get_WI(i+1,Bp_i - 1) ;
 			int WI_Bplus_jminus = get_WI(B_i + 1,j-1);
 			m1 = WI_ipus1_BPminus + WI_Bplus_jminus;
+			//kevin 21 Sept 2017
+			//add hybrid penalty
+			if( is_cross_model(i,j)) {    // If cross model and working with a hybrid molecule 
+				m1 += START_HYBRID_PENALTY;  
+				//printf("VP added penalty\n");                                              // add a hybrid molecule penalty
+			}
 //			if(debug){
 //				printf("VP[%d,%d] branch 1: WI(%d+1)(BP(%d)-1) = %d and WI(B(%d)+1)(%d-1) = %d => m1 = %d \n",i,j,i,i,WI_ipus1_BPminus,i,j,WI_Bplus_jminus, m1);
 //			}
@@ -523,6 +529,12 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 			int WI_i_plus_b_minus = get_WI(i+1,b_i - 1);
 			int WI_bp_plus_j_minus = get_WI(bp_i + 1,j-1);
 			m2 = WI_i_plus_b_minus + WI_bp_plus_j_minus;
+			//kevin 21 Sept 2017
+			//add hybrid penalty
+			if( is_cross_model(i,j)) {    // If cross model and working with a hybrid molecule 
+				m2 += START_HYBRID_PENALTY;  
+				//printf("VP added penalty\n");                                              // add a hybrid molecule penalty
+			}
 //			if(debug){
 //				printf("VP[%d,%d] branch 2: WI(%d+1)(b(%d)-1) = %d and WI(bp(%d)+1)(%d-1) = %d => m2 = %d \n",i,j,i,i,WI_i_plus_b_minus,i,j,WI_bp_plus_j_minus, m2);
 //			}
@@ -542,6 +554,12 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 			int WI_B_plus_b_minus = get_WI(B_i + 1,b_i - 1);
 			int WI_bp_plus_j_minus = get_WI(bp_i +1,j - 1);
 			m3 = WI_i_plus_Bp_minus + WI_B_plus_b_minus + WI_bp_plus_j_minus;
+			//kevin 21 Sept 2017
+			//add hybrid penalty
+			if( is_cross_model(i,j)) {    // If cross model and working with a hybrid molecule 
+				m3 += START_HYBRID_PENALTY;  
+				//printf("VP added penalty\n");                                              // add a hybrid molecule penalty
+			}
 //			if(debug){
 //				printf("VP[%d,%d] branch 3: WI(%d+1)(B'(%d)-1) = %d, WI(B(%d)+1)(b(%d)-1) = %d and WI(b'(%d)+1)(%d-1) = %d => m3 = %d \n",i,j,i,i, WI_i_plus_Bp_minus,i,i,WI_B_plus_b_minus,i,j,WI_bp_plus_j_minus, m3);
 //			}

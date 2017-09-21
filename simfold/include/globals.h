@@ -425,6 +425,7 @@ int linker_length = 5;
 char structure_one_type[3];
 char structure_two_type[3];
 
-
+//kevin 21 Sep 2017 moved the penalty here so we can change it from argument for tuning
+double START_HYBRID_PENALTY;
 
 #endif

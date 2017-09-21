@@ -322,5 +322,7 @@ extern int linker_length;
 extern char structure_one_type[3];
 extern char structure_two_type[3];
 
+//kevin 21 Sep 2017 moved the penalty here so we can change it from argument for tuning
+extern double START_HYBRID_PENALTY;
 
 #endif

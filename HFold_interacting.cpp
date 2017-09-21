@@ -109,6 +109,8 @@ int main (int argc, char *argv[]) {
 
 	int option;
 
+	START_HYBRID_PENALTY = 310.0; //default value for hybrid penalty, can be changed with --pen
+
 	//kevin: june 23 2017 https://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Option-Example.html
 	while (1){
 		static struct option long_options[] =
@@ -119,6 +121,7 @@ int main (int argc, char *argv[]) {
 				{"r2", required_argument, 0, 'd'},	//structure for sequence2
 				{"t1", required_argument, 0, 'e'},	//type for sequence1
 				{"t2", required_argument, 0, 'f'},	//type for sequence2
+				{"pen",required_argument, 0, 'g'},  //start_hybrid_penalty
 				{0, 0, 0, 0}
 			};
 		// getopt_long stores the option index here.
@@ -248,6 +251,10 @@ int main (int argc, char *argv[]) {
 					break;
 				}
 				type2Found = true;
+				break;
+			case 'g':
+				START_HYBRID_PENALTY = atof(optarg);
+				printf("pen: %lf\n",START_HYBRID_PENALTY);
 				break;
 			default:
 				errorFound = true;

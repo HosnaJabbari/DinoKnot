@@ -1272,7 +1272,7 @@ printf("start method4\n");
 		fprintf(stderr, "Structure: %s\n",structure);
 		exit(6);
 	}	
-	//printf("method used: %d\n",method_used);
+	printf("method used: %d\n",method_used);
 	return min_energy;
 }
 

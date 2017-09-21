@@ -20,6 +20,6 @@ extern double bp_penalty;
 extern double cp_penalty;
 
 // Hosna November 16, 2015
-extern double start_hybrid_penalty;
+//extern double start_hybrid_penalty;
 
 #endif /* H_EXTERNS_H */
