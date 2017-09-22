@@ -1094,15 +1094,15 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 	double energy = 0;
 	W_final *hfold_pk_min_fold = new W_final (sequence, restricted, energy_models);
 	if (hfold_pk_min_fold == NULL) giveup ("Cannot allocate memory", "HFold");
-	energy = hfold_pk_min_fold->hfold_pkonly();
+	energy = hfold_pk_min_fold->hfold_pkonly_emodel();
 	hfold_pk_min_fold->return_structure (structure);
 
 	if(is_empty_structure(restricted,structure)){
-		//printf("is empty\n");
+		printf("is empty\n");
     	delete hfold_pk_min_fold;
 		return energy;
 	}else{
-		//printf("is not empty\n");
+		printf("is not empty\n");
 		char G_prime[strlen(structure)];
 		remove_structure_intersection(structure,restricted, G_prime);
 
@@ -1242,9 +1242,11 @@ printf("start method1\n");
 	method_used = 1;
 	strcpy(structure,method1_structure);
 	//printf("method1 energy: %lf\n",min_energy);
+	printf("method1: %s %lf\n",method1_structure,min_energy);
 
 printf("start method2\n");
 	energy = method2_emodel(sequence,restricted,method2_structure,energy_models);
+	printf("method2: %s %lf\n",method2_structure,energy);
 	if(energy < min_energy){
         method_used = 2;
 		min_energy = energy;
@@ -1253,6 +1255,7 @@ printf("start method2\n");
 
 printf("start method3\n");
 	energy = method3_emodel(sequence,restricted,method3_structure,energy_models);
+	printf("method3: %s %lf\n",method3_structure,energy);
 	if(energy < min_energy){
         method_used = 3;
 		min_energy = energy;
@@ -1260,6 +1263,7 @@ printf("start method3\n");
     }
 printf("start method4\n");
 	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
+	printf("method4: %s %lf\n",method4_structure,energy);
 	if(energy < min_energy){
         method_used = 4;
 		min_energy = energy;
