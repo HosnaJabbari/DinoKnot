@@ -1058,7 +1058,7 @@ int is_invalid_restriction(char* restricted_structure, char* current_structure){
 				return 1;
 			}
 		}
-		
+
     }
 	return 0;
 }
@@ -1082,7 +1082,7 @@ double method1_emodel(char *sequence, char *restricted, char *structure, std::ve
 	double energy = 0;
 	energy = hfold_min_fold->hfold_emodel();
 	hfold_min_fold->return_structure (structure);
-	
+
     delete hfold_min_fold;
 	return energy;
 }
@@ -1098,7 +1098,6 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 	hfold_pk_min_fold->return_structure (structure);
 
 	if(is_empty_structure(restricted,structure)){
-		printf("is empty\n");
     	delete hfold_pk_min_fold;
 		return energy;
 	}else{
@@ -1235,7 +1234,7 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 	char method2_structure[strlen(sequence)+1];
 	char method3_structure[strlen(sequence)+1];
 	char method4_structure[strlen(sequence)+1];
-	
+
 	min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
 	method_used = 1;
 	strcpy(structure,method1_structure);
@@ -1271,7 +1270,7 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 		fprintf(stderr, "SEQ: %s\n",sequence);
 		fprintf(stderr, "Structure: %s\n",structure);
 		exit(6);
-	}	
+	}
 	return min_energy;
 }
 
