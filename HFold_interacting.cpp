@@ -254,7 +254,6 @@ int main (int argc, char *argv[]) {
 				break;
 			case 'g':
 				START_HYBRID_PENALTY = atof(optarg);
-				printf("pen: %lf\n",START_HYBRID_PENALTY);
 				break;
 			default:
 				errorFound = true;

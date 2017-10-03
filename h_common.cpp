@@ -1102,7 +1102,6 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
     	delete hfold_pk_min_fold;
 		return energy;
 	}else{
-		printf("is not empty\n");
 		char G_prime[strlen(structure)];
 		remove_structure_intersection(structure,restricted, G_prime);
 
@@ -1237,33 +1236,30 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 	char method3_structure[strlen(sequence)+1];
 	char method4_structure[strlen(sequence)+1];
 	
-printf("start method1\n");
 	min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
 	method_used = 1;
 	strcpy(structure,method1_structure);
 	//printf("method1 energy: %lf\n",min_energy);
-	printf("method1: %s %lf\n",method1_structure,min_energy);
+	//printf("method1: %s %lf\n",method1_structure,min_energy);
 
-printf("start method2\n");
 	energy = method2_emodel(sequence,restricted,method2_structure,energy_models);
-	printf("method2: %s %lf\n",method2_structure,energy);
+	//printf("method2: %s %lf\n",method2_structure,energy);
 	if(energy < min_energy){
         method_used = 2;
 		min_energy = energy;
 		strcpy(structure,method2_structure);
 	}
 
-printf("start method3\n");
 	energy = method3_emodel(sequence,restricted,method3_structure,energy_models);
-	printf("method3: %s %lf\n",method3_structure,energy);
+	//printf("method3: %s %lf\n",method3_structure,energy);
 	if(energy < min_energy){
         method_used = 3;
 		min_energy = energy;
 		strcpy(structure,method3_structure);
     }
-printf("start method4\n");
+
 	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
-	printf("method4: %s %lf\n",method4_structure,energy);
+	//printf("method4: %s %lf\n",method4_structure,energy);
 	if(energy < min_energy){
         method_used = 4;
 		min_energy = energy;
@@ -1276,7 +1272,6 @@ printf("start method4\n");
 		fprintf(stderr, "Structure: %s\n",structure);
 		exit(6);
 	}	
-	printf("method used: %d\n",method_used);
 	return min_energy;
 }
 
