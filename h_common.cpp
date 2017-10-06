@@ -1101,7 +1101,7 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
     	delete hfold_pk_min_fold;
 		return energy;
 	}else{
-		char G_prime[strlen(structure)];
+		char G_prime[strlen(structure)+1];
 		remove_structure_intersection(structure,restricted, G_prime);
 
 		energy = method1_emodel(sequence, G_prime, structure, energy_models);
