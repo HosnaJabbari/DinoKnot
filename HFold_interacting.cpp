@@ -26,9 +26,17 @@
 #include <unistd.h>
 #include "h_common.h"
 
-void printUsage();
+//kevin 26 Sept 2017
+#include "s_specific_functions.h"
+#include "Hotspot.h"
+#include "h_common.h"
 
-int validateModelType(char* type);
+#include "hfold_interacting.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
+
 
 #define KEVIN_DEBUG 1
 /*
@@ -94,6 +102,9 @@ int main (int argc, char *argv[]) {
 	char* outputPath;
 	outputPath = (char*) malloc(sizeof(char) * 1000);
 
+	char* outputDir;
+	outputDir = (char*) malloc(sizeof(char) * 1000);
+
 	int model_1_Type = -1;
 	int model_2_Type = -1;
 
@@ -103,13 +114,16 @@ int main (int argc, char *argv[]) {
 	bool structure2Found = false;
 	bool inputPathFound = false;
 	bool outputPathFound = false;
+	bool outputDirFound = false;
 	bool errorFound = false;
 	bool type1Found = false;
 	bool type2Found = false;
 
+	int number_of_suboptimal_structure = 0;
+
 	int option;
 
-	START_HYBRID_PENALTY = 310.0; //default value for hybrid penalty, can be changed with --pen
+	//START_HYBRID_PENALTY = 310.0; //default value for hybrid penalty, can be changed with --pen
 
 	//kevin: june 23 2017 https://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Option-Example.html
 	while (1){
@@ -122,6 +136,8 @@ int main (int argc, char *argv[]) {
 				{"t1", required_argument, 0, 'e'},	//type for sequence1
 				{"t2", required_argument, 0, 'f'},	//type for sequence2
 				{"pen",required_argument, 0, 'g'},  //start_hybrid_penalty
+				{"n"  ,required_argument, 0, 'h'}, 	//number of suboptimal structure
+				{"o_dir", required_argument, 0, 'j'},
 				{0, 0, 0, 0}
 			};
 		// getopt_long stores the option index here.
@@ -138,18 +154,18 @@ int main (int argc, char *argv[]) {
 			{
 			case 'a': //--s1 (sequence1)
 				if(sequence1Found){
-					printf("--s1 is duplicated\n");
+					fprintf(stderr, "--s1 is duplicated\n");
 					errorFound = true;
 					break;
 				}
 				if(inputPathFound){
-					printf("Cannot combine -i with --s1/--r1/--s2/--r2 \n");
+					fprintf(stderr, "Cannot combine -i with --s1/--r1/--s2/--r2 \n");
 					errorFound = true;
 					break;
 				}
 				strcpy(inputSequence1,optarg);
-				if(!validateSequence(inputSequence1)){
-					printf("--s1 is invalid\n");
+				if(!validateSequence(inputSequence1,true)){
+					fprintf(stderr, "--s1 is invalid\n");
 					errorFound = true;
 					break;
 				}
@@ -157,12 +173,12 @@ int main (int argc, char *argv[]) {
 				break;
 			case 'b': //--r1 (structure1)
 				if(structure1Found){
-					printf("--r1 is duplicated\n");
+					fprintf(stderr, "--r1 is duplicated\n");
 					errorFound = true;
 					break;
 				}
 				if(inputPathFound){
-					printf("Cannot combine -i with --s1/--r1/--s2/--r2 \n");
+					fprintf(stderr, "Cannot combine -i with --s1/--r1/--s2/--r2 \n");
 					errorFound = true;
 					break;
 				}
@@ -171,18 +187,18 @@ int main (int argc, char *argv[]) {
 				break;
 			case 'c': //--s2 (sequence2)
 				if(sequence2Found){
-					printf("--s2 is duplicated\n");
+					fprintf(stderr, "--s2 is duplicated\n");
 					errorFound = true;
 					break;
 				}
 				if(inputPathFound){
-					printf("Cannot combine -i with --s1/--r1/--s2/--r2 \n");
+					fprintf(stderr, "Cannot combine -i with --s1/--r1/--s2/--r2 \n");
 					errorFound = true;
 					break;
 				}
 				strcpy(inputSequence2,optarg);
-				if(!validateSequence(inputSequence2)){
-					printf("--s2 is invalid\n");
+				if(!validateSequence(inputSequence2,true)){
+					fprintf(stderr, "--s2 is invalid\n");
 					errorFound = true;
 					break;
 				}
@@ -190,12 +206,12 @@ int main (int argc, char *argv[]) {
 				break;
 			case 'd': //--r2 (structure2)
 				if(structure2Found){
-					printf("--r2 is duplicated\n");
+					fprintf(stderr, "--r2 is duplicated\n");
 					errorFound = true;
 					break;
 				}
 				if(inputPathFound){
-					printf("Cannot combine -i with --s1/--r1/--s2/--r2 \n");
+					fprintf(stderr, "Cannot combine -i with --s1/--r1/--s2/--r2 \n");
 					errorFound = true;
 					break;
 				}
@@ -204,17 +220,24 @@ int main (int argc, char *argv[]) {
 				break;
 			case 'i':
 				if(sequence1Found || structure1Found || sequence2Found || structure2Found){
-					printf("Cannot combine -i with --s1/--r1/--s2/--r2 \n");
+					fprintf(stderr, "Cannot combine -i with --s1/--r1/--s2/--r2 \n");
 					errorFound = true;
 					break;
 				}
+				/*
 				if(!validateInteractingInputFile(optarg, inputSequence1, inputStructure1, inputSequence2, inputStructure2)){ //store sequences, structures in corresponding variables if valid
 					printf("Input file is invalid\n");
 					errorFound = true;
 					break;
 				}
+				*/
+				if(!validateInteractingInputFile2(optarg, inputSequence1, inputStructure1, inputSequence2, inputStructure2,&sequence1Found, &structure1Found , &sequence2Found , &structure2Found)){
+					fprintf(stderr, "Input file is invalid\n");
+					errorFound = true;
+					break;
+				}
 				strcpy(inputPath, optarg);
-				inputPathFound = true;
+
 				break;
 			case 'o':
 				strcpy(outputPath, optarg);
@@ -226,13 +249,13 @@ int main (int argc, char *argv[]) {
 				break;
 			case 'e':
 				if(type1Found){
-						printf("--t1 is duplicated\n");
+						fprintf(stderr, "--t1 is duplicated\n");
 						errorFound = true;
 						break;
 				}
 				model_1_Type = validateModelType(optarg);
 				if(model_1_Type < 0){
-					printf("Model Type is invalid\n");
+					fprintf(stderr, "Model Type is invalid\n");
 					errorFound = true;
 					break;
 				}
@@ -240,13 +263,13 @@ int main (int argc, char *argv[]) {
 				break;
 			case 'f':
 				if(type2Found){
-					printf("--t2 is duplicated\n");
+					fprintf(stderr, "--t2 is duplicated\n");
 					errorFound = true;
 					break;
 				}
 				model_2_Type = validateModelType(optarg);
 				if(model_2_Type < 0){
-					printf("Model Type is invalid\n");
+					fprintf(stderr, "Model Type is invalid\n");
 					errorFound = true;
 					break;
 				}
@@ -254,6 +277,25 @@ int main (int argc, char *argv[]) {
 				break;
 			case 'g':
 				START_HYBRID_PENALTY = atof(optarg);
+				break;
+			case 'h':
+				number_of_suboptimal_structure = atoi(optarg);
+				if(number_of_suboptimal_structure <= 0){
+					fprintf(stderr, "number must be > 0\n");
+					errorFound = true;
+					break;
+				}
+				break;
+			case 'j':
+				if(!isDirectory(optarg)){
+					fprintf(stderr, "argument is not a directory or directory does not exist\n");
+					errorFound = true;
+					break;
+				}
+				strcpy(outputDir,optarg);
+				printf("outdir: %s\n",outputDir);
+				printf("optarg: %s\n",optarg);
+				outputDirFound = true;
 				break;
 			default:
 				errorFound = true;
@@ -263,49 +305,30 @@ int main (int argc, char *argv[]) {
 			if(errorFound){
 				free(inputPath);
 				free(outputPath);
+				free(outputDir);
 				printUsage();
 				exit(1);
 			}
 	}
 
-	if(!inputPathFound){
-		//if sequence1 or sequence2 or structure1 or structure2 is missing when input file is not present
-		if(!(sequence1Found && structure1Found && sequence2Found && structure2Found)){
-			fprintf(stderr, "--s1/--r1/--s2/--r2 is missing\n");
-			free(inputPath);free(outputPath);
-			printUsage();
-			exit(1);
-		}else{
-			//validate both structures
-			if(!(validateStructure(inputStructure1,inputSequence1))){
-				fprintf(stderr, "--r1 is invalid\n");
-				free(inputPath);free(outputPath);
-				printUsage();
-				exit(1);
-			}else{
-				replaceBrackets(inputStructure1);
-			}
-			if(!(validateStructure(inputStructure2,inputSequence2))){
-				fprintf(stderr, "--r2 is invalid\n");
-				free(inputPath);free(outputPath);
-				printUsage();
-				exit(1);
-			}else{
-				replaceBrackets(inputStructure2);
-			}
-		}
+
+	if(!sequence1Found || !sequence2Found){
+		fprintf(stderr, "sequence1 or sequence2 is missing\n");
+		free(inputPath);free(outputPath);free(outputDir);
+		printUsage();
+		exit(1);
 	}
 
 	if(!type1Found){
 		fprintf(stderr, "--t1 is missing\n");
-		free(inputPath);free(outputPath);
+		free(inputPath);free(outputPath);free(outputDir);
 		printUsage();
 		exit(1);
 	}
 
 	if(!type2Found){
 		fprintf(stderr, "--t2 is missing\n");
-		free(inputPath);free(outputPath);
+		free(inputPath);free(outputPath);free(outputDir);
 		printUsage();
 		exit(1);
 	}
@@ -316,26 +339,6 @@ int main (int argc, char *argv[]) {
 		//printf("out path: %s\n",outputPath);
 
 	}
-
-	//kevin: june 23 2017
-	//end of validation for command line arguments
-
-	// Hosna: November 16, 2015
-	// changed this part accordingly
-	linker_pos = strlen(inputSequence1);
-
-	strcpy(sequence, inputSequence1);
-	if(KEVIN_DEBUG){
-		strcat(sequence, "XXXXX");
-		//linker_length = 0;
-	}else{
-		strcat(sequence, linker);
-	}
-	strcat(sequence, inputSequence2);
-
-	strcpy(restricted, inputStructure1);
-	strcat(restricted, ".....");
-	strcat(restricted, inputStructure2);
 
 	// Before calling any function in the library, you have to initialize config_file, dna_or_rna, temperature
 	// and to call the function init_data, which loads the thermodynamic parameters into memory
@@ -355,6 +358,10 @@ int main (int argc, char *argv[]) {
 	model_2->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
 	energy_models.push_back(*model_2);
 
+	START_HYBRID_PENALTY = get_START_HYBRID_PENALTY(model_1_Type,model_2_Type);
+	//printf("penalty: %lf\n",START_HYBRID_PENALTY);
+	//exit(999);
+
 	for (auto &energy_model : energy_models) {
 		// initialize the thermodynamic parameters
 		// call init_data only once for the same dna_or_rna and same temperature
@@ -371,30 +378,138 @@ int main (int argc, char *argv[]) {
 		fill_data_structures_with_new_parameters_emodel (SIMFOLD_HOME "/params/parameters_DP09.txt", &energy_model);
 	}
 
-    int method_used = -1;
-	//energy = hfold_emodel(sequence, restricted, structure, &energy_models);
-	//kevin july 13 changed to call hfold_interacting_emodel instead of hfold_emodel
-	energy = hfold_interacting_emodel(sequence, restricted, structure, &energy_models, method_used);
+	//kevin: june 23 2017
+	//end of validation for command line arguments
 
-	if(outputPathFound){
-		FILE* fp;
-		fp = fopen(outputPath,"w");
-		if(fp){
-			fprintf(fp,"Sequence: %s\n",sequence);
-			fprintf(fp,"Input_structure: %s\n",restricted);
-			fprintf(fp,"Output_structure: %s\n",structure);
-			fprintf(fp,"Energy: %.2lf\n",energy);
-			fprintf(fp,"Method Used: %d",method_used);
-			fclose(fp);
+	// Hosna: November 16, 2015
+	// changed this part accordingly
+	linker_pos = strlen(inputSequence1);
+
+	strcpy(sequence, inputSequence1);
+	if(KEVIN_DEBUG){
+		strcat(sequence, "XXXXX");
+	}else{
+		strcat(sequence, linker);
+	}
+	strcat(sequence, inputSequence2);
+
+	//set up for RNA so we can use this for building hotspot
+	if(!structure1Found || !structure2Found){
+		char config_file[200];
+		strcpy (config_file, SIMFOLD_HOME "/params/multirnafold.conf");
+		int dna_or_rna;
+		dna_or_rna = RNA;
+		double temperature = 37.0;
+		init_data ("./HFold", config_file, dna_or_rna, temperature);
+		fill_data_structures_with_new_parameters ( SIMFOLD_HOME "/params/turner_parameters_fm363_constrdangles.txt");
+		fill_data_structures_with_new_parameters ( SIMFOLD_HOME "/params/parameters_DP09.txt");
+	}
+
+	std::vector<Hotspot*> hotspot_list1;
+	std::vector<Hotspot*> hotspot_list2;
+	Hotspot* hotspot;
+	if(structure1Found){
+		if(!(validateStructure(inputStructure1,inputSequence1,true))){
+			fprintf(stderr, "--r1 is invalid\n");
+			free(inputPath);free(outputPath);
+			printUsage();
+			exit(1);
+		}else{
+			hotspot = new Hotspot(0,strlen(inputStructure1)-1,strlen(inputStructure1));
+			hotspot->set_structure(inputStructure1);
+			hotspot_list1.push_back(hotspot);
 		}
 	}else{
-		printf ("Seq: %s\n", sequence);
-    	printf ("RES: %s  %.2lf\n", structure, energy);
+		//printf("start hotspot for struct1\n");
+		get_hotspots(inputSequence1, &hotspot_list1);
 	}
+
+	if(structure2Found){
+		if(!(validateStructure(inputStructure2,inputSequence2,true))){
+			fprintf(stderr, "--r2 is invalid\n");
+			free(inputPath);free(outputPath);free(outputDir);
+			printUsage();
+			exit(1);
+		}else{
+			hotspot = new Hotspot(0,strlen(inputStructure2)-1,strlen(inputStructure2));
+			hotspot->set_structure(inputStructure2);
+			hotspot_list2.push_back(hotspot);
+		}
+	}else{
+		//printf("start hotspot for struct2\n");
+		get_hotspots(inputSequence2, &hotspot_list2);
+	}
+
+
+	Result* result;
+	std::vector<Result*> result_list;
+	for(int i =0; i < hotspot_list1.size(); i++){
+		for(int j = 0; j < hotspot_list2.size(); j++){
+			//printf("i: %d j:%d\n",i,j);
+			//printf("hot1: %s\n",hotspot_list1[i]->get_structure());
+			//printf("hot2: %s\n",hotspot_list2[j]->get_structure());
+			strcpy(restricted, hotspot_list1[i]->get_structure());
+			strcat(restricted, ".....");
+			strcat(restricted, hotspot_list2[j]->get_structure());
+
+			int method_used = -1;
+			energy = hfold_interacting_emodel(sequence, restricted, structure, &energy_models, method_used);
+
+			result = new Result(sequence,restricted, structure,energy, method_used);
+			result_list.push_back(result);
+		}
+	}
+	std::sort(result_list.begin(), result_list.end(),compare_result_ptr);
+
+	//kevin 5 oct 2017
+	int number_of_output;
+	//printf("number_of_suboptimal_structure: %d\n",number_of_suboptimal_structure);
+	if(number_of_suboptimal_structure != 0){
+		number_of_output = MIN(result_list.size(),number_of_suboptimal_structure);
+	}else{
+		number_of_output = 1;
+	}
+
+	//kevin: june 22 2017
+	//output to file
+	if(outputPathFound){
+		bool write_success = write_output_file(outputPath, number_of_output, result_list);
+		if(!write_success){
+			fprintf(stderr, "write to file fail\n");
+			exit(4);
+		}
+	}else if(outputDirFound){
+		bool write_success = write_directory(outputDir, number_of_output, result_list);
+		if(!write_success){
+			fprintf(stderr, "write to directory fail\n");
+			exit(4);
+		}
+	}else{
+		//kevin 5 oct 2017
+		printf("Seq: %s\n",sequence);
+		for (int i=0; i < number_of_output; i++) {
+			printf("restricted_%d: %s\n",i, result_list[i]->get_restricted());
+			printf("result_str_%d: %s %lf\n",i, result_list[i]->get_final_structure(),result_list[i]->get_final_energy());
+		}
+	}
+
 
     // clean up
     free(inputPath);
 	free(outputPath);
+	free(outputDir);
+
+	for (int i=0; i < result_list.size(); i++) {
+		delete result_list[i];
+	}
+
+	for(int i =0; i<hotspot_list1.size(); i++){
+		delete hotspot_list1[i];
+	}
+
+	for(int i =0; i<hotspot_list2.size(); i++){
+		delete hotspot_list2[i];
+	}
 
 	destruct_energy_model(model_1);
 	destruct_energy_model(model_2);
@@ -418,6 +533,41 @@ void printUsage(){
 
 }
 
+bool write_output_file(char* path_to_file, int num_of_output, std::vector<Result*> result_list){
+	FILE* fp = fopen(path_to_file,"w");
+	if (fp == NULL) {
+		return false;
+	}
+	fprintf(fp,"Seq: %s\n",result_list[0]->get_sequence());
+	for (int i=0; i < num_of_output; i++) {
+		fprintf(fp,"restricted_%d: %s\n",i, result_list[i]->get_restricted());
+		fprintf(fp,"result_%d: %s %lf\n",i, result_list[i]->get_final_structure(),result_list[i]->get_final_energy());
+	}
+	fclose(fp);
+	return true;
+}
+
+
+bool write_directory(char* path_to_dir, int num_of_output, std::vector<Result*> result_list){
+	for (int i=0; i < num_of_output; i++) {
+		char* path_to_file = (char*)malloc(sizeof(int)*1000);
+		sprintf(path_to_file, "%s/output_%d", path_to_dir, i);
+		printf("path_to_file: %s\n",path_to_file);
+		FILE* fp = fopen(path_to_file,"w");
+		if (fp == NULL) {
+			return false;
+		}
+		fprintf(fp,"Seq: %s\n",result_list[0]->get_sequence());
+		fprintf(fp,"restricted_%d: %s\n",i, result_list[i]->get_restricted());
+		fprintf(fp,"result_%d: %s %lf\n",i, result_list[i]->get_final_structure(),result_list[i]->get_final_energy());
+		free(path_to_file);
+		fclose(fp);
+	}
+	
+	return true;
+}
+
+
 //return code for model type if valid
 //return -1 if not valid
 int validateModelType(char* type){
@@ -433,4 +583,26 @@ int validateModelType(char* type){
 		return PMO;
 	}
 	return -1;
+}
+
+double get_START_HYBRID_PENALTY(int type1, int type2){
+	if(type1 == type2){ //if both model are the same
+		if(type1 == RNA){ //if both are RNA 
+			return 3.0; 
+		}else if(type1 == DNA){ //if both are DNA 
+			return 2.123065105; 
+		}else if(type1 == PMO){
+			fprintf(stderr, "ERROR: model cannot be both PMO\n");
+			exit(1);
+		}
+	}else{
+		return 44.2244816; //when 2 different model
+	}
+}
+
+int isDirectory(const char *path) {
+   struct stat statbuf;
+   if (stat(path, &statbuf) != 0)
+       return 0;
+   return S_ISDIR(statbuf.st_mode);
 }

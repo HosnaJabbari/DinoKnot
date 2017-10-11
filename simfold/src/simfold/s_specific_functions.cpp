@@ -785,6 +785,20 @@ double simfold_loss_augmented (char *sequence, char *known_structure, char *pred
     return min_energy;
 }
 
+//kevin 4 oct 2017
+//comparison function for hotspot so we can use it when sorting
+bool compare_hotspot_ptr(Hotspot* a, Hotspot* b) { 
+    return (a->get_energy() < b->get_energy()); 
+}
+
+//kevin 26 Sept 2017 
+//wrapper to cal get hotspots
+void get_hotspots(char *sequence,std::vector<Hotspot*>* hotspot_list){
+    s_min_folding *min_fold = new s_min_folding (sequence);
+    min_fold->get_hotspots(hotspot_list);
+    delete min_fold;
+}
+
 
 double simfold_restricted (char *sequence, char *restricted, char *structure)
 // PRE:  the init_data function has been called;
@@ -1417,6 +1431,7 @@ PFTYPE simfold_f_and_gradient_smart_numerical (char *sequence, PFTYPE *grad, int
     delete part;
     return pf.real();
 }
+
 
 
 #endif

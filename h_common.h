@@ -4,6 +4,8 @@
 #include "h_struct.h"
 #include "common.h"
 
+#include "Result.h"
+
 //Hosna: June 22, 2007
 
 // #define PS_penalty = 960 		//exterior pseudoloop initiation penalty (9.6 Kcal/mol)
@@ -98,5 +100,10 @@ double method1_emodel(char *sequence, char *restricted, char *structure, std::ve
 int is_empty_structure(char* input_structure, char* output_structure); //---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
 //kevin 30 Aug 2017
 int is_invalid_restriction(char* restricted_structure, char* current_structure); //---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
+
+//kevin 27 Sept 2017
+//comparison function for hotspot so we can use it when sorting
+bool compare_result_ptr(Result* a, Result* b);
+
 #endif /*H_COMMON_H_*/
 
