@@ -2045,3 +2045,9 @@ void print_emodel(energy_model *model) {
 	fprintf(ioFile, "%d", model->enthalpy_nb_tloops);
 	fclose(ioFile);
 }
+
+//kevin 27 Sept 2017
+//comparison function for hotspot so we can use it when sorting
+bool compare_result_ptr(Result* a, Result* b){
+	return (a->get_final_energy() < b->get_final_energy()); 
+}

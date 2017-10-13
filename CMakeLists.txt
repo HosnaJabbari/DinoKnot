@@ -19,6 +19,7 @@ set(HFold_interacting_multimodel_SOURCE
     h_common.h h_common.cpp 
     hfold_validation.h hfold_validation.cpp
     hfold_interacting.h HFold_interacting.cpp
+    Result.h Result.cpp
 )
 
 # pass SIMFOLD_HOME to binary

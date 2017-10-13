@@ -5,13 +5,13 @@ void addTimestamp(char** path);
 
 //check if sequence is valid with regular expression
 //check length and if any characters other than GCAUT
-bool validateSequence(const char *string);
+bool validateSequence(const char *string, bool print_err);
 
 //check if structure is valid
 //check if length match with sequence
 //check if any characters other than ._(){}[]
 //check if pk-free
-bool validateStructure(char* structure, char* sequence);
+bool validateStructure(char* structure, char* sequence, bool print_err);
 
 //change all {} [] to () in structure
 void replaceBrackets(char* structure);
@@ -22,4 +22,6 @@ void addPath(char** output_path, char* input_path);
 
 //check if input file is in correct format and store value into corresponding variable
 //return true on success, false on fail
-bool validateInteractingInputFile(char* path, char* seq1, char* struc1, char* seq2, char* struc2);
+//bool validateInteractingInputFile(char* path, char* seq1, char* struc1, char* seq2, char* struc2);
+
+bool validateInteractingInputFile2(char* path, char* seq1, char* struc1, char* seq2, char* struc2, bool* sequence1Found, bool* structure1Found, bool* sequence2Found, bool* structure2Found);

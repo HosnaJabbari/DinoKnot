@@ -1437,3 +1437,125 @@ void s_min_folding::print_result ()
     printf ("%s\n", structure);
 
 }
+
+
+
+//kevin 4 oct 2017
+//return number of base pair in between the two inclusive index
+int s_min_folding::distance(int left, int right){
+    return (right-left-1);
+}
+
+//kevin 4 oct 2017
+//given a initial hotspot which is a hairpin loop, keep trying to add a arc to form a larger stack
+void s_min_folding::expand_hotspot(Hotspot* hotspot){
+    //printf("\nexpanding hotspot: i: %d j: %d\n",hotspot->get_left_inner_index(),hotspot->get_right_inner_index());
+    
+    double energy = 0;   
+    int non_gc_penalty = 0;  
+    int dangle_top_penalty = 0;
+    int dangle_bot_penalty = 0;
+    
+    //calculation for the hairpin that is already in there
+    V->compute_hotspot_energy(hotspot->get_left_outer_index(),hotspot->get_right_outer_index(),0);
+    
+    //try to expand by adding a arc right beside the current out most arc
+    while(hotspot->get_left_outer_index()-1 >= 0 && hotspot->get_right_outer_index()+1 <= nb_nucleotides-1){
+        if(can_pair(int_sequence[hotspot->get_left_outer_index()-1],int_sequence[hotspot->get_right_outer_index()+1])){    
+            hotspot->move_left_outer_index();
+            hotspot->move_right_outer_index();
+            hotspot->increment_size();
+            V->compute_hotspot_energy(hotspot->get_left_outer_index(),hotspot->get_right_outer_index(),1);
+            //printf("AU(i:%d,j:%d) = %d\n",hotspot->get_left_outer_index(),hotspot->get_right_outer_index(), AU_penalty (int_sequence[hotspot->get_left_outer_index()],int_sequence[hotspot->get_right_outer_index()]));
+        }else{
+            break;
+        }
+    }
+
+    non_gc_penalty += AU_penalty (int_sequence[hotspot->get_left_outer_index()],int_sequence[hotspot->get_right_outer_index()]);
+    
+    //if current out left-1 >= 0  (aka still have spot on left side of curent left out)
+    //if current out right+1 <= nb_nuc-1 (aka still have spot on right side of curent right out)
+    if(hotspot->get_left_outer_index() - 1 >= 0 && hotspot->get_right_outer_index() + 1 <= nb_nucleotides-1){
+        int i = hotspot->get_left_outer_index()-1;
+        int j = hotspot->get_right_outer_index()+1;
+        dangle_bot_penalty = dangle_bot [int_sequence[j-1]][int_sequence[i+1]][int_sequence[i]];
+        dangle_top_penalty = dangle_top [int_sequence[j-1]][int_sequence[i+1]][int_sequence[j]];
+        //printf("i: %d j: %d, dangle_bot: %d dangle_top: %d\n",i,j,dangle_bot_penalty,dangle_top_penalty);
+    }else if(hotspot->get_left_outer_index() - 1 >= 0){
+        int i = hotspot->get_left_outer_index()-1;
+        int j = nb_nucleotides-1;
+        dangle_bot_penalty = dangle_bot [int_sequence[j]][int_sequence[i+1]][int_sequence[i]];
+        //printf("i: %d j: %d, dangle_bot: %d \n",i,j,dangle_bot_penalty);
+    }else if(hotspot->get_right_outer_index() + 1 <= nb_nucleotides-1){
+        int i = 0;
+        int j = hotspot->get_right_outer_index()+1;
+        dangle_top_penalty = dangle_top [int_sequence [j-1]][int_sequence [i]][int_sequence [j]];
+        //printf("i: %d j: %d, angle_top: %d\n",i,j,dangle_top_penalty);
+    }
+
+    energy = V->get_energy(hotspot->get_left_outer_index(),hotspot->get_right_outer_index());
+    //printf("energy: %lf, AU_total: %d, dangle_top_total: %d, dangle_bot_total: %d\n",energy,non_gc_penalty,dangle_top_penalty,dangle_bot_penalty);
+
+    energy = (energy + non_gc_penalty + dangle_top_penalty + dangle_bot_penalty) / 100;
+
+    hotspot->set_energy(energy);
+    //printf("done: %d %d %d %d\n",hotspot->get_left_outer_index(),hotspot->get_left_inner_index(),hotspot->get_right_inner_index(),hotspot->get_right_outer_index());
+    return;
+}
+
+//kevin 4 oct 2017
+//look for every possible hairpin loop, and try to add a arc to form a larger stack with at least min_stack_size bases
+void s_min_folding::get_hotspots(std::vector<Hotspot*>* hotspot_list){
+    int max_hotspot = 20;
+    int min_bp_distance = 3;
+    int min_stack_size = 3; //todo kevin change this
+
+    Hotspot* current_hotspot;
+    //start at min_stack_size-1 and go outward to try to add more arcs to form bigger stack because we cannot expand more than min_stack_size from there anyway
+    for(int i = min_stack_size-1; i < this->nb_nucleotides; i++){
+        for(int j = i; j < this->nb_nucleotides; j++){
+            if(can_pair(this->int_sequence[i],this->int_sequence[j]) && distance(i,j) >= min_bp_distance){
+                current_hotspot = new Hotspot(i,j,nb_nucleotides);
+                
+                expand_hotspot(current_hotspot);
+                
+                if(current_hotspot->get_size() < min_stack_size || current_hotspot->is_invalid_energy()){
+                    delete current_hotspot;
+                    //printf("delete\n");
+                }else{
+                    //printf("store\n");
+                    current_hotspot->set_structure();
+                    hotspot_list->push_back(current_hotspot);
+
+                    //printf("done: %d %d %d %d final_en: %lf\n",current_hotspot->get_left_outer_index(),current_hotspot->get_left_inner_index(),current_hotspot->get_right_inner_index(),current_hotspot->get_right_outer_index(),current_hotspot->get_energy());
+                    //printf("str: %s\n",current_hotspot->get_structure());
+                    //printf("\n\n");
+                }
+            }
+        }
+    }
+
+    //make sure we only keep top 20 hotspot with lowest energy
+    std::sort(hotspot_list->begin(), hotspot_list->end(),compare_hotspot_ptr);
+    while(hotspot_list->size() > max_hotspot){
+        delete hotspot_list->back();
+        hotspot_list->pop_back();
+    }
+
+    //if no hotspot found, add all _ as restricted
+    if(hotspot_list->size() == 0){
+        Hotspot* hotspot = new Hotspot(0,nb_nucleotides-1,nb_nucleotides);
+        hotspot->set_default_structure();
+        hotspot_list->push_back(hotspot);
+    }
+
+    printf("final:\n");
+    for(int i = 0; i< hotspot_list->size(); i++){
+        printf("%s %lf\n",hotspot_list->at(i)->get_structure(),hotspot_list->at(i)->get_energy());
+    }
+
+
+    
+    return;
+}

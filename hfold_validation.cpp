@@ -28,20 +28,26 @@ void replaceBrackets(char* structure){
 //check if length match with sequence
 //check if any characters other than ._(){}[]
 //check if pk-free
-bool validateStructure(char* structure, char* sequence){
+bool validateStructure(char* structure, char* sequence, bool print_err){
 	if(strlen(structure) > MAXSLEN){
-		printf("Structure length greater than max length\n");
+		if(print_err){
+			fprintf(stderr,"Structure length greater than max length\n");
+		}
 		return false;
 	}
 
 	if(strlen(structure) <= 0){
-                printf("length of structure is <= 0. This shouldn't even be able to happen.\n");
+		if(print_err){
+        	fprintf(stderr,"length of structure is <= 0. This shouldn't even be able to happen.\n");
+		}
 		return false;
 	}
 
 	//printf("strlen: %d %d\n",strlen(structure), strlen(sequence));
 	if(strlen(structure) != strlen(sequence)){
-		printf("Length of sequence and corresponding structure must have same length\n");
+		if(print_err){
+			fprintf(stderr,"Length of sequence and corresponding structure must have same length\n");
+		}
 		return false;
 	}
 
@@ -53,7 +59,9 @@ bool validateStructure(char* structure, char* sequence){
 		      || curr == '(' || curr == '{' || curr == '['
 		      || curr == ')' || curr == '}' || curr == ']'))
 		{
-			printf("Structure must only contain ._(){}[] \n");
+			if(print_err){
+				fprintf(stderr,"Structure must only contain ._(){}[] \n");
+			}
 			return false;
 		}
 	}
@@ -70,18 +78,22 @@ bool validateStructure(char* structure, char* sequence){
 
         // if stack is empty that means there are more right brackets than left brackets
              if (mystack.empty() == true ) {
-                 printf("Structure is invalid: more right parentheses than left parentheses\n");
+				 if(print_err){
+                 	fprintf(stderr,"Structure is invalid: more right parentheses than left parentheses\n");
+				 }
                  return false;
              }
 			if(closeBracketArray.find_first_of(structure[i]) != openBracketArray.find_first_of(mystack.top())){ //if current bracket is not corresponding bracket of what we popped
-				printf("Structure bracket types must match and be pseudoknot free\n");
+				if(print_err){
+					fprintf(stderr,"Structure bracket types must match and be pseudoknot free\n");
+				}
 				return false;
 			}
 			mystack.pop();
 		}
 	}
 	if(mystack.empty() == false){
-		printf("Structure is invalid: more left parentheses than right parentheses\n");
+		fprintf(stderr,"Structure is invalid: more left parentheses than right parentheses\n");
 		return false;
 	}
 	return true;
@@ -91,7 +103,7 @@ bool validateStructure(char* structure, char* sequence){
 
 //check if sequence is valid with regular expression
 //check length and if any characters other than GCAUT
-bool validateSequence(const char* string){
+bool validateSequence(const char* string, bool print_err){
 	if(strlen(string) > MAXSLEN){
 		return false;
 	}
@@ -104,7 +116,9 @@ bool validateSequence(const char* string){
   for(const char* it = string; *it; ++it) {
     const char curr = *it;
     if (!(curr == 'G' || curr == 'C' || curr == 'A' || curr == 'U' || curr == 'T')) {
-        printf("Sequence contains character '%c' that is not G,C,A,U, or T.\n",curr);
+		if(print_err){
+        	fprintf(stderr,"Sequence contains character '%c' that is not G,C,A,U, or T.\n",curr);
+		}
         return false;
     }
   }
@@ -153,6 +167,7 @@ void addTimestamp(char** path){
 	}
 }
 
+/*
 //check if input file is in correct format and store value into corresponding variable
 //return true on success, false on fail
 bool validateInteractingInputFile(char* path, char* seq1, char* struc1, char* seq2, char* struc2){
@@ -162,7 +177,7 @@ bool validateInteractingInputFile(char* path, char* seq1, char* struc1, char* se
 
     fp = fopen(path, "r");
     if(!fp){
-        printf("File not found\n");
+        fprintf("File not found\n");
         return false;
     }
     fscanf(fp,"%s\n%s\n%s\n%s",seq1,struc1,seq2,struc2);
@@ -197,4 +212,93 @@ bool validateInteractingInputFile(char* path, char* seq1, char* struc1, char* se
 
     return true;
 }
+*/
 
+bool validateInteractingInputFile2(char* path, char* seq1, char* struc1, char* seq2, char* struc2, bool* sequence1Found, bool* structure1Found, bool* sequence2Found, bool* structure2Found){
+	FILE* fp;
+    char line[MAXSLEN];
+
+    fp = fopen(path, "r");
+    if(!fp){
+        printf("File not found\n");
+        return false;
+    }
+
+	while (fgets(line, sizeof(line), fp)) {
+		if(strcmp(line, "\n") == 0){
+			break;
+		}
+
+		//printf("\ncurrent line: %s\n",line);
+
+		if(*sequence2Found && *structure2Found == false){
+			//printf("#2\n");
+			strncpy(struc2,line,strlen(line)-1);
+			if(validateStructure(struc2,seq2, false)){
+				//store struct2
+				*structure2Found = true;
+			}else if(validateSequence(struc2, false)){
+				//store seq2
+				strncpy(seq2,line,strlen(line)-1);
+				*sequence2Found = true;
+			}else{
+				//error
+				return false;
+			}
+		}
+
+		if(*sequence1Found && *structure1Found == false && *structure2Found == false){
+			//printf("#1\n");
+		
+			strncpy(struc1,line,strlen(line)-1);
+			if(validateStructure(struc1,seq1, false)){
+				//store struct1
+				*structure1Found = true;
+			}else if(validateSequence(struc1, false)){
+				//store seq2
+				strncpy(seq2,line,strlen(line)-1);
+				*sequence2Found = true;
+			}else{
+				//error
+				return false;
+			}
+		}
+
+		if(*sequence1Found && *sequence2Found == false){
+			//printf("store seq2\n");
+			//store seq2
+			strncpy(seq2,line,strlen(line)-1);
+			*sequence2Found = true;
+		}
+
+		if(*sequence1Found == false){
+			//printf("store seq1\n");
+			//store seq1
+			strncpy(seq1,line,strlen(line)-1);
+			*sequence1Found = true;
+		}
+    }
+	
+	if(!(*sequence1Found && *sequence2Found)){
+		return false;
+	}
+/*
+	if(sequence1Found){
+		printf("seq1: %s|\n",seq1);
+	}
+	
+	if(structure1Found){
+		printf("str1: %s|\n",struc1);
+	}
+	printf("\n");
+	if(sequence2Found){
+		printf("seq2: %s|\n",seq2);
+	}
+
+	if(structure2Found){
+		printf("str2: %s|\n",struc2);
+	}
+	printf("\n");
+*/
+	return true;
+}
