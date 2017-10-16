@@ -123,7 +123,7 @@ int main (int argc, char *argv[]) {
 
 	int option;
 
-	//START_HYBRID_PENALTY = 310.0; //default value for hybrid penalty, can be changed with --pen
+	START_HYBRID_PENALTY = -1; 
 
 	//kevin: june 23 2017 https://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Option-Example.html
 	while (1){
@@ -358,7 +358,8 @@ int main (int argc, char *argv[]) {
 	model_2->temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
 	energy_models.push_back(*model_2);
 
-	START_HYBRID_PENALTY = get_START_HYBRID_PENALTY(model_1_Type,model_2_Type);
+	if (START_HYBRID_PENALTY == -1)
+	    START_HYBRID_PENALTY = get_START_HYBRID_PENALTY(model_1_Type,model_2_Type);
 	//printf("penalty: %lf\n",START_HYBRID_PENALTY);
 	//exit(999);
 
