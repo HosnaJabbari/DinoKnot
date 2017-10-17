@@ -1550,5 +1550,11 @@ void s_min_folding::get_hotspots(std::vector<Hotspot*>* hotspot_list){
         hotspot_list->push_back(hotspot);
     }
 
+
+    //printf("final:\n");
+    //for(int i = 0; i< hotspot_list->size(); i++){
+    //    printf("%s %lf\n",hotspot_list->at(i)->get_structure(),hotspot_list->at(i)->get_energy());
+    //}
+
     return;
 }
