@@ -1146,6 +1146,7 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 	//^get disjoint substructure
 	int i = 0;
 	int j = 0;
+
 	for(auto current_substructure_index : disjoint_substructure_index){
 		i = current_substructure_index.first;
 		j = current_substructure_index.second;
@@ -1198,9 +1199,13 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 		}
 		//^Gupdated <- Gupdated U G'kupdated
 	}
-	energy = method2_emodel(sequence, G_updated, structure, energy_models);
 
-	return energy;
+        if (strcmp(G_updated,restricted) == 0) {
+            //printf("method4 g_updated = restricted return INF\n");
+            return INF;
+        }
+	
+        return method2_emodel(sequence, G_updated, structure, energy_models);
 }
 
 //---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------

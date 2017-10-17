@@ -1450,18 +1450,18 @@ int s_min_folding::distance(int left, int right){
 //given a initial hotspot which is a hairpin loop, keep trying to add a arc to form a larger stack
 void s_min_folding::expand_hotspot(Hotspot* hotspot){
     //printf("\nexpanding hotspot: i: %d j: %d\n",hotspot->get_left_inner_index(),hotspot->get_right_inner_index());
-    
-    double energy = 0;   
-    int non_gc_penalty = 0;  
+
+    double energy = 0;
+    int non_gc_penalty = 0;
     int dangle_top_penalty = 0;
     int dangle_bot_penalty = 0;
-    
+
     //calculation for the hairpin that is already in there
     V->compute_hotspot_energy(hotspot->get_left_outer_index(),hotspot->get_right_outer_index(),0);
-    
+
     //try to expand by adding a arc right beside the current out most arc
     while(hotspot->get_left_outer_index()-1 >= 0 && hotspot->get_right_outer_index()+1 <= nb_nucleotides-1){
-        if(can_pair(int_sequence[hotspot->get_left_outer_index()-1],int_sequence[hotspot->get_right_outer_index()+1])){    
+        if(can_pair(int_sequence[hotspot->get_left_outer_index()-1],int_sequence[hotspot->get_right_outer_index()+1])){
             hotspot->move_left_outer_index();
             hotspot->move_right_outer_index();
             hotspot->increment_size();
@@ -1473,7 +1473,7 @@ void s_min_folding::expand_hotspot(Hotspot* hotspot){
     }
 
     non_gc_penalty += AU_penalty (int_sequence[hotspot->get_left_outer_index()],int_sequence[hotspot->get_right_outer_index()]);
-    
+
     //if current out left-1 >= 0  (aka still have spot on left side of curent left out)
     //if current out right+1 <= nb_nuc-1 (aka still have spot on right side of curent right out)
     if(hotspot->get_left_outer_index() - 1 >= 0 && hotspot->get_right_outer_index() + 1 <= nb_nucleotides-1){
@@ -1517,9 +1517,9 @@ void s_min_folding::get_hotspots(std::vector<Hotspot*>* hotspot_list){
         for(int j = i; j < this->nb_nucleotides; j++){
             if(can_pair(this->int_sequence[i],this->int_sequence[j]) && distance(i,j) >= min_bp_distance){
                 current_hotspot = new Hotspot(i,j,nb_nucleotides);
-                
+
                 expand_hotspot(current_hotspot);
-                
+
                 if(current_hotspot->get_size() < min_stack_size || current_hotspot->is_invalid_energy()){
                     delete current_hotspot;
                     //printf("delete\n");
@@ -1550,12 +1550,5 @@ void s_min_folding::get_hotspots(std::vector<Hotspot*>* hotspot_list){
         hotspot_list->push_back(hotspot);
     }
 
-    printf("final:\n");
-    for(int i = 0; i< hotspot_list->size(); i++){
-        printf("%s %lf\n",hotspot_list->at(i)->get_structure(),hotspot_list->at(i)->get_energy());
-    }
-
-
-    
     return;
 }
