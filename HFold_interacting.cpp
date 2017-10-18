@@ -591,13 +591,13 @@ double get_START_HYBRID_PENALTY(int type1, int type2){
 		if(type1 == RNA){ //if both are RNA 
 			return 3.0; 
 		}else if(type1 == DNA){ //if both are DNA 
-			return 2.123065105; 
+			return 4.4785825; 
 		}else if(type1 == PMO){
 			fprintf(stderr, "ERROR: model cannot be both PMO\n");
 			exit(1);
 		}
 	}else{
-		return 44.2244816; //when 2 different model
+		return 58.4511432; //when 2 different model
 	}
 }
 
