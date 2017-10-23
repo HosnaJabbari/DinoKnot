@@ -1506,10 +1506,10 @@ void s_min_folding::expand_hotspot(Hotspot* hotspot){
 
 //kevin 4 oct 2017
 //look for every possible hairpin loop, and try to add a arc to form a larger stack with at least min_stack_size bases
-void s_min_folding::get_hotspots(std::vector<Hotspot*>* hotspot_list){
-    int max_hotspot = 20;
+void s_min_folding::get_hotspots(std::vector<Hotspot*>* hotspot_list,int max_hotspot){
+    //printf("max hotspot: %d\n",max_hotspot);
     int min_bp_distance = 3;
-    int min_stack_size = 3; //todo kevin change this
+    int min_stack_size = 3; //the hotspot must be a stack of size >= 3
 
     Hotspot* current_hotspot;
     //start at min_stack_size-1 and go outward to try to add more arcs to form bigger stack because we cannot expand more than min_stack_size from there anyway

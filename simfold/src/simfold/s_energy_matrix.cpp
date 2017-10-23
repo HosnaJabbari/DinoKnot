@@ -232,7 +232,7 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
     min_en[1] = INF;
     min_en[2] = INF;
     min_en[3] = INF;
-    
+
 	// Hosna, March 26, 2012
 	// if the restricted base pairs are non-canonical then checking for can_pair only will cause missing those base pairs
 	if (can_pair (sequence[i], sequence[j]) || (fres[i].pair == j && fres[j].pair ==i)) {

@@ -61,7 +61,7 @@ class s_min_folding
         // writes the predicted MFE structure into structure       
 
         //kevin 4 oct 2017
-        void get_hotspots(std::vector<Hotspot*>* hotspot_list);
+        void get_hotspots(std::vector<Hotspot*>* hotspot_list, int max_hotspot);
 
     // better to have protected variable rather than private, it's necessary for Hfold
     protected:

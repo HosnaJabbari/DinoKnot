@@ -78,6 +78,6 @@ PARAMTYPE s_calculate_enthalpy (int *sequence, char *csequence, str_features *f)
 //kevin 4 oct 2017
 //comparison function for hotspot so we can use it when sorting
 bool compare_hotspot_ptr(Hotspot* a, Hotspot* b);
-void get_hotspots(char *sequence,std::vector<Hotspot*>* hotspot_list);
+void get_hotspots(char *sequence,std::vector<Hotspot*>* hotspot_list, int max_hotspot);
 
 #endif

@@ -123,6 +123,8 @@ int main (int argc, char *argv[]) {
 
 	int option;
 
+	int max_hotspot = 20; //default value for number of hotspot
+
 	START_HYBRID_PENALTY = -1; 
 
 	//kevin: june 23 2017 https://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Option-Example.html
@@ -137,7 +139,8 @@ int main (int argc, char *argv[]) {
 				{"t2", required_argument, 0, 'f'},	//type for sequence2
 				{"pen",required_argument, 0, 'g'},  //start_hybrid_penalty
 				{"n"  ,required_argument, 0, 'h'}, 	//number of suboptimal structure
-				{"o_dir", required_argument, 0, 'j'},
+				{"o_dir", required_argument, 0, 'j'},	//output every file to directory
+				{"hotspot_num", required_argument, 0, 'k'}, //max number of hotspot
 				{0, 0, 0, 0}
 			};
 		// getopt_long stores the option index here.
@@ -297,6 +300,14 @@ int main (int argc, char *argv[]) {
 				printf("optarg: %s\n",optarg);
 				outputDirFound = true;
 				break;
+			case 'k':
+				if(atoi(optarg) <= 0){
+					fprintf(stderr, "number of hotspot must be > 0\n");
+					errorFound = true;
+					break;
+				}
+				max_hotspot = atoi(optarg);
+				break;
 			default:
 				errorFound = true;
 				break;
@@ -422,7 +433,7 @@ int main (int argc, char *argv[]) {
 		}
 	}else{
 		//printf("start hotspot for struct1\n");
-		get_hotspots(inputSequence1, &hotspot_list1);
+		get_hotspots(inputSequence1, &hotspot_list1,max_hotspot);
 	}
 
 	if(structure2Found){
@@ -438,7 +449,7 @@ int main (int argc, char *argv[]) {
 		}
 	}else{
 		//printf("start hotspot for struct2\n");
-		get_hotspots(inputSequence2, &hotspot_list2);
+		get_hotspots(inputSequence2, &hotspot_list2,max_hotspot);
 	}
 
 

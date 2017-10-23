@@ -793,9 +793,9 @@ bool compare_hotspot_ptr(Hotspot* a, Hotspot* b) {
 
 //kevin 26 Sept 2017 
 //wrapper to cal get hotspots
-void get_hotspots(char *sequence,std::vector<Hotspot*>* hotspot_list){
+void get_hotspots(char *sequence,std::vector<Hotspot*>* hotspot_list, int max_hotspot){
     s_min_folding *min_fold = new s_min_folding (sequence);
-    min_fold->get_hotspots(hotspot_list);
+    min_fold->get_hotspots(hotspot_list,max_hotspot);
     delete min_fold;
 }
 
