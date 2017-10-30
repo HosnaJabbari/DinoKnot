@@ -105,6 +105,7 @@ int main (int argc, char *argv[]) {
 	char* outputDir;
 	outputDir = (char*) malloc(sizeof(char) * 1000);
 
+
 	int model_1_Type = -1;
 	int model_2_Type = -1;
 
@@ -118,6 +119,10 @@ int main (int argc, char *argv[]) {
 	bool errorFound = false;
 	bool type1Found = false;
 	bool type2Found = false;
+	
+	bool hotspot_only = false;
+	char* hotspotDir;
+	hotspotDir = (char*) malloc(sizeof(char) * 1000);
 
 	int number_of_suboptimal_structure = 0;
 
@@ -141,6 +146,7 @@ int main (int argc, char *argv[]) {
 				{"n"  ,required_argument, 0, 'h'}, 	//number of suboptimal structure
 				{"o_dir", required_argument, 0, 'j'},	//output every file to directory
 				{"hotspot_num", required_argument, 0, 'k'}, //max number of hotspot
+				{"hotspot_only", required_argument, 0, 'l'}, //only dump hotspots to file
 				{0, 0, 0, 0}
 			};
 		// getopt_long stores the option index here.
@@ -308,6 +314,10 @@ int main (int argc, char *argv[]) {
 				}
 				max_hotspot = atoi(optarg);
 				break;
+			case 'l':
+				hotspot_only = true;
+				strcpy(hotspotDir, optarg);
+				break;
 			default:
 				errorFound = true;
 				break;
@@ -452,6 +462,23 @@ int main (int argc, char *argv[]) {
 		get_hotspots(inputSequence2, &hotspot_list2,max_hotspot);
 	}
 
+	if(hotspot_only){
+		FILE* fp = fopen(hotspotDir,"w");
+		if(fp == NULL){
+			fprintf(stderr, "cannot write to hotspot file\n");
+			exit(4);
+		}
+		for(int i =0; i < hotspot_list1.size(); i++){
+			fprintf(fp,"Seq1_hotspot_%d: %s\n",i,hotspot_list1[i]->get_structure());
+		}
+		fprintf(fp,"-----\n");
+		for(int j = 0; j < hotspot_list2.size(); j++){
+			fprintf(fp,"Seq2_hotspot_%d: %s\n",j,hotspot_list2[j]->get_structure());
+		}
+		fclose(fp);
+		free(hotspotDir);
+		exit(0);
+	}
 
 	Result* result;
 	std::vector<Result*> result_list;
@@ -510,6 +537,7 @@ int main (int argc, char *argv[]) {
     free(inputPath);
 	free(outputPath);
 	free(outputDir);
+	free(hotspotDir);
 
 	for (int i=0; i < result_list.size(); i++) {
 		delete result_list[i];

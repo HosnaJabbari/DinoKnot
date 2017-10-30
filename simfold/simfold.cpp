@@ -125,7 +125,6 @@ int main (int argc, char *argv[])
     double energies[MAXSUBSTR];
     int actual_num_str;
     //debug = 1;
-
     get_arguments (argc, argv);
 
     // Before calling any function in the library, you have to initialize config_file, dna_or_rna, temperature

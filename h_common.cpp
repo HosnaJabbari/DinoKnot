@@ -1066,6 +1066,7 @@ int is_invalid_restriction(char* restricted_structure, char* current_structure){
 
 //kevin 18 July
 void simfold_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	//printf("simfold emodel\n");
 	W_final *simfold = new W_final (sequence, restricted, energy_models);
 	if (simfold == NULL) giveup ("Cannot allocate memory", "method3 Simfold");
 	double min_energy = simfold->call_simfold_emodel();
@@ -1114,6 +1115,7 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 
 //kevin 18 July
 double method3_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	//printf("m3\n");
 	double energy = 0;
 	int length = strlen(sequence);
 	char simfold_structure[length];
@@ -1133,6 +1135,7 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 
 //kevin 18 July
 double method4_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models){
+	//printf("m4\n");
 	int KEVIN_DEBUG = 0;
 	double energy = 0;
 	int length = strlen(sequence);
@@ -1232,20 +1235,21 @@ void remove_structure_intersection(char* G1, char* G0, char* G_p){
 //kevin 18 July
 //july 24: changed hfold, hfold_pkonly to a method; changed replaced final_structure with method1-4_structure
 double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models, int &method_used){
-
+	//printf("start interacting emodel\n");
 	double energy = 0;
 	double min_energy = INF;
 	char method1_structure[strlen(sequence)+1];
 	char method2_structure[strlen(sequence)+1];
 	char method3_structure[strlen(sequence)+1];
 	char method4_structure[strlen(sequence)+1];
-
+	
+	//printf("outside method1\n");
 	min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
 	method_used = 1;
 	strcpy(structure,method1_structure);
 	//printf("method1 energy: %lf\n",min_energy);
 	//printf("method1: %s %lf\n",method1_structure,min_energy);
-
+	//printf("ouside method2\n");
 	energy = method2_emodel(sequence,restricted,method2_structure,energy_models);
 	//printf("method2: %s %lf\n",method2_structure,energy);
 	if(energy < min_energy){
@@ -1253,7 +1257,7 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 		min_energy = energy;
 		strcpy(structure,method2_structure);
 	}
-
+	//printf("outside method3\n");
 	energy = method3_emodel(sequence,restricted,method3_structure,energy_models);
 	//printf("method3: %s %lf\n",method3_structure,energy);
 	if(energy < min_energy){
@@ -1261,7 +1265,8 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 		min_energy = energy;
 		strcpy(structure,method3_structure);
     }
-
+	
+	//printf("outside method4\n");
 	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
 	//printf("method4: %s %lf\n",method4_structure,energy);
 	if(energy < min_energy){
@@ -1276,6 +1281,7 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 		fprintf(stderr, "Structure: %s\n",structure);
 		exit(6);
 	}
+	//printf("end interacting emodel\n");
 	return min_energy;
 }
 
