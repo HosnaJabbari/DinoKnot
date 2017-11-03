@@ -433,37 +433,37 @@ PFTYPE s_partition_function::compute_partition_function ()
                 compute_u1 (i,j);   // must be after s3!!
                 compute_s2 (i,j);
 
-                if (std::isinf(upm[ij]) || ::isnan(upm[ij]))
+                if (::isinf(upm[ij]) || ::isnan(upm[ij]))
                 {
                     fprintf (stderr, "UPM(%d,%d) = %Lg\n", i, j, upm[ij]);
                     exit(1);
                 }
-                if (std::isinf(up[ij])  || ::isnan(up[ij]))
+                if (::isinf(up[ij])  || ::isnan(up[ij]))
                 {
                     fprintf (stderr, "UP(%d,%d) = %Lg\n", i, j, up[ij]);
                     exit(1);
                 }
-                if (std::isinf(s1[ij])  || ::isnan(s1[ij]))
+                if (::isinf(s1[ij])  || ::isnan(s1[ij]))
                 {
                     fprintf (stderr, "S1(%d,%d) = %Lg\n", i, j, s1[ij]);
                     exit(1);
                 }
-                if (std::isinf(u[ij])   || ::isnan(u[ij]))
+                if (::isinf(u[ij])   || ::isnan(u[ij]))
                 {
                     fprintf (stderr, "U(%d,%d) = %Lg\n", i, j, u[ij]);
                     exit(1);
                 }
-                if (std::isinf(s3[ij])  || ::isnan(s3[ij]))
+                if (::isinf(s3[ij])  || ::isnan(s3[ij]))
                 {
                     fprintf (stderr, "S3(%d,%d) = %Lg\n", i, j, s3[ij]);
                     exit(1);
                 }
-                if (std::isinf(u1[ij])  || ::isnan(u1[ij]))
+                if (::isinf(u1[ij])  || ::isnan(u1[ij]))
                 {
                     fprintf (stderr, "U1(%d,%d) = %Lg\n", i, j, u1[ij]);
                     exit(1);
                 }
-                if (std::isinf(s2[ij])  || ::isnan(s2[ij]))
+                if (::isinf(s2[ij])  || ::isnan(s2[ij]))
                 {
                     fprintf (stderr, "S2(%d,%d) = %Lg\n", i, j, s2[ij]);
                     exit(1);
