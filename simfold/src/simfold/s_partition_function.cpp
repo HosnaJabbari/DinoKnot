@@ -414,6 +414,7 @@ void s_partition_function::initialize_arrays ()
 PFTYPE s_partition_function::compute_partition_function ()
 // the recursions are taken from Ding and Lawrence, "A statistical sampling algorithm for RNA secondary structure prediction", NAR 2003
 {
+/*
     int i, j, ij;
     //for (j=TURN+1; j < seqlen; j++)
     for (j=1; j < seqlen; j++)
@@ -515,7 +516,9 @@ PFTYPE s_partition_function::compute_partition_function ()
         Z = u_ip_jp[firstlast] + u_ip_ju[firstlast] + u_iu_jp[firstlast] + u_iu_ju[firstlast];
     }
     return Z;
+*/
 }
+
 
 
 void s_partition_function::print_u()
@@ -2699,6 +2702,7 @@ int s_partition_function::verify_partition_function()
 //      compute_partition_function_exhaustively();
 // POST: returns 1 if there's error, 0 otherwise
 {
+/*
     //#define PREC 0.0000000001
     int i,j,ij;
     int error = 0;
@@ -2731,11 +2735,14 @@ int s_partition_function::verify_partition_function()
         error = 1;
     }
     return error;
+*/
 }
+ 
 
 
 void s_partition_function::verify_recurrences()
 {
+/*
     int i,j,ij;
     int error = 0;
 //     printf ("Checking u  .................. ");
@@ -2857,26 +2864,26 @@ void s_partition_function::verify_recurrences()
     if (ufine)
         printf ("\t++++++++++++++++++++++\n");
 
-    /*
-    printf ("Checking s1 ................... ");
-    int s1fine = 1;
-    for (i=0; i < seqlen; i++)
-        for (j=i+1; j < seqlen; j++)
-        {
-            ij = index[i]+j-i;
-            //s3 should be the same as s3_jp + s3_ju
-            double s1new = s1_jp[ij] + s1_ju[ij];
-            if (s1[ij] - s1new > PREC || s1new - s1[ij] > PREC)
-            {
-                if (s1fine)
-                    printf ("\t----------------------\n");
-                printf ("\ts1new[%d,%d] = %g, s1 = %g, diff = %g\n", i,j,s1new,s1[ij], s1new-s1[ij]);
-                s1fine = 0;
-            }
-        }
-    if (s1fine)
-        printf ("\t++++++++++++++++++++++\n");
-    */
+    
+//    printf ("Checking s1 ................... ");
+//    int s1fine = 1;
+//    for (i=0; i < seqlen; i++)
+//        for (j=i+1; j < seqlen; j++)
+//        {
+//            ij = index[i]+j-i;
+//            //s3 should be the same as s3_jp + s3_ju
+//            double s1new = s1_jp[ij] + s1_ju[ij];
+//            if (s1[ij] - s1new > PREC || s1new - s1[ij] > PREC)
+//            {
+//                if (s1fine)
+//                    printf ("\t----------------------\n");
+//                printf ("\ts1new[%d,%d] = %g, s1 = %g, diff = %g\n", i,j,s1new,s1[ij], s1new-s1[ij]);
+//                s1fine = 0;
+//            }
+//        }
+//    if (s1fine)
+//        printf ("\t++++++++++++++++++++++\n");
+    
 
 //     printf ("Checking u1 ................... ");
 //     int u1fine = 1;
@@ -2919,7 +2926,7 @@ void s_partition_function::verify_recurrences()
 
 
     //if (error)  exit(1);
-
+*/
 }
 
 
@@ -5692,6 +5699,7 @@ void s_partition_function::compute_logZ_gradient ()
 int s_partition_function::correct_gradient ()
 // return 1 if it is correct, 0 otherwise
 {
+/*
     int index_param;
     int i, j, k, l, m, n, o, p;
     index_param = 0;
@@ -5721,6 +5729,7 @@ int s_partition_function::correct_gradient ()
         }
     }
     return correct;
+*/
 }
 
 void s_partition_function::copy_gradient (PFTYPE *grad)
@@ -5747,6 +5756,7 @@ void s_partition_function::copy_gradient_exhaustively (PFTYPE *grad)
 int s_partition_function::correct_gradient_nan ()
 // return 1 if no derivative is nan
 {
+/*
     int i;
     int correct = 1;
     for (i=0; i < num_params; i++)
@@ -5758,8 +5768,8 @@ int s_partition_function::correct_gradient_nan ()
         }
     }
     return correct;
+*/
 }
-
 
 
 void s_partition_function::print_gradient ()
