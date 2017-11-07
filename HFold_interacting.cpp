@@ -125,7 +125,7 @@ int main (int argc, char *argv[]) {
 
 	int max_hotspot = 20; //default value for number of hotspot
 
-	START_HYBRID_PENALTY = -1; 
+	START_HYBRID_PENALTY = -1;
 
 	//kevin: june 23 2017 https://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Option-Example.html
 	while (1){
@@ -487,7 +487,6 @@ int main (int argc, char *argv[]) {
 	if(outputPathFound){
 		bool write_success = write_output_file(outputPath, number_of_output, result_list);
 		if(!write_success){
-			fprintf(stderr, "write to file fail\n");
 			exit(4);
 		}
 	}else if(outputDirFound){
@@ -548,6 +547,7 @@ void printUsage(){
 bool write_output_file(char* path_to_file, int num_of_output, std::vector<Result*> result_list){
 	FILE* fp = fopen(path_to_file,"w");
 	if (fp == NULL) {
+        perror("Write to file error:");
 		return false;
 	}
 	fprintf(fp,"Seq: %s\n",result_list[0]->get_sequence());
@@ -575,7 +575,7 @@ bool write_directory(char* path_to_dir, int num_of_output, std::vector<Result*> 
 		free(path_to_file);
 		fclose(fp);
 	}
-	
+
 	return true;
 }
 
@@ -599,10 +599,10 @@ int validateModelType(char* type){
 
 double get_START_HYBRID_PENALTY(int type1, int type2){
 	if(type1 == type2){ //if both model are the same
-		if(type1 == RNA){ //if both are RNA 
-			return 3.0; 
-		}else if(type1 == DNA){ //if both are DNA 
-			return 4.4785825; 
+		if(type1 == RNA){ //if both are RNA
+			return 3.0;
+		}else if(type1 == DNA){ //if both are DNA
+			return 4.4785825;
 		}else if(type1 == PMO){
 			fprintf(stderr, "ERROR: model cannot be both PMO\n");
 			exit(1);
