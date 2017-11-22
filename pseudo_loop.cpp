@@ -4238,6 +4238,29 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 	//				printf("P_WI: case 3: min = %d and best_row = %d \n",min,best_row);
 				}
 			}
+                        //Mahyar and Kevin, Nov 22 2017 todo confirm
+			int new_j = j;
+                        if(int_sequence[new_j] == X){
+                                while(int_sequence[new_j-1] == X){
+                                        new_j--;
+                                        best_row = 4;
+                                }
+
+                        }
+                        //added this to check if i is a X
+                        //if it is, move i till it is the last X so the next iteration can handle it properly
+                        int new_i = i;
+                        if(int_sequence[new_i] == X){
+                                while(int_sequence[new_i+1] == X){
+                                        new_i++;
+                                        best_row = 4;
+                                }
+                        }
+                        //added this to make sure after we move the new i and j, we do not cross
+                        //if it is, error
+                        if(new_i >= new_j){
+                                best_row = -1; //error
+                        }
 			switch (best_row)
 			{
 				case 1:
@@ -4275,6 +4298,14 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 						insert_node(i,j,P_WMB);
 					}
 					break;
+                                case 4: //Mahyar and Kevin, Nov 22 2017 todo confirm
+					// added this case to jump i or j when encounter X
+                                        insert_node(new_i,new_j,M_WM);
+                                        break;
+                                default:
+                                        printf("i= %d j=%d\n",i,j);
+                                        fprintf(stderr, "ERROR backtrack M_WM has no best row\n");
+                                        exit(10);
 			}
 		}
 			break;
@@ -4575,6 +4606,30 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 	//				printf("P_WIP: case 5: min = %d and best_row = %d \n",min,best_row);
 				}
 			}
+                        
+                        //Mahyar and Kevin, Nov 22 2017 todo confirm
+                        int new_j = j;
+                        if(int_sequence[new_j] == X){
+                                while(int_sequence[new_j-1] == X){
+                                        new_j--;
+                                        best_row = 6;
+                                }
+
+                        }
+                        //added this to check if i is a X
+                        //if it is, move i till it is the last X so the next iteration can handle it properly
+                        int new_i = i;
+                        if(int_sequence[new_i] == X){
+                                while(int_sequence[new_i+1] == X){
+                                        new_i++;
+                                        best_row = 6;
+                                }
+                        }
+                        //added this to make sure after we move the new i and j, we do not cross
+                        //if it is, error
+                        if(new_i >= new_j){
+                                best_row = -1; //error
+                        }
 			switch(best_row)
 			{
 				case 1:
@@ -4628,6 +4683,14 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 						insert_node(i,j,P_WMB);
 					}
 					break;
+                                case 6: //Mahyar and Kevin, Nov 22 2017 todo confirm
+                                        //added this case to jump i or j when encounter X
+                                        insert_node(new_i,new_j,M_WM);
+                                        break;
+                                default:
+                                        printf("i= %d j=%d\n",i,j);
+                                        fprintf(stderr, "ERROR backtrack M_WM has no best row\n");
+                                        exit(10);
 			}
 		}
 			break;
