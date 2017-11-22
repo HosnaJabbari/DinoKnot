@@ -232,7 +232,7 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
     min_en[1] = INF;
     min_en[2] = INF;
     min_en[3] = INF;
-
+   
 	// Hosna, March 26, 2012
 	// if the restricted base pairs are non-canonical then checking for can_pair only will cause missing those base pairs
 	if (can_pair (sequence[i], sequence[j]) || (fres[i].pair == j && fres[j].pair ==i)) {
@@ -251,7 +251,7 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
                 // Hybrid molecule penalty
                 // This needs to be out here as we cannot tell if the energy models are different in H->compute_energy_restricted_emodel
                 // requires there to be exactly 2 energy models
-				if( is_cross_model(i,j) ) {    // If cross model and working with a hybrid molecule 
+				if( is_cross_model(i,j) ) {    // If cross model 
                    min_en[0] += START_HYBRID_PENALTY;  
                    //printf("added penalty\n");                                              // add a hybrid molecule penalty
 				}
@@ -271,28 +271,13 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
                     energy_model.energy_value = VBI->compute_energy_restricted_emodel (i, j, fres, &energy_model);
                 }
                 min_en[2] = emodel_energy_function (i, j, energy_models);
-                // Ian Wark and Kevin Aug 10 2017
-                // Hybrid molecule penalty
-                // This needs to be out here as we cannot tell if the energy models are different in H->compute_energy_restricted_emodel
-                // requires there to be exactly 2 energy models
-                if( is_cross_model(i,j)) {    // If cross model and working with a hybrid molecule 
-                    min_en[2] += START_HYBRID_PENALTY;  
-                    //printf("added penalty\n");                                              // add a hybrid molecule penalty
-                }
+                
 
                 for (auto &energy_model : *energy_models) {
                     energy_model.energy_value = VM->compute_energy_restricted_emodel (i, j, fres, &energy_model);
                 }
                 
                 min_en[3] = emodel_energy_function (i, j, energy_models);
-
-                //kevin Aug 11 2017
-                //add hybrid penalty for VM when i+1 or j-1 is linker (discussed with Hosna, Mahyar)
-                if(sequence[i+1] == X || sequence[j-1] == X){ //if linker is in i+1 or j-1
-                    min_en[3] += START_HYBRID_PENALTY;
-                    //printf("added penalty\n");      
-                }
-
 
             }
         }
@@ -319,7 +304,7 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
         case  3: type = MULTI; break;
         default: type = NONE;
     }
-//printf ("V(%d,%d) %c energy %d %d %d %d\n", i, j, type, min_en[0],min_en[1],min_en[2],min_en[3]);
+//printf ("V(%d,%d) %c energy %d %d %d %d, min=%d\n", i, j, type, min_en[0],min_en[1],min_en[2],min_en[3],min);
 
     if (min < INF/2) {
         int ij = index[i]+j-i;
@@ -358,7 +343,7 @@ void s_energy_matrix::compute_energy_restricted_pkonly_emodel (int i, int j, str
                 // Hybrid molecule penalty
                 // This needs to be out here as we cannot tell if the energy models are different in H->compute_energy_restricted_emodel
                 // requires there to be exactly 2 energy models
-				if( is_cross_model(i,j)) {   // If cross model and working with a hybrid molecule
+				if( is_cross_model(i,j)) {   // If cross model
                    min_en[0] += START_HYBRID_PENALTY;                                            
 				}
 			}
@@ -376,21 +361,12 @@ void s_energy_matrix::compute_energy_restricted_pkonly_emodel (int i, int j, str
                     energy_model.energy_value = VBI->compute_energy_restricted_pkonly_emodel (i, j, fres, &energy_model);
                 }
                 min_en[2] = emodel_energy_function (i, j, energy_models);
-                //kevin Aug 11 2017
-                //add hybrid penalty for VBI
-                if( is_cross_model(i,j)) { // If working with a hybrid molecule and this hairpin includes the linker,
-                    min_en[2] += START_HYBRID_PENALTY;      
-                }
 
                 for (auto &energy_model : *energy_models) {
                     energy_model.energy_value = VM->compute_energy_restricted_emodel (i, j, fres, &energy_model); // should be left as is, Hosna April 18, 2012
                 }
                 min_en[3] = emodel_energy_function (i, j, energy_models);
-                //kevin Aug 11 2017
-                //add hybrid penalty for VM when i+1 or j-1 is linker (discussed with Hosna, Mahyar)
-                if(sequence[i+1] == X || sequence[j-1] == X ){ //if linker is in i+1 or j-1
-                    min_en[3] += START_HYBRID_PENALTY;      
-                }
+
             }
         }
     }

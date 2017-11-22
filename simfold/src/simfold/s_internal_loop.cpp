@@ -342,12 +342,12 @@ int best_jp = -999;
 			// Hosna, March 26, 2012
 			// changed to accommodate non-canonical base pairs in the restricted structure
 			ttmp = get_energy_str_restricted_emodel (i, j, ip, jp, fres, model);
-            /*
-            if(i==34 && j==64 && ip == 44 && jp == 57){
-                printf("aaaaaaaaaaaa  %d\n",ttmp);
-               
+
+            // Mahyar and Kevin Nov 14, 2017
+            if( is_cross_model(i,j) && !(is_cross_model(ip,jp))) {    // If ij cross molecule but ip,jp does not cross 
+                ttmp += START_HYBRID_PENALTY;  
+                //printf("added penalty\n");                                              // add a hybrid molecule penalty
             }
-            */
 
             if (ttmp < mmin)
             {
@@ -410,6 +410,12 @@ PARAMTYPE s_internal_loop::compute_energy_restricted_pkonly_emodel (int i, int j
             //ttmp = get_energy_str (i, j, ip, jp);
 			// pkonly version
 			ttmp = (fres[ip].pair == jp && fres[jp].pair == ip)? get_energy_str_restricted_emodel (i, j, ip, jp, fres, model): INF;
+
+            // Mahyar and Kevin Nov 20, 2017
+            if( is_cross_model(i,j) && !(is_cross_model(ip,jp))) {    // If ij cross molecule but ip,jp does not cross 
+                ttmp += START_HYBRID_PENALTY;  
+                //printf("added penalty\n");                                              // add a hybrid molecule penalty
+            }
 
             if (ttmp < mmin)
             {
@@ -900,8 +906,10 @@ PARAMTYPE s_internal_loop::get_energy_str_restricted_emodel (int i, int j, int i
     // Ian Wark and Kevin July 20 2017
     // These are the only cases that are actually used in the following code
     // if i,j,ip, or jp are linker (X), cannot pair
-    if (sequence[i] == X || sequence[j] == X || sequence[ip] == X || sequence[jp] == X)
+
+    if (sequence[i] == X || sequence[j] == X || sequence[ip] == X || sequence[jp] == X){
         return INF;
+    }
 
     //kevin and Mahyar 6 Sep 2017
     //check ip/jp is restricted and if the ip/jp is not the corresponding pair, return INF
@@ -1731,10 +1739,7 @@ PARAMTYPE s_internal_loop::get_energy_emodel (int i, int j, int ip, int jp, int 
 // returns the free energy of the internal loop closed at (i,j,ip,jp)
 // Also called by the partition function
 {
-    // TODO
-    //return 100;
-    //printf ("\n3\n");
-
+    //printf("s_internal_loop::get_energy_emodel i:%d ip:%d jp:%d j:%d\n",i,ip,jp,j);
     PARAMTYPE energy = INF;   // just in case i,j,ip,jp are not closing an internal loop
     PARAMTYPE penalty_size, asym_penalty, ip_jp_energy, i_j_energy;
     int branch1, branch2, l;
@@ -1743,8 +1748,10 @@ PARAMTYPE s_internal_loop::get_energy_emodel (int i, int j, int ip, int jp, int 
 	//if (sequence[i] == X || sequence[j] == X || sequence[ip] == X || sequence[jp] == X || sequence[i+1] == X || sequence[j+1] == X || sequence[ip+1] == X || sequence[jp+1] == X || sequence[i-1] == X || sequence[j-1] == 4 || sequence[ip-1] == 4 || sequence[jp-1] == 4)
 	//	return INF;
 
-    if (sequence[i] == X || sequence[i+1] == X || sequence[ip] == X || sequence[ip+1] == X || sequence[ip-1] == X || sequence[j] == X || sequence[jp] == X || sequence[j-1] == X || sequence[jp-1] == X || sequence[jp+1] == X)
+    if (sequence[i] == X || sequence[ip] == X || sequence[j] == X || sequence[jp] == X)
 		return INF;
+
+    
 
     if (exists_restricted_ptable (i,ip,ptable) || exists_restricted_ptable (jp,j,ptable))
         return INF;
@@ -1752,41 +1759,72 @@ PARAMTYPE s_internal_loop::get_energy_emodel (int i, int j, int ip, int jp, int 
     branch1 = ip-i-1;
     branch2 = j-jp-1;
 
+    //kevin and mahyar Nov 20 2017 todo confirm
+    if(is_cross_model(i,ip)){
+        branch1 -= linker_length;
+    }
+    
+    //kevin and mahyar Nov 20 2017 todo confirm
+    if(is_cross_model(jp,j)){
+        branch2 -= linker_length;
+    }
+
+    //Kevin and Mahyar, Nov 20 2017 todo confirm
+    int next_valid_i_base = i + 1;
+    if (sequence[next_valid_i_base] == X){
+        next_valid_i_base += linker_length;
+    }
+    int prev_valid_j_base = j - 1;
+    if (sequence[prev_valid_j_base] == X){
+        prev_valid_j_base -= linker_length;
+    }
+
+    int prev_valid_ip_base = ip - 1;
+    if (sequence[prev_valid_ip_base] == X){
+        prev_valid_ip_base -= linker_length;
+    }
+    int next_valid_jp_base = jp + 1;
+    if (sequence[next_valid_jp_base] == X){
+        next_valid_jp_base += linker_length;
+    }
+
     if (branch1 != 0 || branch2 != 0)
     {
+
         // check if it is a bulge loop of size 1
         // check if it is int11 or int21 or int22
         if (branch1 == 1 && branch2 == 1 && !simple_internal_energy)     // it is int11
         {
-                        // int11[i][j][i+1][j-1][ip][jp]
+                        // int11[i][j][i+1][j-1][ip][jp]            
             energy = model->int11 [sequence[i]][sequence[j]]
-                           [sequence[i+1]][sequence[j-1]]
+                           [sequence[next_valid_i_base]][sequence[prev_valid_j_base]]
                            [sequence[ip]][sequence[jp]];
-            check_int11_emodel_parameters (sequence[i], sequence[j], sequence[i+1], sequence[j-1], sequence[ip], sequence[jp], model);
+            
+            check_int11_emodel_parameters (sequence[i], sequence[j], sequence[next_valid_i_base], sequence[prev_valid_j_base], sequence[ip], sequence[jp], model);
         }
         else if (branch1 == 1 && branch2 == 2 && !simple_internal_energy)
         {
             // int21[i][j][i+1][j-1][ip][jp][jp+1]
-            energy = model->int21 [sequence[i]][sequence[j]]
-                           [sequence[i+1]][sequence[j-1]]
+           energy = model->int21 [sequence[i]][sequence[j]]
+                           [sequence[next_valid_i_base]][sequence[prev_valid_j_base]]
                            [sequence[ip]][sequence[jp]]
-                           [sequence[jp+1]];
+                           [sequence[next_valid_jp_base]];
         }
         else if(branch1 == 2 && branch2 == 1 && !simple_internal_energy)
         {
             // after rotation: int21[jp][ip][j-1][ip-1][j][i][i+1]
             energy = model->int21 [sequence[jp]][sequence[ip]]
-                           [sequence[j-1]][sequence[ip-1]]
+                           [sequence[prev_valid_j_base]][sequence[prev_valid_ip_base]]
                            [sequence[j]][sequence[i]]
-                           [sequence[i+1]];
+                           [sequence[next_valid_i_base]];
         }
         else if (branch1 == 2 && branch2 == 2 && !simple_internal_energy)
         {
             // int22[i][j][i+1][j-1][ip][jp][ip-1][jp+1]
             energy = model->int22 [sequence[i]][sequence[j]]
-                           [sequence[i+1]][sequence[j-1]]
+                           [sequence[next_valid_i_base]][sequence[prev_valid_j_base]]
                            [sequence[ip]][sequence[jp]]
-                           [sequence[ip-1]][sequence[jp+1]];
+                           [sequence[prev_valid_ip_base]][sequence[next_valid_jp_base]];
             //printf ("IN GET_ENERGY int22(%d,%d,%d,%d,%d,%d,%d,%d): %g\n", sequence[i],sequence[j],sequence[i+1],sequence[j-1],sequence[ip],sequence[jp],sequence[ip-1],sequence[jp+1],energy);
         }
         else
@@ -1815,7 +1853,7 @@ PARAMTYPE s_internal_loop::get_energy_emodel (int i, int j, int ip, int jp, int 
                         {
                             i2 = sequence[i];
                             j2 = sequence[j];
-                            k2 = sequence[i+1];
+                            k2 = sequence[next_valid_i_base];
                             ip2 = sequence[ip];
                             jp2 = sequence[jp];
                         }
@@ -1823,7 +1861,7 @@ PARAMTYPE s_internal_loop::get_energy_emodel (int i, int j, int ip, int jp, int 
                         {
                             i2 = sequence[jp];
                             j2 = sequence[ip];
-                            k2 = sequence[j-1];
+                            k2 = sequence[prev_valid_j_base];
                             ip2 = sequence[j];
                             jp2 = sequence[i];
                         }
@@ -1843,6 +1881,7 @@ PARAMTYPE s_internal_loop::get_energy_emodel (int i, int j, int ip, int jp, int 
             // it is an internal loop (not a bulge)
             else
             {
+
                 l = branch1+branch2;
                 penalty_size = penalty_by_size_emodel (l, 'I', model);
                 asym_penalty = asymmetry_penalty_emodel (branch1, branch2, model);
@@ -1879,9 +1918,9 @@ PARAMTYPE s_internal_loop::get_energy_emodel (int i, int j, int ip, int jp, int 
                 else
                 {
                     i_j_energy   = model->tstacki[sequence[i]][sequence[j]]
-                                          [sequence[i+1]][sequence[j-1]];
+                                          [sequence[next_valid_i_base]][sequence[prev_valid_j_base]];
                     ip_jp_energy = model->tstacki[sequence[jp]][sequence[ip]]
-                                          [sequence[jp+1]][sequence[ip-1]];
+                                          [sequence[next_valid_jp_base]][sequence[prev_valid_ip_base]];
                     i_j_energy += special_energy_internal_emodel (sequence, i,j,ip,jp,model);
                 }
                 energy = i_j_energy + ip_jp_energy + penalty_size + asym_penalty;

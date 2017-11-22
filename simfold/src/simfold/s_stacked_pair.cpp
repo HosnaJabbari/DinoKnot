@@ -93,7 +93,6 @@ PARAMTYPE s_stacked_pair::compute_energy_emodel (int i, int j, energy_model *mod
     local_energy = model->stack[sequence[i]][sequence[j]][sequence[i+1]][sequence[j-1]];
     
     min = V_energy + local_energy;
-
     // add the loss
     if (pred_pairings != NULL)
     {

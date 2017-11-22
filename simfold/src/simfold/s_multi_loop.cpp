@@ -425,6 +425,7 @@ PARAMTYPE s_multi_loop::compute_energy_restricted_emodel (int i, int j, str_feat
     int kplus1jminus2;
 int print_i = i;
 int print_j = j;
+
 /*
 	//AP
 	if (sequence[i] == X || sequence[j] == X)
@@ -436,60 +437,42 @@ int print_j = j;
     // Ian Wark and Kevin July 20 2017
     // if i or j is linker (X), cannot be anything
     // Uses i+1 or j-1, so those also cannot be X
-    if (sequence[i] == X || sequence[j] == X)
+    if (sequence[i] == X || sequence[j] == X){
         return INF;
-    
+    }
 
     //14 Aug Kevin and Mahyar
     //handles i+1 and j-1 are both X, so we have to force haipin to be picked
     //also prevents i and j to cross each other
     if(sequence[i+1] == X && sequence[j-1] == X){
+        
         return INF;
     }
 
 /*
-    //14 Aug Kevin and Mahyar
-    //if i+1 is a X, then we have to shift the beginning of k to the index after the X
-    //shift i 
-    if(sequence[i+1] == X){
-        i++;
-        while(sequence[i] == X){
-            i++;
-        }    
-        
-    } 
-*/
     //18 Aug 2017 Kevin and Mahyar
     //changed the above if(sequence[i+1] == X) skipping part to tghe one below to avoid skipping too much for X cases
     while(sequence[i+1] == X){
         i++;
     }
-/*
-    //14 Aug Kevin and Mahyar
-    //if j-1 is a X, then we have to shift the end of k to the index before the X
-    //shift j 
-    if(sequence[j-1] == X){
-        j--;
-        while(sequence[j] == X){
-            j--;
-        }    
-        if(print_i==30 && print_j==62){
-            printf("new j: %d\n",j);
-        }
-    }
-*/
-    //18 Aug 2017 Kevin and Mahyar
+
+    //18 Aug 2017 Kevin and Mahyar 
     //changed the above if(sequence[j-1] == X) skipping part to tghe one below to avoid skipping too much for X cases
     while(sequence[j-1] == X){
         j--;
 
     }
+*/
+
 
 	// May 16, 2007: Replaced this for loop, because we may have very short restricted branches
     //for (k = i+TURN+1; k <= j-TURN-2; k++)
     for (k = i+2; k <= j-3; k++)
     {
-       
+       //Kevin and Mahyar Nov 14, 2017 todo confirm
+       if(sequence[k] == X){//make sure the splitting point k for WM is not an X, so the X will be handled in either WM[i+1,k-1] or WM[k,j-1]
+            continue;
+       }
         
         //printf("k:%d\n",k);
         iplus1k = index[i+1] + k -i-1;
@@ -506,7 +489,7 @@ int print_j = j;
         {
             tmp = WM[iplus2k] + WM[kplus1jminus1] +
                 model->misc.multi_free_base_penalty; 
-            //Aug 18 2017 kevin and Mahyar
+            //Aug 18 2017 kevin and Mahyar todo confirm
             //modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1 are not X to avoid seg fault
             if(sequence[i] != X && sequence[j] != X && sequence[i+1] != X){
                 tmp += model->dangle_top [sequence [i]]
@@ -523,7 +506,7 @@ int print_j = j;
 
             tmp = WM[iplus1k] + WM[kplus1jminus2] +
                 model->misc.multi_free_base_penalty;
-            //Aug 18 2017 kevin and Mahyar
+            //Aug 18 2017 kevin and Mahyar todo confirm
             //modiefied the formula such that we only add dangle_bot,dangle_top when i,j,j-1 are not X to avoid seg fault
             if(sequence[i] != X && sequence[j] != X && sequence[j-1] != X){
                 tmp += model->dangle_bot [sequence[i]]
@@ -538,13 +521,15 @@ int print_j = j;
 
             tmp = WM[iplus2k] + WM[kplus1jminus2] +
                 2 * model->misc.multi_free_base_penalty;
-            //Aug 18 2017 kevin and Mahyar
+            //Nov 21 2017 kevin and Mahyar todo confirm
             //modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1,j-1 are not X to avoid seg fault
-            if(sequence[i] != X && sequence[j] != X && sequence[i+1] != X && sequence[j-1] != X){
+            if(sequence[i] != X && sequence[j] != X && sequence[i+1] != X){
                 tmp += model->dangle_top [sequence [i]]
 								[sequence [j]]
-								[sequence [i+1]] +
-                        model->dangle_bot [sequence[i]]
+								[sequence [i+1]];
+            }
+            if(sequence[i] != X && sequence[j] != X && sequence[j-1] != X){
+                tmp += model->dangle_bot [sequence[i]]
 								[sequence[j]]
 								[sequence[j-1]];
             }
@@ -583,7 +568,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 
         //Aug 14 2017 kevin and Ian and Mayhar and Hosna
         //WM[ij] = INF if i,j both X or ij cross each other
-        if(sequence[i] == X && sequence[j] == X){
+        if(sequence[i] == X && sequence[j] == X){ 
             WM[ij] = INF;
             continue;
         }
@@ -599,7 +584,9 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
 
             if(temp_i < j){
                 temp_ij = index[temp_i]+j-temp_i;
-                WM[ij] = WM[temp_ij]; 
+                //Kevin and Mahyar, Nov 14, 2017
+                //Since we are crossing over X, we need the hybrid penalty
+                WM[ij] = WM[temp_ij] + START_HYBRID_PENALTY; 
             }else{
                 WM[ij] = INF;
             }
@@ -617,7 +604,9 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
             }
             if(i < temp_j){
                 temp_ij = index[i]+temp_j-i;
-                WM[ij] = WM[temp_ij];
+                //Kevin and Mahyar, Nov 14, 2017
+                //Since we are crossing over X, we need the hybrid penalty
+                WM[ij] = WM[temp_ij] + START_HYBRID_PENALTY;
             }else{
                 WM[ij] = INF;
             }
@@ -649,11 +638,13 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
                 
                 //Aug 14 2017 kevin and Mahyar
                 //modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1,j-1 are not X to avoid seg fault
-                if(sequence[i] != X && sequence[j] != X && sequence[i+1] != X && sequence[j-1] != X){
+                if(sequence[j-1] != X && sequence[i+1] != X && sequence[i]){
                     tmp += model->dangle_bot [sequence[j-1]]
 		                            	[sequence[i+1]]
-		                            	[sequence[i]] +
-		                model->dangle_top [sequence [j-1]]
+		                            	[sequence[i]];
+                }
+                if(sequence[j-1] != X && sequence[i+1] != X && sequence[j] != X){
+		            tmp += model->dangle_top [sequence [j-1]]
 		                            	[sequence [i+1]]
 		                            	[sequence [j]];
                 }
@@ -781,7 +772,9 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_emodel (int j, str_featur
             }
             if(temp_i < j){
                 temp_ij = index[temp_i]+j-temp_i;
-                WM[ij] = WM[temp_ij]; 
+                //Kevin and Mahyar, Nov 20, 2017
+                //Since we are crossing over X, we need the hybrid penalty
+                WM[ij] = WM[temp_ij] + START_HYBRID_PENALTY; 
             }else{
                 WM[ij] = INF;
             }
@@ -798,7 +791,9 @@ void s_multi_loop::compute_energy_WM_restricted_pkonly_emodel (int j, str_featur
             }
             if(i < temp_j){
                 temp_ij = index[i]+temp_j-i;
-                WM[ij] = WM[temp_ij];
+                //Kevin and Mahyar, Nov 20, 2017
+                //Since we are crossing over X, we need the hybrid penalty
+                WM[ij] = WM[temp_ij] + START_HYBRID_PENALTY;
             }else{
                 WM[ij] = INF;
             }
