@@ -360,7 +360,7 @@ void pseudo_loop::compute_WI(int i, int j , h_str_features *fres){
 //	if (fres[i].pair < 0 && fres[j].pair < 0)
 //	{
 	int t;
-	for (t = i; t< j && int_sequence[t] != X; t++){
+	for (t = i; t< j; t++){
 		
 		//Mahyar and Kevin, Nov 16, 2017 todo confirm 
 		if (int_sequence[t] == X){
@@ -4188,7 +4188,7 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 	//    	if (fres[i].pair < 0 && fres[j].pair < 0)
 	//		{
 				int t;
-				for (t = i; t< j && int_sequence[t] != X; t++){
+				for (t = i; t< j; t++){
 					//Mahyar and Kevin, Nov 21, 2017 todo confirm 
 					if (int_sequence[t] == X){
 						continue;
@@ -4300,7 +4300,7 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 					break;
                                 case 4: //Mahyar and Kevin, Nov 22 2017 todo confirm
 					// added this case to jump i or j when encounter X
-                                        insert_node(new_i,new_j,M_WM);
+                                        insert_node(new_i,new_j,P_WI);
                                         break;
                                 default:
                                         printf("i= %d j=%d\n",i,j);
@@ -4685,7 +4685,7 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 					break;
                                 case 6: //Mahyar and Kevin, Nov 22 2017 todo confirm
                                         //added this case to jump i or j when encounter X
-                                        insert_node(new_i,new_j,M_WM);
+                                        insert_node(new_i,new_j,P_WIP);
                                         break;
                                 default:
                                         printf("i= %d j=%d\n",i,j);
@@ -4811,6 +4811,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				// Hosna: July 5th, 2007:
 				// if we have bp(i)> j then we should not have come to the WMBP
 				for (l = i+1; l < j; l++){
+
+					//Mahyar, Nov 23, 2017 todo confirm 
+					if (int_sequence[l] == X){
+						continue;
+					}
+
 					// Hosna, April 9th, 2007
 					// checking the borders as they may be negative
 					//				if(fres[l].pair < 0 && get_bp(i,l) >= 0 && get_bp(i,l) < nb_nucleotides){
@@ -4850,6 +4856,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				int l, acc = INF;
 				int l3 = -1;
 				for (l = i+1; l<j ; l++)	{
+				
+					//Mahyar, Nov 23, 2017 todo confirm 
+					if (int_sequence[l] == X){
+						continue;
+					}
+
 					// Hosna, April 6th, 2007
 					// whenever we use get_borders we have to check for the correct values
 					if (fres[l].arc > -1 && get_B(l,j) >= 0 && get_B(l,j) < nb_nucleotides && get_Bp(l,j) >= 0 && get_Bp(l,j)<nb_nucleotides){
@@ -4902,6 +4914,13 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			if(fres[j].pair < j){
 				int l, acc = INF;
 				for(l = i+1; l<j; l++){
+
+
+					//Mahyar, Nov 23, 2017 todo confirm 
+					if (int_sequence[l] == X){
+						continue;
+					}
+
 					// Hosna: April 18th, 2007
 					// l and j should be in the same arc
 					if (fres[l].pair < 0 && fres[l].arc > -1 && fres[j].arc > -1 && fres[l].arc == fres[j].arc){
@@ -5067,6 +5086,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				min_borders = get_Bp(i,j);
 			}
 			for (ip = i+1; ip < min_borders; ip++){
+
+				//Mahyar, Nov 23, 2017 todo confirm
+				if (int_sequence[ip] == X){
+					continue;
+				}
+		
 				// Hosna: April 20, 2007
 				// i and ip and j and jp should be in the same arc
 				// it should also be the case that [i+1,ip-1] && [jp+1,j-1] are empty regions
@@ -5082,6 +5107,13 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 						max_borders = get_bp(i,j);
 					}
 					for (jp = max_borders+1 ; jp < j ; jp++){
+							
+						//Mahyar, Nov 23, 2017 todo confirm
+						if (int_sequence[jp] == X){
+							continue;
+						}
+						
+
 						if (fres[jp].pair < 0 && can_pair(int_sequence[ip],int_sequence[jp]) && is_empty_region(jp+1,j-1)==1){
 							// Hosna: April 20, 2007
 							// i and ip and j and jp should be in the same arc
@@ -5115,6 +5147,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				min_Bp_j = get_Bp(i,j);
 			}
 			for (r = i+1; r < min_Bp_j ; r++){
+
+				//Mahyar, Nov 23, 2017 todo confirm
+				if (int_sequence[r] == X){
+					continue;
+				}
+
 				if (fres[r].pair < 0){
 					// Hosna: July 5th, 2007
 					// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
@@ -5138,6 +5176,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				max_i_bp = get_bp(i,j);
 			}
 			for (r = max_i_bp+1; r < j ; r++){
+
+				//Mahyar, Nov 23, 2017 todo confirm
+				if (int_sequence[r] == X){
+					continue;
+				}
+
 				if (fres[r].pair < 0){
 					// Hosna: July 5th, 2007
 					// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
@@ -5304,6 +5348,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				max_i_bp = get_bp(i,j);
 			}
 			for (r = max_i_bp+1; r < j; r++ ){
+				
+				//mahyar, Nov 23, 2017 todo confirm
+				if (int_sequence[r] == X){
+					continue;
+				}
+				
 				if (fres[r].pair < 0){
 					tmp = get_VP(i,r) + get_WIP(r+1,j);
 					if (tmp < min){
@@ -5324,6 +5374,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				min_Bp_j = get_Bp(i,j);
 			}
 			for (r = i+1; r < min_Bp_j; r++){
+ 
+				//mahyar and kevin  Nov 21, 2017 todo confirm
+				if (int_sequence[r] == X){
+					continue;
+				}
+
 				if (fres[r].pair < 0){
 					tmp = get_WIP(i,r-1) + get_VP(r,j);
 					if (tmp < min){
@@ -5348,6 +5404,20 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			//			max_i_bp = get_bp(i,j);
 			//		}
 			for (r = max_i_bp+1; r < j; r++ ){
+
+
+				//Mahyar, Nov 23, 2017 todo confirm
+				if (int_sequence[r] == X){
+					continue;
+				}
+				int skip_X = 0;
+				int tmp = 0;
+				if(is_cross_model(r,j)){
+					skip_X = linker_length;
+					tmp = START_HYBRID_PENALTY;
+				}
+
+
 				if (fres[r].pair < 0 && this->is_empty_region(r+1,j)){
 					tmp = get_VP(i,r) + cp_penalty *(j-r); // check the (j-r) part
 					//				if (debug){
@@ -5368,8 +5438,26 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			//			min_Bp_j = get_Bp(i,j);
 			//		}
 			for (r = i+1; r < min_Bp_j; r++){
+
+				//mahyar and kevin  Nov 21, 2017 todo confirm
+				if (int_sequence[r] == X){
+					continue;
+				}
+
 				if (fres[r].pair < 0 && this->is_empty_region(i,r-1)){
 					tmp = cp_penalty * (r-i) + get_VP(r,j);
+					
+
+					//Mahyar and Kevin, Nov 21, 2017 todo confirm
+					int skip_X = 0;
+					int tmp = 0;
+					if(is_cross_model(i,r)){
+						skip_X = linker_length;
+						tmp = START_HYBRID_PENALTY;
+					}
+					tmp += cp_penalty * (r-i-skip_X) + get_VP(r,j);
+	
+
 					//				if (debug){
 					//					printf("VPP(%d,%d) branch 4: %d *(%d-%d) = %d, VP(%d,%d)= %d ==> tmp = %d  and m4 = %d\n",i,j,cp_penalty,r,i,cp_penalty * (r-i),r,j,get_VP(r,j),tmp, m4);
 					//				}
@@ -5464,6 +5552,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			//		{
 			int t;
 			for (t = i; t< j; t++){
+ 				
+				//Mahyar, Nov 23, 2017 todo confirm 
+				if (int_sequence[t] == X){
+					continue;
+				}
+
 				int wi_1 = get_WI(i,t);
 				int wi_2 = get_WI(t+1,j);
 				tmp = wi_1 + wi_2;
@@ -5511,6 +5605,31 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 					//				printf("P_WI: case 3: min = %d and best_row = %d \n",min,best_row);
 				}
 			}
+
+			//Mahyar and Kevin, Nov 23 2017 todo confirm
+			int new_j = j;
+                        if(int_sequence[new_j] == X){
+                                while(int_sequence[new_j-1] == X){
+                                        new_j--;
+                                        best_row = 4;
+                                }
+
+                        }
+                        //added this to check if i is a X
+                        //if it is, move i till it is the last X so the next iteration can handle it properly
+                        int new_i = i;
+                        if(int_sequence[new_i] == X){
+                                while(int_sequence[new_i+1] == X){
+                                        new_i++;
+                                        best_row = 4;
+                                }
+                        }
+                        //added this to make sure after we move the new i and j, we do not cross
+                        //if it is, error
+                        if(new_i >= new_j){
+                                best_row = -1; //error
+                        }
+			
 			switch (best_row)
 			{
 				case 1:
@@ -5548,6 +5667,14 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 						insert_node(i,j,P_WMB);
 					}
 					break;
+				case 4: //Mahyar and Kevin, Nov 23 2017 todo confirm
+					// added this case to jump i or j when encounter X
+                                        insert_node(new_i,new_j,P_WI);
+                                        break;
+                                default:
+                                        printf("i= %d j=%d\n",i,j);
+                                        fprintf(stderr, "ERROR backtrack M_WM has no best row\n");
+                                        exit(10);
 			}
 		}
 			break;
@@ -5647,10 +5774,23 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 
 					// case 4
 					if (is_weakly_closed(i+1,l-1) == 1 && is_empty_region(lp+1,j-1) == 1){
+
+						//Mahyar, Nov 23, 2017 todo confirm
+						//Regarding the case: ((.)........(.......)..XXXXX..)
+						int skip_X = 0;
+						int temp = 0;
+						if(is_cross_model(lp,j)){
+							skip_X = linker_length;
+							temp = START_HYBRID_PENALTY;
+						}
+
 						// Hosna: July 5th, 2007
 						// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
 						// in a multiloop that spans a band
-						tmp = get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + c_penalty * (j-lp+1) + ap_penalty + 2* bp_penalty;
+//						tmp = get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + c_penalty * (j-lp+1) + ap_penalty + 2* bp_penalty;
+						
+						//Mahyar, Nov 23, 2017 todo confirm
+						tmp = get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + c_penalty * (j-lp+1-skip_X) + ap_penalty + 2* bp_penalty;
 						if (min > tmp){
 							min = tmp;
 							best_row = 4;
@@ -5663,10 +5803,23 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 
 					// case 5
 					if (is_empty_region(i+1,l-1) == 1 && is_weakly_closed(lp+1,j-1) == 1){
+
+						//Mahyar, Nov 23, 2017 todo confirm
+						//Regarding the case: (..XXXXX........(.......).......(.).)
+						int skip_X = 0;
+						int temp = 0;
+						if(is_cross_model(i,l)){
+							skip_X = linker_length;
+							temp = START_HYBRID_PENALTY;
+						}
+
 						// Hosna: July 5th, 2007
 						// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
 						// in a multiloop that spans a band
-						tmp = ap_penalty + 2* bp_penalty+ c_penalty * (l-i+1) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1);
+//						tmp = ap_penalty + 2* bp_penalty+ c_penalty * (l-i+1) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1);
+
+						//Mahyar, Nov 23, 2017 todo confirm
+						tmp = ap_penalty + 2* bp_penalty+ c_penalty * (l-i+1-skip_X) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1);
 						if (min > tmp){
 							min = tmp;
 							best_row = 5;
@@ -5834,6 +5987,31 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 					//				printf("P_WIP: case 5: min = %d and best_row = %d \n",min,best_row);
 				}
 			}
+
+			//Mahyar and Kevin, Nov 22 2017 todo confirm
+                        int new_j = j;
+                        if(int_sequence[new_j] == X){
+                                while(int_sequence[new_j-1] == X){
+                                        new_j--;
+                                        best_row = 6;
+                                }
+
+                        }
+                        //added this to check if i is a X
+                        //if it is, move i till it is the last X so the next iteration can handle it properly
+                        int new_i = i;
+                        if(int_sequence[new_i] == X){
+                                while(int_sequence[new_i+1] == X){
+                                        new_i++;
+                                        best_row = 6;
+                                }
+                        }
+                        //added this to make sure after we move the new i and j, we do not cross
+                        //if it is, error
+                        if(new_i >= new_j){
+                                best_row = -1; //error
+                        }
+
 			switch(best_row)
 			{
 				case 1:
@@ -5887,6 +6065,16 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 						insert_node(i,j,P_WMB);
 					}
 					break;
+
+				case 6: //Mahyar and Kevin, Nov 23 2017 todo confirm
+                                        //added this case to jump i or j when encounter X
+                                        insert_node(new_i,new_j,P_WIP);
+                                        break;
+                                default:
+                                        printf("i= %d j=%d\n",i,j);
+                                        fprintf(stderr, "ERROR backtrack M_WM has no best row\n");
+                                        exit(10);
+	
 			}
 		}
 			break;
