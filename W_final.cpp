@@ -3436,6 +3436,15 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 								//17 Aug 2017 kevin and Mahyar
 								//changed the above function call to this one so we dont re-caculate it and just look up the value
 								model.energy_value = (fres[ip].pair == jp && fres[jp].pair == ip)? v->get_energy(ip,jp):INF;
+
+                                                                //Mahyar Nov 22 2017 todo confirm
+								//changed this back to get_energy_str_restricted_emodel and added hybrid penalty handling
+								model.energy_value = (fres[ip].pair == jp && fres[jp].pair == ip) ? VBI->get_energy_str_restricted_emodel (i, j, ip, jp, fres, &model):INF;
+								if( is_cross_model(i,j) && !(is_cross_model(ip,jp))) {    
+									model.energy_value += START_HYBRID_PENALTY;  
+								}
+
+
 							}
 							tmp = emodel_energy_function (i, j, energy_models);
 
@@ -3464,7 +3473,17 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 					int k, best_k = -1, best_row = -1;
 					int tmp= INF, min = INF;
 					for (k = i+1; k <= j-1; k++)
+                                        //Mahyar Nov 22 2017 todo confirm
+					//changed k = i+1; k <= j-1; k++ to match how VM does the for loop
+					for (k = i+2; k <= j-3; k++)
 					{
+                                               
+						//Kevin and Mahyar Nov 21, 2017 todo confirm
+						if(int_sequence[k] == X){//make sure the splitting point k for WM is not an X, so the X will be handled in either WM[i+1,k-1] or WM[k,j-1]
+								continue;
+						}
+
+
 						tmp = vm->get_energy_WM (i+1,k) + vm->get_energy_WM (k+1, j-1);
 						if (tmp < min)
 						{
@@ -3477,8 +3496,12 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 							//AP
 							for (auto &model : *energy_models) {
 								model.energy_value = vm->get_energy_WM (i+2,k) + vm->get_energy_WM (k+1, j-1) +
-								model.dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]] +
 								model.misc.multi_free_base_penalty;
+                                                                //Mahyar Nov 22 2017 todo confirm
+								//modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+								if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X){
+                                                                    model.energy_value += model.dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]]
+                                                                }
 							}
 							tmp = emodel_energy_function (i, j, energy_models);
 
@@ -3494,8 +3517,12 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 							//AP
 							for (auto &model : *energy_models) {
 								model.energy_value = vm->get_energy_WM (i+1,k) + vm->get_energy_WM (k+1, j-2) +
-								model.dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]] +
 								model.misc.multi_free_base_penalty;
+								//Mahyar Nov 22 2017 todo confirm
+                                                                //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                                                                if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[j-1] != X){
+									model.energy_value += model.dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]]
+								}
 							}
 							tmp = emodel_energy_function (i, j, energy_models);
 
@@ -3511,9 +3538,15 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 							//AP
 							for (auto &model : *energy_models) {
 								model.energy_value = vm->get_energy_WM (i+2,k) + vm->get_energy_WM (k+1, j-2) +
-								model.dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]] +
-								model.dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]] +
 								2*model.misc.multi_free_base_penalty;
+                                                                //Mahyar Nov 22 2017 todo confirm
+                                                                //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                                                                if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X){
+									model.energy_value += model.dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]]
+								}
+                                                                if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[j-1] != X){
+									model.energy_value += model.dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]] 
+								}
 							}
 							tmp = emodel_energy_function (i, j, energy_models);
 
@@ -3636,9 +3669,14 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 						for (auto &emodel : *energy_models) {
 							model = &emodel;
 							model->energy_value = energy_ij + AU_penalty_emodel (int_sequence[i+1], int_sequence[j], model) + acc;
-							model->energy_value += model->dangle_bot [int_sequence[j]]
-																	[int_sequence[i+1]]
-																	[int_sequence[i]];
+							//Mahyar Nov 22 2017 todo confirm
+                                                        //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                                                        if(int_sequence[j] != X && int_sequence[i+1] != X && int_sequence[i] != X){
+								model->energy_value += model->dangle_bot [int_sequence[j]]
+												[int_sequence[i+1]]
+												[int_sequence[i]];
+								
+							}
 						}
 						tmp = emodel_energy_function (i, j, energy_models);
 
@@ -3659,9 +3697,13 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 						for (auto &emodel : *energy_models) {
 							model = &emodel;
 							model->energy_value = energy_ij + AU_penalty_emodel (int_sequence[i], int_sequence[j-1], model) + acc;
-							model->energy_value += model->dangle_top [int_sequence[j-1]]
-																	[int_sequence[i]]
-																	[int_sequence[j]];
+                                                        //Mahyar Nov 22 2017 todo confirm
+                                                        //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                                                        if(int_sequence[j-1] != X && int_sequence[i] != X && int_sequence[j] != X){
+								model->energy_value += model->dangle_top [int_sequence[j-1]]
+													[int_sequence[i]]
+													[int_sequence[j]];
+							}
 						}
 						tmp = emodel_energy_function (i, j, energy_models);
 
@@ -3682,12 +3724,21 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 						for (auto &emodel : *energy_models) {
 							model = &emodel;
 							model->energy_value = energy_ij + AU_penalty_emodel (int_sequence[i+1], int_sequence[j-1], model) + acc;
-							model->energy_value += model->dangle_bot [int_sequence[j-1]]
-																	[int_sequence[i+1]]
-																	[int_sequence[i]];
-							model->energy_value += model->dangle_top [int_sequence[j-1]]
-																	[int_sequence[i+1]]
-																	[int_sequence[j]];
+
+							//Mahyar Nov 22 2017 todo confirm
+                                                        //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                                                        if(int_sequence[j-1] != X && int_sequence[i+1] != X && int_sequence[i] != X){
+								model->energy_value += model->dangle_bot [int_sequence[j-1]]
+													[int_sequence[i+1]]
+													[int_sequence[i]];
+							}
+                                                        //Mahyar Nov 22 2017 todo confirm
+                                                        //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                                                        if(int_sequence[j-1] != X && int_sequence[i+1] != X && int_sequence[j] != X){
+								model->energy_value += model->dangle_top [int_sequence[j-1]]
+													[int_sequence[i+1]]
+													[int_sequence[j]];
+							}
 						}
 						tmp = emodel_energy_function (i, j, energy_models);
 
@@ -3932,11 +3983,13 @@ void W_final::backtrack_restricted_pkonly_emodel (seq_interval *cur_interval, st
 						AU_penalty_emodel (int_sequence[i+1], int_sequence[j-1], model) +
 						model->misc.multi_helix_penalty +
 						2*model->misc.multi_free_base_penalty;
-					//Aug 18 2017 kevin and Mahyar
+					//Mahyar Nov 22, 2017 todo confirm
                 	//modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1, j-1 are not X to avoid seg fault
-					if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X && int_sequence[j-1] != X){
-						model->energy_value += model->dangle_bot [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[i]] +
-							model->dangle_top [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[j]];
+					if(int_sequence[j-1] != X && int_sequence[i+1] != X && int_sequence[i] != X){
+						model->energy_value += model->dangle_bot [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[i]]
+                                        }
+                                        if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X){
+							model->dangle_top [int_sequence[i]] [int_sequence[j]] [int_sequence[i+1]];
 					}
 				}
 				tmp = emodel_energy_function (i, j, energy_models);
@@ -4230,7 +4283,14 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 						//VBI->get_energy_str_restricted_emodel (i, j, ip, jp, fres, &model);
 						//17 Aug 2017 kevin and Mahyar
 						//changed the above function call to this one so we dont re-caculate it and just look up the value
-                        model.energy_value = V->get_energy(ip,jp);
+//                        model.energy_value = V->get_energy(ip,jp);
+
+                   	//Mahyar Nov 22 2017 todo confirm
+			//changed this back to get_energy_str_restricted_emodel and added hybrid penalty handling
+			model.energy_value = VBI->get_energy_str_restricted_emodel (i, j, ip, jp, fres, &model);
+			if( is_cross_model(i,j) && !(is_cross_model(ip,jp))) {    
+				model.energy_value += START_HYBRID_PENALTY;  
+								}
 
                     }
                     tmp = emodel_energy_function (i, j, energy_models);
@@ -4257,8 +4317,17 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
             f[j].type = MULTI;
             int k, best_k = -1, best_row = -1;
             PARAMTYPE tmp, min = INF;
-            for (k = i+1; k <= j-1; k++)
+//            for (k = i+1; k <= j-1; k++)
+            //Mahyar Nov 22 2017 todo confirm
+	    //changed k = i+1; k <= j-1; k++ to match how VM does the for loop
+            for (k = i+2; k <= j-3; k++)
               {
+		//Mahyar Nov 22, 2017 todo confirm
+		if(int_sequence[k] == X){//make sure the splitting point k for WM is not an X, so the X will be handled in either WM[i+1,k-1] or WM[k,j-1]
+			continue;
+		}               
+
+
                 tmp = VM->get_energy_WM (i+1,k) + VM->get_energy_WM (k+1, j-1);
                 if (tmp < min)
                   {
@@ -4272,8 +4341,13 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                     for (auto &model : *energy_models) {
                         model.energy_value = VM->get_energy_WM (i+2,k) +
                             VM->get_energy_WM (k+1, j-1) +
-                            model.dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]] +
                             model.misc.multi_free_base_penalty;
+                            //Mahyar Nov 22 2017 todo confirm
+                            //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                            if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X){
+                            	model.energy_value += model.dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]]
+                            	
+                            }
                     }
                     tmp = emodel_energy_function (i, j, energy_models);
 
@@ -4290,9 +4364,13 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                     for (auto &model : *energy_models) {
 						model.energy_value = VM->get_energy_WM (i+1,k) +
 							VM->get_energy_WM (k+1, j-2) +
-							model.dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]] +
 							model.misc.multi_free_base_penalty;
-					}
+                    	//Mahyar Nov 22 2017 todo confirm
+                        //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                        if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[j-1] != X){
+				model.energy_value += model.dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]]
+                        }
+		    }
                     tmp = emodel_energy_function (i, j, energy_models);
 
                     if (tmp < min)
@@ -4307,9 +4385,15 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
                     //AP
 					for (auto &model : *energy_models) {
 						model.energy_value = VM->get_energy_WM (i+2,k) + VM->get_energy_WM (k+1, j-2) +
-                    		model.dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]] +
-                    		model.dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]] +
                     		2*model.misc.multi_free_base_penalty;
+                                //Mahyar Nov 22 2017 todo confirm
+                      		//modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                       		if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X){
+					model.energy_value += model.dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]]
+                                }
+                                if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[j-1] != X){
+                                        model.energy_value += model.dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]] 
+                                }
                     }
 							tmp = emodel_energy_function (i, j, energy_models);
 					if (tmp < min)
@@ -4413,9 +4497,13 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 					for (auto &emodel : *energy_models) {
 						model = &emodel;
 						model->energy_value = energy_ij + AU_penalty_emodel (int_sequence[i+1], int_sequence[j], model) + acc;
-						model->energy_value += model->dangle_bot [int_sequence[j]]
-							[int_sequence[i+1]]
-							[int_sequence[i]];
+                                        	//Mahyar Nov 22 2017 todo confirm
+                		                //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+		                                if(int_sequence[j] != X && int_sequence[i+1] != X && int_sequence[i] != X){
+							model->energy_value += model->dangle_bot [int_sequence[j]]
+												[int_sequence[i+1]]
+												[int_sequence[i]];
+						}
 					}
 					tmp = emodel_energy_function (i, j, energy_models);
     //                 if (fres[i+1].pair == j)
@@ -4442,9 +4530,12 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 					for (auto &emodel : *energy_models) {
 						model = &emodel;
 						model->energy_value = energy_ij + AU_penalty_emodel (int_sequence[i], int_sequence[j-1], model) + acc;
-						model->energy_value += model->dangle_top [int_sequence[j-1]]
-							[int_sequence[i]]
-							[int_sequence[j]];
+                                                //Mahyar Nov 22 2017 todo confirm
+		                                //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                		                if(int_sequence[j-1] != X && int_sequence[i] != X && int_sequence[j] != X){
+							model->energy_value += model->dangle_top [int_sequence[j-1]]
+											[int_sequence[i]]
+											[int_sequence[j]];
 					}
 					tmp = emodel_energy_function (i, j, energy_models);
     //                 if (fres[i].pair == j-1)
@@ -4472,12 +4563,20 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 					for (auto &emodel : *energy_models) {
 						model = &emodel;
 						model->energy_value = energy_ij + AU_penalty_emodel (int_sequence[i+1], int_sequence[j-1], model) + acc;
-						model->energy_value += model->dangle_bot [int_sequence[j-1]]
-							[int_sequence[i+1]]
-							[int_sequence[i]];
-						model->energy_value += model->dangle_top [int_sequence[j-1]]
-							[int_sequence[i+1]]
-							[int_sequence[j]];
+						//Mahyar Nov 22 2017 todo confirm
+                                                //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                                                if(int_sequence[j-1] != X && int_sequence[i+1] != X && int_sequence[i] != X){
+							model->energy_value += model->dangle_bot [int_sequence[j-1]]
+												[int_sequence[i+1]]
+												[int_sequence[i]];
+						}
+						//Mahyar Nov 22 2017 todo confirm
+                                                //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                                                if(int_sequence[j-1] != X && int_sequence[i+1] != X && int_sequence[j] != X){
+							model->energy_value += model->dangle_top [int_sequence[j-1]]
+												[int_sequence[i+1]]
+												[int_sequence[j]];
+						}
 					}
 					tmp = emodel_energy_function (i, j, energy_models);
     //                 if (fres[i+1].pair == j-1)
@@ -4601,11 +4700,14 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 						AU_penalty_emodel (int_sequence[i+1], int_sequence[j-1], model) +
 						model->misc.multi_helix_penalty +
 						2*model->misc.multi_free_base_penalty;
-					//Aug 18 2017 kevin and Mahyar
-                	//modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1, j-1 are not X to avoid seg fault
-					if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X && int_sequence[j-1] != X){
-						model->energy_value += model->dangle_bot [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[i]] +
-							model->dangle_top [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[j]];
+					//Mahyar Nov 22 2017 todo confirm
+		                	//modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1, j-1 are not X to avoid seg fault
+					if(int_sequence[j-1] != X && int_sequence[i+1] != X && int_sequence[i] != X){
+						model->energy_value += model->dangle_bot [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[i]];
+                                        }
+                                        //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                                        if(int_sequence[j-1] != X && int_sequence[i+1] != X && int_sequence[j] != X){
+						model->energy_value += model->dangle_top [int_sequence[j-1]] [int_sequence[i+1]] [int_sequence[j]];
 					}
 				}
 				tmp = emodel_energy_function (i, j, energy_models);
@@ -4843,8 +4945,12 @@ void W_final::backtrack_restricted_pkonly (seq_interval *cur_interval, str_featu
 						if (fres[i+1].pair <= -1)
 						{
 							tmp = vm->get_energy_WM (i+2,k) + vm->get_energy_WM (k+1, j-1) +
-							dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]] +
 							misc.multi_free_base_penalty;
+                                                        //Mahyar Nov 22 2017 todo confirm
+	                                                //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+        	                                        if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X){
+								tmp += dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]] 
+							}
 							if (tmp < min)
 							{
 								min = tmp;
@@ -4857,6 +4963,11 @@ void W_final::backtrack_restricted_pkonly (seq_interval *cur_interval, str_featu
 							tmp = vm->get_energy_WM (i+1,k) + vm->get_energy_WM (k+1, j-2) +
 							dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]] +
 							misc.multi_free_base_penalty;
+                                                        //Mahyar Nov 22 2017 todo confirm
+                                                        //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                                                        if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X){
+                                                                tmp += dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]];
+                                                        }
 							if (tmp < min)
 							{
 								min = tmp;
@@ -4867,9 +4978,17 @@ void W_final::backtrack_restricted_pkonly (seq_interval *cur_interval, str_featu
 						if (fres[i+1].pair <= -1 && fres[j-1].pair <= -1)
 						{
 							tmp = vm->get_energy_WM (i+2,k) + vm->get_energy_WM (k+1, j-2) +
-							dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]] +
-							dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]] +
 							2*misc.multi_free_base_penalty;
+							//Mahyar Nov 22 2017 todo confirm
+                                                	//modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                                                	if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[i+1] != X){
+								tmp += dangle_top [int_sequence[i]][int_sequence[j]][int_sequence[i+1]];
+                                                        }
+							//Mahyar Nov 22 2017 todo confirm
+                                                        //modiefied the formula such that we only add dangle when indexs are not X to avoid seg fault
+                                                        if(int_sequence[i] != X && int_sequence[j] != X && int_sequence[j-1] != X){
+								tmp += dangle_bot [int_sequence[i]][int_sequence[j]][int_sequence[j-1]];
+                                                        }
 							if (tmp < min)
 							{
 								min = tmp;
