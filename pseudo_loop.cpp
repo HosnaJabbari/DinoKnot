@@ -312,13 +312,13 @@ void pseudo_loop::compute_WI(int i, int j , h_str_features *fres){
 			WI[ij] = 0;
 			return;
 		}
-		//Mahyar and Kevin, Nov 23 2017 todo confrim, changed from 0 to Pup
+		//Mahyar and Kevin, Nov 23 2017 , changed from 0 to Pup
 		if(i == j){
 			WI[ij] = PUP_penalty;
 			return;
 		}
 		new_ij = index[i] + j -i;
-		//Mahyar and Kevin, Nov 16 2017 todo confrim
+		//Mahyar and Kevin, Nov 16 2017 
 		WI[ij] = WI[new_ij] + START_HYBRID_PENALTY;
 		return;
 	}
@@ -1206,6 +1206,10 @@ void pseudo_loop::compute_WMB(int i, int j, h_str_features *fres){
 //				printf("\n INSIDE WMB BRANCH 2 \n where bp_j = %d and j = %d \n\n", bp_j,j);
 //			}
 			for (l = (bp_j +1); (l < j); l++){
+
+				if(int_sequence[l] == X){
+					continue;
+				}
 				// Hosna: April 24, 2007
 				// correct case 2 such that a multi-pseudoknotted
 				// loop would not be treated as case 2
@@ -1222,9 +1226,7 @@ void pseudo_loop::compute_WMB(int i, int j, h_str_features *fres){
 //					if (fres[l].pair < 0 && get_Bp(l,j) >= 0 && get_Bp(l,j)<nb_nucleotides){
 					if (get_Bp(l,j) >= 0 && get_Bp(l,j)<nb_nucleotides){
 						int sum = get_BE(bp_j,j,fres[get_Bp(l,j)].pair,get_Bp(l,j)) + get_WMBP(i,l) + get_WI(l+1,get_Bp(l,j)-1);
-						if (l == 600 && i == 522 && j == 615) {
-							int t = 0;
-						}
+						
 						if (temp > sum){
 							temp = sum;
 							l_min = l;
