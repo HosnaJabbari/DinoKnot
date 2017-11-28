@@ -304,6 +304,7 @@ void s_energy_matrix::compute_energy_restricted_emodel (int i, int j, str_featur
         case  3: type = MULTI; break;
         default: type = NONE;
     }
+
 //printf ("V(%d,%d) %c energy %d %d %d %d, min=%d\n", i, j, type, min_en[0],min_en[1],min_en[2],min_en[3],min);
 
     if (min < INF/2) {

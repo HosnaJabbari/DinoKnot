@@ -919,7 +919,7 @@ PARAMTYPE s_internal_loop::get_energy_str_restricted_emodel (int i, int j, int i
 
 	if ((sequence[ip]+sequence[jp] == 3 || sequence[ip]+sequence[jp] == 5) && can_pair(sequence[i],sequence[j])) // normal case
 	{
-
+        
 		branch1 = ip-i-1;
 		branch2 = j-jp-1;
 
@@ -1044,6 +1044,9 @@ PARAMTYPE s_internal_loop::get_energy_str_restricted_emodel (int i, int j, int i
 						}
 
 						ttmp = en + penalty_size + V->get_energy (ip, jp);
+                        if(i == 606 && j == 619){
+                            printf("%d %d %d\n",en , penalty_size , V->get_energy (ip, jp));
+                        }
 						if (ttmp < mmin)
 						{
 							mmin = ttmp;
@@ -1759,17 +1762,17 @@ PARAMTYPE s_internal_loop::get_energy_emodel (int i, int j, int ip, int jp, int 
     branch1 = ip-i-1;
     branch2 = j-jp-1;
 
-    //kevin and mahyar Nov 20 2017 todo confirm
+    //kevin and mahyar Nov 20 2017 
     if(is_cross_model(i,ip)){
         branch1 -= linker_length;
     }
     
-    //kevin and mahyar Nov 20 2017 todo confirm
+    //kevin and mahyar Nov 20 2017 
     if(is_cross_model(jp,j)){
         branch2 -= linker_length;
     }
 
-    //Kevin and Mahyar, Nov 20 2017 todo confirm
+    //Kevin and Mahyar, Nov 20 2017 
     int next_valid_i_base = i + 1;
     if (sequence[next_valid_i_base] == X){
         next_valid_i_base += linker_length;

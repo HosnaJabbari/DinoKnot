@@ -469,7 +469,7 @@ int print_j = j;
     //for (k = i+TURN+1; k <= j-TURN-2; k++)
     for (k = i+2; k <= j-3; k++)
     {
-       //Kevin and Mahyar Nov 14, 2017 todo confirm
+       //Kevin and Mahyar Nov 14, 2017 
        if(sequence[k] == X){//make sure the splitting point k for WM is not an X, so the X will be handled in either WM[i+1,k-1] or WM[k,j-1]
             continue;
        }
@@ -489,7 +489,7 @@ int print_j = j;
         {
             tmp = WM[iplus2k] + WM[kplus1jminus1] +
                 model->misc.multi_free_base_penalty; 
-            //Aug 18 2017 kevin and Mahyar todo confirm
+            //Aug 18 2017 kevin and Mahyar 
             //modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1 are not X to avoid seg fault
             if(sequence[i] != X && sequence[j] != X && sequence[i+1] != X){
                 tmp += model->dangle_top [sequence [i]]
@@ -506,7 +506,7 @@ int print_j = j;
 
             tmp = WM[iplus1k] + WM[kplus1jminus2] +
                 model->misc.multi_free_base_penalty;
-            //Aug 18 2017 kevin and Mahyar todo confirm
+            //Aug 18 2017 kevin and Mahyar 
             //modiefied the formula such that we only add dangle_bot,dangle_top when i,j,j-1 are not X to avoid seg fault
             if(sequence[i] != X && sequence[j] != X && sequence[j-1] != X){
                 tmp += model->dangle_bot [sequence[i]]
@@ -521,7 +521,7 @@ int print_j = j;
 
             tmp = WM[iplus2k] + WM[kplus1jminus2] +
                 2 * model->misc.multi_free_base_penalty;
-            //Nov 21 2017 kevin and Mahyar todo confirm
+            //Nov 21 2017 kevin and Mahyar 
             //modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1,j-1 are not X to avoid seg fault
             if(sequence[i] != X && sequence[j] != X && sequence[i+1] != X){
                 tmp += model->dangle_top [sequence [i]]
