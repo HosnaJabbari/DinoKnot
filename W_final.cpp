@@ -19,7 +19,7 @@
 #include "structs.h"
 #include "common.h"
 
-//#define debug 0
+#define debug 0
 
 
 
@@ -4217,7 +4217,7 @@ void W_final::backtrack_restricted_simfold_emodel (seq_interval *cur_interval, s
 // PRE:  All matrixes V, VM, WM and W have been filled
 // POST: Discover the MFE path
 {
-	int debug = 0;
+	//int debug = 0;
     char type;
 	energy_model *model;
     if(cur_interval->type == LOOP)

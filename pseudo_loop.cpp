@@ -257,11 +257,12 @@ void pseudo_loop::compute_energies(int i, int j)
 //AP
 void pseudo_loop::compute_energies_emodel(int i, int j, std::vector<energy_model> *energy_models)
 {
+	/*
     // Ian Wark and Kevin July 20 2017
     // i and j cannot be X
     if (int_sequence[i] == X || int_sequence[j] == X )
         return;
-
+*/
 	// Hosna, April 18th, 2007
 	// based on discussion with Anne, we changed WMB to case 2 and WMBP(containing the rest of the recurrences)
 	// Hosna, March 14, 2012, changed the position of computing VP from after BE to before WMBP
@@ -284,11 +285,18 @@ void pseudo_loop::compute_energies_emodel(int i, int j, std::vector<energy_model
 void pseudo_loop::compute_WI(int i, int j , h_str_features *fres){
 	int min = INF, m1 = INF, m2= INF, m3= INF;
 	int ij = index[i]+j-i;
+
 	if (WI[ij] != 0){ //calculated before
 //		if (debug)
 //		{
 //			printf("WI(%d,%d) was calculated before ==> WI(%d,%d) = %d \n",i,j,i,j,get_WI(i,j));
 //		}
+		return;
+	}
+
+	//Kevin and Mahyar, Nov 30, 2017
+	if(int_sequence[i] == X && int_sequence[j] == X){
+		WI[ij] = START_HYBRID_PENALTY;
 		return;
 	}
 
@@ -312,9 +320,9 @@ void pseudo_loop::compute_WI(int i, int j , h_str_features *fres){
 			WI[ij] = 0;
 			return;
 		}
-		//Mahyar and Kevin, Nov 23 2017 , changed from 0 to Pup
+		//Mahyar and Kevin, Nov 30 2017 , changed from 0 to Pup + START_HYBRID_PENALTY
 		if(i == j){
-			WI[ij] = PUP_penalty;
+			WI[ij] = PUP_penalty + START_HYBRID_PENALTY;
 			return;
 		}
 		new_ij = index[i] + j -i;
@@ -424,6 +432,7 @@ void pseudo_loop::compute_WI(int i, int j , h_str_features *fres){
 //	if (debug ){
 //		printf("WI[%d,%d]: m1 = %d, m2 = %d and m3 = %d ==> min = %d \n",i,j,m1,m2,m3,WI[ij]);
 //	}
+
 }
 
 
@@ -549,9 +558,11 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 			int B_i = get_B(i,j);
 			int b_i = get_b(i,j);
 			int bp_i = get_bp(i,j);
+			
 			int WI_i_plus_Bp_minus = get_WI(i+1,Bp_i - 1);
 			int WI_B_plus_b_minus = get_WI(B_i + 1,b_i - 1);
 			int WI_bp_plus_j_minus = get_WI(bp_i +1,j - 1);
+
 			m3 = WI_i_plus_Bp_minus + WI_B_plus_b_minus + WI_bp_plus_j_minus;
 			
 //			if(debug){
@@ -748,6 +759,7 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 //			printf("VP[%d,%d]: m1 = %d, m2 = %d, m3 = %d, m4 = %d, m5 = %d, m6 = %d, m7 = %d and min = %d \n",i,j,m1,m2,m3,m4,m5,m6,m7,min);
 //		}
 		VP[ij] = min;
+
 	}
 }
 
@@ -1005,10 +1017,12 @@ void pseudo_loop::compute_WMBP(int i, int j, h_str_features *fres){
 		return;
 	}
 	//base case
-	if (i == j){
+	//Kevin and Mahyar, Nov 30 2017
+	if ((i >= j) || (int_sequence[i] == X && int_sequence[j] == X)){
 		WMBP[ij] = INF;
 		return;
 	}
+
 	// Hosna: July 6th, 2007
 	// added impossible cases
 	// Ian Wark July 19 2017
@@ -1179,7 +1193,8 @@ void pseudo_loop::compute_WMB(int i, int j, h_str_features *fres){
 		return;
 	}
 	//base case
-	if (i == j){
+	//Mahyar and Kevin, Nov 30 2017
+	if ((i >= j) ||  (int_sequence[i] == X && int_sequence[j] == X)){
 		WMB[ij] = INF;
 		return;
 	}
@@ -1269,9 +1284,13 @@ void pseudo_loop::compute_WIP(int i, int j, h_str_features *fres){
 //		}
 //	}
 
+	//Kevin and Mahyar, Nov 30, 2017
+	if(int_sequence[i] == X && int_sequence[j] == X){
+		WI[ij] = START_HYBRID_PENALTY;
+		return;
+	}
+
 	//14 Aug 2017 kevin and Mahyar
-	//
-	
 	if(int_sequence[i] == X || int_sequence[j] == X){
 		
 		int new_ij = -1;

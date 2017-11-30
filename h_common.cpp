@@ -1244,10 +1244,11 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 	method_used = 1;
 	strcpy(structure,method1_structure);
 	
-	//printf("method1: %s %lf\n",method1_structure,min_energy);
+	printf("method1: %s %lf\n",method1_structure,min_energy);
+	
 	energy = method2_emodel(sequence,restricted,method2_structure,energy_models);
 
-	//printf("method2: %s %lf\n",method2_structure,energy);
+	printf("method2: %s %lf\n",method2_structure,energy);
 	if(energy < min_energy){
         method_used = 2;
 		min_energy = energy;
@@ -1255,7 +1256,7 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
 	}
 
 	energy = method3_emodel(sequence,restricted,method3_structure,energy_models);
-	//printf("method3: %s %lf\n",method3_structure,energy);
+	printf("method3: %s %lf\n",method3_structure,energy);
 	if(energy < min_energy){
         method_used = 3;
 		min_energy = energy;
@@ -1263,7 +1264,7 @@ double hfold_interacting_emodel(char *sequence, char *restricted, char *structur
     }
 
 	energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
-	//printf("method4: %s %lf\n",method4_structure,energy);
+	printf("method4: %s %lf\n",method4_structure,energy);
 	if(energy < min_energy){
         method_used = 4;
 		min_energy = energy;
