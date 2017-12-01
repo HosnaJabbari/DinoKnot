@@ -608,7 +608,7 @@ double get_START_HYBRID_PENALTY(int type1, int type2){
 			exit(1);
 		}
 	}else{
-		return 58.4511432; //when 2 different model
+		return 74.5607742; //when 2 different model old: 58.4511432
 	}
 }
 
