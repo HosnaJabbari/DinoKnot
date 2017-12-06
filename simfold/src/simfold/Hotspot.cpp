@@ -9,7 +9,7 @@ Hotspot::Hotspot(int left_inner_index, int right_inner_index, int length){
     this->left_outer_index = left_inner_index;
     this->right_outer_index = right_inner_index;
     this->length = length;
-    this->energy = 0.0; //todo kevin set it to hairpin of left_inner_index,right_inner_index?
+    this->energy = 0.0; 
     this->size = 1;
     this->structure = (char*) malloc(sizeof(char) * (length+1));
 

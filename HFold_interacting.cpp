@@ -296,8 +296,8 @@ int main (int argc, char *argv[]) {
 					break;
 				}
 				strcpy(outputDir,optarg);
-				printf("outdir: %s\n",outputDir);
-				printf("optarg: %s\n",optarg);
+				//printf("outdir: %s\n",outputDir);
+				//printf("optarg: %s\n",optarg);
 				outputDirFound = true;
 				break;
 			case 'k':
@@ -492,15 +492,14 @@ int main (int argc, char *argv[]) {
 	}else if(outputDirFound){
 		bool write_success = write_directory(outputDir, number_of_output, result_list);
 		if(!write_success){
-			fprintf(stderr, "write to directory fail\n");
 			exit(4);
 		}
 	}else{
 		//kevin 5 oct 2017
 		printf("Seq: %s\n",sequence);
 		for (int i=0; i < number_of_output; i++) {
-			printf("restricted_%d: %s\n",i, result_list[i]->get_restricted());
-			printf("result_str_%d: %s %lf\n",i, result_list[i]->get_final_structure(),result_list[i]->get_final_energy());
+			printf("Restricted_%d: %s\n",i, result_list[i]->get_restricted());
+			printf("Result_%d: %s \nEnergy_%d: %lf\n",i, result_list[i]->get_final_structure(),i,result_list[i]->get_final_energy());
 		}
 	}
 
@@ -552,8 +551,8 @@ bool write_output_file(char* path_to_file, int num_of_output, std::vector<Result
 	}
 	fprintf(fp,"Seq: %s\n",result_list[0]->get_sequence());
 	for (int i=0; i < num_of_output; i++) {
-		fprintf(fp,"restricted_%d: %s\n",i, result_list[i]->get_restricted());
-		fprintf(fp,"result_%d: %s %lf\n",i, result_list[i]->get_final_structure(),result_list[i]->get_final_energy());
+		fprintf(fp,"Restricted_%d: %s\n",i, result_list[i]->get_restricted());
+		fprintf(fp,"Result_%d: %s \nEnergy_%d: %lf\n",i, result_list[i]->get_final_structure(),i,result_list[i]->get_final_energy());
 	}
 	fclose(fp);
 	return true;
@@ -564,14 +563,15 @@ bool write_directory(char* path_to_dir, int num_of_output, std::vector<Result*> 
 	for (int i=0; i < num_of_output; i++) {
 		char* path_to_file = (char*)malloc(sizeof(int)*1000);
 		sprintf(path_to_file, "%s/output_%d", path_to_dir, i);
-		printf("path_to_file: %s\n",path_to_file);
+		//printf("path_to_file: %s\n",path_to_file);
 		FILE* fp = fopen(path_to_file,"w");
 		if (fp == NULL) {
+			perror("Write to directory file error:");
 			return false;
 		}
 		fprintf(fp,"Seq: %s\n",result_list[0]->get_sequence());
-		fprintf(fp,"restricted_%d: %s\n",i, result_list[i]->get_restricted());
-		fprintf(fp,"result_%d: %s %lf\n",i, result_list[i]->get_final_structure(),result_list[i]->get_final_energy());
+		fprintf(fp,"Restricted_%d: %s\n",i, result_list[i]->get_restricted());
+		fprintf(fp,"Result_%d: %s \nEnergy_%d: %lf\n",i, result_list[i]->get_final_structure(),i,result_list[i]->get_final_energy());
 		free(path_to_file);
 		fclose(fp);
 	}
@@ -608,7 +608,7 @@ double get_START_HYBRID_PENALTY(int type1, int type2){
 			exit(1);
 		}
 	}else{
-		return 58.4511432; //when 2 different model
+		return 74.5607742; //when 2 different model old: 58.4511432
 	}
 }
 
