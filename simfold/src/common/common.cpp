@@ -1440,7 +1440,7 @@ PARAMTYPE emodel_energy_function (int i, int j, std::vector<energy_model> *energ
 
 
 //kevin 10 Aug 2017
-//return 1 if i and j goes across linker and the model is different
+//return 1 if i and j goes across linker
 int is_cross_model(int i, int j){
 	if( (linker_pos != 0) && (i < linker_pos) && (j > linker_pos+linker_length-1) ){
 		return 1;

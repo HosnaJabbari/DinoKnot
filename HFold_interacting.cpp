@@ -130,7 +130,7 @@ int main (int argc, char *argv[]) {
 
 	int max_hotspot = 20; //default value for number of hotspot
 
-	START_HYBRID_PENALTY = -1; 
+	START_HYBRID_PENALTY = -1;
 
 	//kevin: june 23 2017 https://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Option-Example.html
 	while (1){
@@ -302,8 +302,8 @@ int main (int argc, char *argv[]) {
 					break;
 				}
 				strcpy(outputDir,optarg);
-				printf("outdir: %s\n",outputDir);
-				printf("optarg: %s\n",optarg);
+				//printf("outdir: %s\n",outputDir);
+				//printf("optarg: %s\n",optarg);
 				outputDirFound = true;
 				break;
 			case 'k':
@@ -514,21 +514,19 @@ int main (int argc, char *argv[]) {
 	if(outputPathFound){
 		bool write_success = write_output_file(outputPath, number_of_output, result_list);
 		if(!write_success){
-			fprintf(stderr, "write to file fail\n");
 			exit(4);
 		}
 	}else if(outputDirFound){
 		bool write_success = write_directory(outputDir, number_of_output, result_list);
 		if(!write_success){
-			fprintf(stderr, "write to directory fail\n");
 			exit(4);
 		}
 	}else{
 		//kevin 5 oct 2017
 		printf("Seq: %s\n",sequence);
 		for (int i=0; i < number_of_output; i++) {
-			printf("restricted_%d: %s\n",i, result_list[i]->get_restricted());
-			printf("result_str_%d: %s %lf\n",i, result_list[i]->get_final_structure(),result_list[i]->get_final_energy());
+			printf("Restricted_%d: %s\n",i, result_list[i]->get_restricted());
+			printf("Result_%d: %s \nEnergy_%d: %lf\n",i, result_list[i]->get_final_structure(),i,result_list[i]->get_final_energy());
 		}
 	}
 
@@ -576,12 +574,13 @@ void printUsage(){
 bool write_output_file(char* path_to_file, int num_of_output, std::vector<Result*> result_list){
 	FILE* fp = fopen(path_to_file,"w");
 	if (fp == NULL) {
+        perror("Write to file error:");
 		return false;
 	}
 	fprintf(fp,"Seq: %s\n",result_list[0]->get_sequence());
 	for (int i=0; i < num_of_output; i++) {
-		fprintf(fp,"restricted_%d: %s\n",i, result_list[i]->get_restricted());
-		fprintf(fp,"result_%d: %s %lf\n",i, result_list[i]->get_final_structure(),result_list[i]->get_final_energy());
+		fprintf(fp,"Restricted_%d: %s\n",i, result_list[i]->get_restricted());
+		fprintf(fp,"Result_%d: %s \nEnergy_%d: %lf\n",i, result_list[i]->get_final_structure(),i,result_list[i]->get_final_energy());
 	}
 	fclose(fp);
 	return true;
@@ -592,18 +591,19 @@ bool write_directory(char* path_to_dir, int num_of_output, std::vector<Result*> 
 	for (int i=0; i < num_of_output; i++) {
 		char* path_to_file = (char*)malloc(sizeof(int)*1000);
 		sprintf(path_to_file, "%s/output_%d", path_to_dir, i);
-		printf("path_to_file: %s\n",path_to_file);
+		//printf("path_to_file: %s\n",path_to_file);
 		FILE* fp = fopen(path_to_file,"w");
 		if (fp == NULL) {
+			perror("Write to directory file error:");
 			return false;
 		}
 		fprintf(fp,"Seq: %s\n",result_list[0]->get_sequence());
-		fprintf(fp,"restricted_%d: %s\n",i, result_list[i]->get_restricted());
-		fprintf(fp,"result_%d: %s %lf\n",i, result_list[i]->get_final_structure(),result_list[i]->get_final_energy());
+		fprintf(fp,"Restricted_%d: %s\n",i, result_list[i]->get_restricted());
+		fprintf(fp,"Result_%d: %s \nEnergy_%d: %lf\n",i, result_list[i]->get_final_structure(),i,result_list[i]->get_final_energy());
 		free(path_to_file);
 		fclose(fp);
 	}
-	
+
 	return true;
 }
 
@@ -627,16 +627,16 @@ int validateModelType(char* type){
 
 double get_START_HYBRID_PENALTY(int type1, int type2){
 	if(type1 == type2){ //if both model are the same
-		if(type1 == RNA){ //if both are RNA 
-			return 3.0; 
-		}else if(type1 == DNA){ //if both are DNA 
-			return 4.4785825; 
+		if(type1 == RNA){ //if both are RNA
+			return 3.0;
+		}else if(type1 == DNA){ //if both are DNA
+			return 4.4785825;
 		}else if(type1 == PMO){
 			fprintf(stderr, "ERROR: model cannot be both PMO\n");
 			exit(1);
 		}
 	}else{
-		return 58.4511432; //when 2 different model
+		return 74.5607742; //when 2 different model old: 58.4511432
 	}
 }
 

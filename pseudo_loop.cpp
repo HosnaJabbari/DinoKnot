@@ -257,13 +257,12 @@ void pseudo_loop::compute_energies(int i, int j)
 //AP
 void pseudo_loop::compute_energies_emodel(int i, int j, std::vector<energy_model> *energy_models)
 {
+	/*
     // Ian Wark and Kevin July 20 2017
     // i and j cannot be X
-    // TODO ian - how specific should our linker cases be? should these be in each file?
-    //if (sequence[i] == X || sequence[j] == X || sequence[i+1] == X || sequence[j-1])
-    if (sequence[i] == X || sequence[j] == X )
+    if (int_sequence[i] == X || int_sequence[j] == X )
         return;
-
+*/
 	// Hosna, April 18th, 2007
 	// based on discussion with Anne, we changed WMB to case 2 and WMBP(containing the rest of the recurrences)
 	// Hosna, March 14, 2012, changed the position of computing VP from after BE to before WMBP
@@ -280,12 +279,13 @@ void pseudo_loop::compute_energies_emodel(int i, int j, std::vector<energy_model
 	compute_VPP(i,j,fres);
 
 	compute_BE_emodel(fres[j].pair,j,fres[i].pair,i,fres,energy_models);
-}
+} 
 
 
 void pseudo_loop::compute_WI(int i, int j , h_str_features *fres){
 	int min = INF, m1 = INF, m2= INF, m3= INF;
 	int ij = index[i]+j-i;
+
 	if (WI[ij] != 0){ //calculated before
 //		if (debug)
 //		{
@@ -294,28 +294,40 @@ void pseudo_loop::compute_WI(int i, int j , h_str_features *fres){
 		return;
 	}
 
+	//Kevin and Mahyar, Nov 30, 2017
+	if(int_sequence[i] == X && int_sequence[j] == X){
+		WI[ij] = START_HYBRID_PENALTY;
+		return;
+	}
+
 	//14 Aug 2017 kevin and Mahyar
 	//
-	if(sequence[i] == X || sequence[j] == X){
+	if(int_sequence[i] == X || int_sequence[j] == X){
 		int new_ij = -1;
-		if(sequence[i] == X){
+		if(int_sequence[i] == X){
 			i++;
-			while(sequence[i] == X){
+			while(int_sequence[i] == X){
 				i++;
 			}
 		}
-		if(sequence[j] == X){
+		if(int_sequence[j] == X){
 			j--;
-			while(sequence[j] == X){
+			while(int_sequence[j] == X){
 				j--;
 			}
 		}
-		if(i >= j){
+		if(i > j){
 			WI[ij] = 0;
 			return;
 		}
+		//Mahyar and Kevin, Nov 30 2017 , changed from 0 to Pup + START_HYBRID_PENALTY
+		if(i == j){
+			WI[ij] = PUP_penalty + START_HYBRID_PENALTY;
+			return;
+		}
 		new_ij = index[i] + j -i;
-		WI[ij] = WI[new_ij];
+		//Mahyar and Kevin, Nov 16 2017 
+		WI[ij] = WI[new_ij] + START_HYBRID_PENALTY;
 		return;
 	}
 	
@@ -357,11 +369,17 @@ void pseudo_loop::compute_WI(int i, int j , h_str_features *fres){
 // ((..))((...))
 // such that both i and j are paired but we can chop them
 
-	// branch 1:
+	// branch 1:compute_WI
 //	if (fres[i].pair < 0 && fres[j].pair < 0)
 //	{
 	int t;
 	for (t = i; t< j; t++){
+		
+		//Mahyar and Kevin, Nov 16, 2017  
+		if (int_sequence[t] == X){
+			continue;
+		}
+		
 		int wi_1 = get_WI(i,t);
 		int wi_2 = get_WI(t+1,j);
 		int energy = wi_1 + wi_2;
@@ -414,6 +432,7 @@ void pseudo_loop::compute_WI(int i, int j , h_str_features *fres){
 //	if (debug ){
 //		printf("WI[%d,%d]: m1 = %d, m2 = %d and m3 = %d ==> min = %d \n",i,j,m1,m2,m3,WI[ij]);
 //	}
+
 }
 
 
@@ -507,12 +526,6 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 			int WI_ipus1_BPminus = get_WI(i+1,Bp_i - 1) ;
 			int WI_Bplus_jminus = get_WI(B_i + 1,j-1);
 			m1 = WI_ipus1_BPminus + WI_Bplus_jminus;
-			//kevin 21 Sept 2017
-			//add hybrid penalty
-			if( is_cross_model(i,j)) {    // If cross model and working with a hybrid molecule 
-				m1 += START_HYBRID_PENALTY;  
-				//printf("VP added penalty\n");                                              // add a hybrid molecule penalty
-			}
 //			if(debug){
 //				printf("VP[%d,%d] branch 1: WI(%d+1)(BP(%d)-1) = %d and WI(B(%d)+1)(%d-1) = %d => m1 = %d \n",i,j,i,i,WI_ipus1_BPminus,i,j,WI_Bplus_jminus, m1);
 //			}
@@ -529,12 +542,7 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 			int WI_i_plus_b_minus = get_WI(i+1,b_i - 1);
 			int WI_bp_plus_j_minus = get_WI(bp_i + 1,j-1);
 			m2 = WI_i_plus_b_minus + WI_bp_plus_j_minus;
-			//kevin 21 Sept 2017
-			//add hybrid penalty
-			if( is_cross_model(i,j)) {    // If cross model and working with a hybrid molecule 
-				m2 += START_HYBRID_PENALTY;  
-				//printf("VP added penalty\n");                                              // add a hybrid molecule penalty
-			}
+			
 //			if(debug){
 //				printf("VP[%d,%d] branch 2: WI(%d+1)(b(%d)-1) = %d and WI(bp(%d)+1)(%d-1) = %d => m2 = %d \n",i,j,i,i,WI_i_plus_b_minus,i,j,WI_bp_plus_j_minus, m2);
 //			}
@@ -550,16 +558,13 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 			int B_i = get_B(i,j);
 			int b_i = get_b(i,j);
 			int bp_i = get_bp(i,j);
+			
 			int WI_i_plus_Bp_minus = get_WI(i+1,Bp_i - 1);
 			int WI_B_plus_b_minus = get_WI(B_i + 1,b_i - 1);
 			int WI_bp_plus_j_minus = get_WI(bp_i +1,j - 1);
+
 			m3 = WI_i_plus_Bp_minus + WI_B_plus_b_minus + WI_bp_plus_j_minus;
-			//kevin 21 Sept 2017
-			//add hybrid penalty
-			if( is_cross_model(i,j)) {    // If cross model and working with a hybrid molecule 
-				m3 += START_HYBRID_PENALTY;  
-				//printf("VP added penalty\n");                                              // add a hybrid molecule penalty
-			}
+			
 //			if(debug){
 //				printf("VP[%d,%d] branch 3: WI(%d+1)(B'(%d)-1) = %d, WI(B(%d)+1)(b(%d)-1) = %d and WI(b'(%d)+1)(%d-1) = %d => m3 = %d \n",i,j,i,i, WI_i_plus_Bp_minus,i,i,WI_B_plus_b_minus,i,j,WI_bp_plus_j_minus, m3);
 //			}
@@ -595,6 +600,10 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 		}
 //		printf("B'(%d,%d) = %d, b(%d,%d) = %d, min_borders = %d\n",i,j,get_Bp(i,j),i,j,get_b(i,j), min_borders);
 		for (ip = i+1; ip < min_borders; ip++){
+			//Mahyar and Kevin, Nov 16, 2017 
+			if (int_sequence[ip] == X){
+				continue;
+			}
 			// Hosna: April 20, 2007
 			// i and ip and j and jp should be in the same arc
 			// also it should be the case that [i+1,ip-1] && [jp+1,j-1] are empty regions
@@ -611,6 +620,10 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 				}
 //				printf("b'(%d,%d) = %d, B(%d,%d) = %d, max_borders = %d\n",i,j,get_bp(i,j),i,j,get_B(i,j), max_borders);
 				for (jp = max_borders+1; jp < j ; jp++){
+					//Mahyar and Kevin, Nov 16, 2017   
+					if (int_sequence[jp] == X){
+						continue;
+					}
 					if (fres[jp].pair < 0 && can_pair(int_sequence[ip],int_sequence[jp]) && is_empty_region(jp+1,j-1) == 1){
 						// Hosna: April 20, 2007
 						// i and ip and j and jp should be in the same arc
@@ -643,6 +656,10 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 			min_Bp_j = get_Bp(i,j);
 		}
 		for (r = i+1; r < min_Bp_j ; r++){
+			//Mahyar and Kevin, Nov 16, 2017  
+			if (int_sequence[jp] == X){
+				continue;
+			}
 			if (fres[r].pair < 0){
 				// Hosna: July 5th, 2007
 				// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
@@ -667,6 +684,10 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 			max_i_bp = get_bp(i,j);
 		}
 		for (r = max_i_bp+1; r < j ; r++){
+			//Mahyar and Kevin, Nov 16, 2017  
+			if (int_sequence[r] == X){
+				continue;
+			}
 			if (fres[r].pair < 0){
 				// Hosna: July 5th, 2007
 				// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
@@ -738,6 +759,7 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 //			printf("VP[%d,%d]: m1 = %d, m2 = %d, m3 = %d, m4 = %d, m5 = %d, m6 = %d, m7 = %d and min = %d \n",i,j,m1,m2,m3,m4,m5,m6,m7,min);
 //		}
 		VP[ij] = min;
+
 	}
 }
 
@@ -995,10 +1017,12 @@ void pseudo_loop::compute_WMBP(int i, int j, h_str_features *fres){
 		return;
 	}
 	//base case
-	if (i == j){
+	//Kevin and Mahyar, Nov 30 2017
+	if ((i >= j) || (int_sequence[i] == X && int_sequence[j] == X)){
 		WMBP[ij] = INF;
 		return;
 	}
+
 	// Hosna: July 6th, 2007
 	// added impossible cases
 	// Ian Wark July 19 2017
@@ -1026,6 +1050,10 @@ void pseudo_loop::compute_WMBP(int i, int j, h_str_features *fres){
 			// Hosna: July 5th, 2007:
 			// if we have bp(i)> j then we should not have come to the WMBP
 			for (l = i+1; l < j; l++){
+				//Mahyar and Kevin, Nov 16, 2017  
+				if (int_sequence[l] == X){
+					continue;
+				}
 				// Hosna, March 14, 2007
 				// fixing the for loop
 
@@ -1063,6 +1091,10 @@ void pseudo_loop::compute_WMBP(int i, int j, h_str_features *fres){
 		if (fres[j].pair < 0){
 			int l, temp = INF, l_min=-1;
 			for (l = i+1; l<j ; l++)	{
+				//Mahyar and Kevin, Nov 16, 2017  
+				if (int_sequence[l] == X){
+					continue;
+				}
 				// Hosna, April 6th, 2007
 				// whenever we use get_borders we have to check for the correct values
 
@@ -1110,11 +1142,17 @@ void pseudo_loop::compute_WMBP(int i, int j, h_str_features *fres){
 //		if (debug){
 //			printf("WMBP(%d,%d) branch 4:  VP = %d So m4 = %d\n",i,j,get_VP(i,j), m4);
 //		}
+
+
 		// 5) WMB(i,j) = min_{i<l<j}{WMB(i,l)+WI(l+1,j)} if bp(j)<j
 		// Hosna: Feb 5, 2007
 		if(fres[j].pair < j){
 			int l,l_min =-1;
 			for(l = i+1; l<j; l++){
+				//Mahyar and Kevin, Nov 16, 2017  
+				if (int_sequence[l] == X){
+					continue;
+				}
 				// Hosna: March 14th, 2007
 				// I think l cannot be paired
 
@@ -1155,7 +1193,8 @@ void pseudo_loop::compute_WMB(int i, int j, h_str_features *fres){
 		return;
 	}
 	//base case
-	if (i == j){
+	//Mahyar and Kevin, Nov 30 2017
+	if ((i >= j) ||  (int_sequence[i] == X && int_sequence[j] == X)){
 		WMB[ij] = INF;
 		return;
 	}
@@ -1182,6 +1221,10 @@ void pseudo_loop::compute_WMB(int i, int j, h_str_features *fres){
 //				printf("\n INSIDE WMB BRANCH 2 \n where bp_j = %d and j = %d \n\n", bp_j,j);
 //			}
 			for (l = (bp_j +1); (l < j); l++){
+
+				if(int_sequence[l] == X){
+					continue;
+				}
 				// Hosna: April 24, 2007
 				// correct case 2 such that a multi-pseudoknotted
 				// loop would not be treated as case 2
@@ -1198,9 +1241,7 @@ void pseudo_loop::compute_WMB(int i, int j, h_str_features *fres){
 //					if (fres[l].pair < 0 && get_Bp(l,j) >= 0 && get_Bp(l,j)<nb_nucleotides){
 					if (get_Bp(l,j) >= 0 && get_Bp(l,j)<nb_nucleotides){
 						int sum = get_BE(bp_j,j,fres[get_Bp(l,j)].pair,get_Bp(l,j)) + get_WMBP(i,l) + get_WI(l+1,get_Bp(l,j)-1);
-						if (l == 600 && i == 522 && j == 615) {
-							int t = 0;
-						}
+						
 						if (temp > sum){
 							temp = sum;
 							l_min = l;
@@ -1231,6 +1272,7 @@ void pseudo_loop::compute_WMB(int i, int j, h_str_features *fres){
 }
 
 void pseudo_loop::compute_WIP(int i, int j, h_str_features *fres){
+	//printf("compute_WIP %d %d\n",i,j);
 	int ij = index[i]+j-i;
 	if (WIP[ij] < INF/2){ // was calculated before
 		return;
@@ -1242,19 +1284,25 @@ void pseudo_loop::compute_WIP(int i, int j, h_str_features *fres){
 //		}
 //	}
 
+	//Kevin and Mahyar, Nov 30, 2017
+	if(int_sequence[i] == X && int_sequence[j] == X){
+		WI[ij] = START_HYBRID_PENALTY;
+		return;
+	}
+
 	//14 Aug 2017 kevin and Mahyar
-	//
-	if(sequence[i] == X || sequence[j] == X){
+	if(int_sequence[i] == X || int_sequence[j] == X){
+		
 		int new_ij = -1;
-		if(sequence[i] == X){
+		if(int_sequence[i] == X){
 			i++;
-			while(sequence[i] == X){
+			while(int_sequence[i] == X){
 				i++;
 			}
 		}
-		if(sequence[j] == X){
+		if(int_sequence[j] == X){
 			j--;
-			while(sequence[j] == X){
+			while(int_sequence[j] == X){
 				j--;
 			}
 		}
@@ -1263,9 +1311,12 @@ void pseudo_loop::compute_WIP(int i, int j, h_str_features *fres){
 			return;
 		}
 		new_ij = index[i] + j -i;
-		WIP[ij] = WIP[new_ij];
+		//Mahyar and Kevin, Nov 14 2017 
+		WIP[ij] = WIP[new_ij] + START_HYBRID_PENALTY;
+		return;
 	}
-
+    
+	
 	if (fres[i].arc != fres[j].arc || i == j || weakly_closed[ij]== 0){
 		WIP[ij] = INF;
 		return;
@@ -1295,6 +1346,10 @@ void pseudo_loop::compute_WIP(int i, int j, h_str_features *fres){
 	//branch 3:
 	int t;
 	for (t = i; t <j; t++){
+		//Mahyar and Kevin, Nov 16, 2017 
+		if (int_sequence[t] == X){
+			continue;
+		}
 		int tmp = get_WIP(i,t) + get_WIP(t+1,j);
 		if (tmp < m3){
 			m3 = tmp;
@@ -1322,8 +1377,10 @@ void pseudo_loop::compute_WIP(int i, int j, h_str_features *fres){
 //	if (debug && i == 6 && j == 15){
 //		printf("WIP(6,15) is calling WMB \n");
 //	}
-
+    
+	
 	WIP[ij] = MIN(MIN(m1,MIN(m2,m3)),MIN(m4,m5));
+
 
 //	if (debug){
 //		printf("WIP(%d,%d): m1 = %d, m2 = %d, m3 = %d, m4 = %d, m5 = %d ==> min = %d \n",i,j,m1,m2,m3,m4,m5,WIP[ij]);
@@ -1412,6 +1469,10 @@ void pseudo_loop::compute_VPP(int i, int j, h_str_features *fres){
 		max_i_bp = get_bp(i,j);
 	}
 	for (r = max_i_bp+1; r < j; r++ ){
+		//mahyar and kevin  Nov 17, 2017 
+		if (int_sequence[r] == X){
+			continue;
+		}
         // Ian Wark July 19 2017
         // fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
         // otherwise it will create pairs in spots where the restricted structure says there should be no pairs
@@ -1434,6 +1495,10 @@ void pseudo_loop::compute_VPP(int i, int j, h_str_features *fres){
 		min_Bp_j = get_Bp(i,j);
 	}
 	for (r = i+1; r < min_Bp_j; r++){
+		//mahyar and kevin  Nov 17, 2017 
+		if (int_sequence[r] == X){
+			continue;
+		}
         // Ian Wark July 19 2017
         // fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
         // otherwise it will create pairs in spots where the restricted structure says there should be no pairs
@@ -1454,11 +1519,23 @@ void pseudo_loop::compute_VPP(int i, int j, h_str_features *fres){
 //		max_i_bp = get_bp(i,j);
 //	}
 	for (r = max_i_bp+1; r < j; r++ ){
+		//mahyar and kevin  Nov 17, 2017 
+		if (int_sequence[r] == X){
+			continue;
+		}
+		//Mahyar and Kevin, Nov 17, 2017 
+		int skip_X = 0;
+		int tmp = 0;
+		if(is_cross_model(r,j)){
+			skip_X = linker_length;
+			tmp = START_HYBRID_PENALTY;
+		}
         // Ian Wark July 19 2017
         // fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
         // otherwise it will create pairs in spots where the restricted structure says there should be no pairs
 		if (fres[r].pair < FRES_RESTRICTED_MIN && this->is_empty_region(r+1,j)){
-			int tmp = get_VP(i,r) + (cp_penalty *(j-r)); // check the (j-r) part
+			tmp += get_VP(i,r) + (cp_penalty *(j-r-skip_X)); // check the (j-r) part
+			
 //			if (debug){
 //				printf("VPP(%d,%d) branch 3: VP(%d,%d) = %d, %d *(%d-%d)= %d ==> tmp = %d  and m3 = %d\n",i,j,i,r,get_VP(i,r),cp_penalty,j,r,cp_penalty *(j-r),tmp, m3);
 //			}
@@ -1475,11 +1552,23 @@ void pseudo_loop::compute_VPP(int i, int j, h_str_features *fres){
 //		min_Bp_j = get_Bp(i,j);
 //	}
 	for (r = i+1; r < min_Bp_j; r++){
+		//mahyar and kevin  Nov 17, 2017 
+		if (int_sequence[r] == X){
+			continue;
+		}
         // Ian Wark July 19 2017
         // fres[i].pair < 0 changed to fres[i].pair < FRES_RESTRICTED_MIN (which equals -1 at time of writing)
         // otherwise it will create pairs in spots where the restricted structure says there should be no pairs
 		if (fres[r].pair < FRES_RESTRICTED_MIN && this->is_empty_region(i,r-1)){
-			int tmp = (cp_penalty * (r-i)) + get_VP(r,j);
+			//Mahyar and Kevin, Nov 17, 2017 
+			int skip_X = 0;
+			int tmp = 0;
+			if(is_cross_model(i,r)){
+				skip_X = linker_length;
+				tmp = START_HYBRID_PENALTY;
+			}
+			tmp += (cp_penalty * (r-i-skip_X)) + get_VP(r,j);
+			
 //			if (debug){
 //				printf("VPP(%d,%d) branch 4: %d *(%d-%d) = %d, VP(%d,%d)= %d ==> tmp = %d  and m4 = %d\n",i,j,cp_penalty,r,i,cp_penalty * (r-i),r,j,get_VP(r,j),tmp, m4);
 //			}
@@ -1590,7 +1679,7 @@ void pseudo_loop::compute_BE(int i, int j, int ip, int jp, h_str_features * fres
 				// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
 				// in a multiloop that spans a band
 				int temp = get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1)+ ap_penalty + 2* bp_penalty;
-//				if (debug){
+//				if (debug){lp
 //					printf("BE(%d,%d,%d,%d) branch 3: WIP(%d,%d) = %d, BE(%d,%d,%d,%d)= %d, WIP(%d,%d)= %d ==> temp = %d  and m3 = %d\n",i,j,ip,jp,i+1,l-1,get_WIP(i+1,l-1),l,lp,ip,jp,get_BE(l,lp,ip,jp),lp+1,j-1,get_WIP(lp+1,j-1),temp,m3);
 //				}
 				if (m3 > temp){
@@ -1663,7 +1752,7 @@ void pseudo_loop::compute_BE_emodel(int i, int j, int ip, int jp, h_str_features
 	}
 
 	//if i or j or ip or jp is X, return base case which is X
-	if(sequence[i] == X || sequence[j] == X || sequence[ip] == X || sequence[jp] == X ){
+	if(int_sequence[i] == X || int_sequence[j] == X || int_sequence[ip] == X || int_sequence[jp] == X ){
 		BE[iip] = INF;
 		return;
 	}
@@ -1695,6 +1784,7 @@ void pseudo_loop::compute_BE_emodel(int i, int j, int ip, int jp, h_str_features
 		if (fres[i+1].pair == j-1){
 			//AP
 			m1 = get_e_stP_emodel(i,j,model) + get_BE(i+1,j-1,ip,jp);
+			 
 	//		if(debug ){
 	//			printf("BE(%d,%d,%d,%d) Case 1: e_stP(%d,%d) = %d and BE(%d,%d,%d,%d) = %d ==> m1 = %d \n",i,j,ip,jp,i,j,get_e_stP(i,j),i+1,j-1,ip,jp,get_BE(i+1,j-1,ip,jp),m1);
 	//		}
@@ -1723,12 +1813,14 @@ void pseudo_loop::compute_BE_emodel(int i, int j, int ip, int jp, h_str_features
 				if (is_empty_region(i+1,l-1) == 1 && is_empty_region(lp+1,j-1) == 1 ){//&& !(ip == (i+1) && jp==(j-1)) && !(l == (i+1) && lp == (j-1))){
 					//AP
 					int temp = get_e_intP_emodel(i,l,lp,j,model)+ get_BE(l,lp,ip,jp);
+					
 	//				if (debug){
 	//					printf("BE(%d,%d,%d,%d) branch 2: e_intP(%d,%d,%d,%d) = %d, BE(%d,%d,%d,%d)= %d ==> temp = %d  and m2 = %d\n",i,j,ip,jp,i,l,lp,j,get_e_intP(i,l,lp,j),l,lp,ip,jp,get_BE(l,lp,ip,jp));
 	//				}
-					if (m2 > temp){
+					if (temp < m2){
 						m2 = temp;
 					}
+					
 				}
 
 				// 3)
@@ -1737,6 +1829,7 @@ void pseudo_loop::compute_BE_emodel(int i, int j, int ip, int jp, h_str_features
 					// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
 					// in a multiloop that spans a band
 					int temp = get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1)+ ap_penalty + 2* bp_penalty;
+
 	//				if (debug){
 	//					printf("BE(%d,%d,%d,%d) branch 3: WIP(%d,%d) = %d, BE(%d,%d,%d,%d)= %d, WIP(%d,%d)= %d ==> temp = %d  and m3 = %d\n",i,j,ip,jp,i+1,l-1,get_WIP(i+1,l-1),l,lp,ip,jp,get_BE(l,lp,ip,jp),lp+1,j-1,get_WIP(lp+1,j-1),temp,m3);
 	//				}
@@ -1747,13 +1840,23 @@ void pseudo_loop::compute_BE_emodel(int i, int j, int ip, int jp, h_str_features
 
 				// 4)
 				if (is_weakly_closed(i+1,l-1) == 1 && is_empty_region(lp+1,j-1) == 1){
+					//Mahyar and Kevin, Nov 17, 2017 
+					//Regarding the case: ((.)........(.......)..XXXXX..)
+					int skip_X = 0;
+					int temp = 0;
+					if(is_cross_model(lp,j)){
+						skip_X = linker_length;
+						temp = START_HYBRID_PENALTY;
+					}
 					// Hosna: July 5th, 2007
 					// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
 					// in a multiloop that spans a band
-					int temp = get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + cp_penalty * (j-lp+1) + ap_penalty + 2*bp_penalty;
-	//				if (debug){
+					temp += get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + cp_penalty * (j-lp+1-skip_X) + ap_penalty + 2*bp_penalty;
+					
+	//				if (debug){lp
 	//					printf("BE(%d,%d,%d,%d) branch 4: WIP(%d,%d) = %d, BE(%d,%d,%d,%d)= %d ==> temp = %d  and m4 = %d\n",i,j,ip,jp,i+1,l-1,get_WIP(i+1,l-1),l,lp,ip,jp,get_BE(l,lp,ip,jp),temp,m4);
 	//				}
+	 				
 					if (m4 > temp){
 						m4 = temp;
 					}
@@ -1761,10 +1864,19 @@ void pseudo_loop::compute_BE_emodel(int i, int j, int ip, int jp, h_str_features
 
 				// 5)
 				if (is_empty_region(i+1,l-1) == 1 && is_weakly_closed(lp+1,j-1) == 1){
+					//Mahyar and Kevin, Nov 17, 2017 
+					//Regarding the case: (..XXXXX........(.......).......(.).)
+					int skip_X = 0;
+					int temp = 0;
+					if(is_cross_model(i,l)){
+						skip_X = linker_length;
+						temp = START_HYBRID_PENALTY;
+					}
 					// Hosna: July 5th, 2007
 					// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
 					// in a multiloop that spans a band
-					int temp = ap_penalty + 2*bp_penalty + (cp_penalty * (l-i+1)) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1);
+					temp += ap_penalty + 2*bp_penalty + (cp_penalty * (l-i+1-skip_X)) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1);
+					
 	//				if (debug && l == 9 && ip == 11){
 	//					printf("BE(%d,%d,%d,%d) branch 5: BE(%d,%d,%d,%d)= %d and WIP(%d,%d) = %d ==> temp = %d \n", i,j,ip,jp,l,lp,ip,jp,get_BE(l,lp,ip,jp),lp+1,j-1,get_WIP(lp+1,j-1),temp);
 	//				}
@@ -2094,6 +2206,11 @@ int pseudo_loop::get_e_intP_emodel(int i, int ip, int jp, int j, energy_model *m
 //	printf("test: e_int(5,30,7,29) = %d \n",VBI->get_energy(5,30,7,29,int_sequence));
 //	printf("e_int(%d,%d,%d,%d) = %d \n",i,j,ip,jp,e_int);
 	int energy = (int)round(e_intP_penalty * (double)e_int);
+	//Mahyar and Kevin, Nov 14, 2017 
+	//Regarding the cases: (..(..XXXXX..(.......).........)..) and (..(.........(.......)..XXXXX..)..)
+	if (is_cross_model(i,ip) || is_cross_model(jp,j)){
+		energy += START_HYBRID_PENALTY;
+	}
 //	printf("e_intP(%d,%d,%d,%d) = %d \n",i,ip,jp,j,energy);
 	return energy;
 }
@@ -3299,6 +3416,11 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 					int l, acc = INF;
 					int bp_j = fres[j].pair;
 					for (l = bp_j +1; l < j; l++){
+						//kevin and mahyar 23 Nov 2017 
+						if(int_sequence[l] == X){
+							continue;
+						}
+
 						// Hosna: April 24, 2007
 						// correct case 2 such that a multi-pseudoknotted
 						// loop would not be treated as case 2
@@ -3384,6 +3506,11 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 					// Hosna: July 5th, 2007:
 					// if we have bp(i)> j then we should not have come to the WMBP
 					for (l = i+1; l < j; l++){
+						//Mahyar and Kevin, Nov 21, 2017  
+						if (int_sequence[l] == X){
+							continue;
+						}
+
 						// Hosna, April 9th, 2007
 						// checking the borders as they may be negative
 		//				if(fres[l].pair < 0 && get_bp(i,l) >= 0 && get_bp(i,l) < nb_nucleotides){
@@ -3423,6 +3550,11 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 					int l, acc = INF;
 					int l3 = -1;
 					for (l = i+1; l<j ; l++)	{
+						//Mahyar and Kevin, Nov 21, 2017  
+						if (int_sequence[l] == X){
+							continue;
+						}
+
 						// Hosna, April 6th, 2007
 						// whenever we use get_borders we have to check for the correct values
 						if (fres[l].arc > -1 && get_B(l,j) >= 0 && get_B(l,j) < nb_nucleotides && get_Bp(l,j) >= 0 && get_Bp(l,j)<nb_nucleotides){
@@ -3475,6 +3607,11 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 				if(fres[j].pair < j){
 					int l, acc = INF;
 					for(l = i+1; l<j; l++){
+						//Mahyar and Kevin, Nov 21, 2017  
+						if (int_sequence[l] == X){
+							continue;
+						}
+
 						// Hosna: April 18th, 2007
 						// l and j should be in the same arc
 						if (fres[l].pair < 0 && fres[l].arc > -1 && fres[j].arc > -1 && fres[l].arc == fres[j].arc){
@@ -3640,6 +3777,10 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 					min_borders = get_Bp(i,j);
 				}
 				for (ip = i+1; ip < min_borders; ip++){
+					//Mahyar and Kevin, Nov 21, 2017 
+					if (int_sequence[ip] == X){
+						continue;
+					}
 					// Hosna: April 20, 2007
 					// i and ip and j and jp should be in the same arc
 					// it should also be the case that [i+1,ip-1] && [jp+1,j-1] are empty regions
@@ -3655,6 +3796,10 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 							max_borders = get_bp(i,j);
 						}
 						for (jp = max_borders+1 ; jp < j ; jp++){
+							//Mahyar and Kevin, Nov 21, 2017 
+							if (int_sequence[jp] == X){
+								continue;
+							}
 							if (fres[jp].pair < 0 && can_pair(int_sequence[ip],int_sequence[jp]) && is_empty_region(jp+1,j-1)==1){
 								// Hosna: April 20, 2007
 								// i and ip and j and jp should be in the same arc
@@ -3688,6 +3833,10 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 					min_Bp_j = get_Bp(i,j);
 				}
 				for (r = i+1; r < min_Bp_j ; r++){
+					//Mahyar and Kevin, Nov 21, 2017 
+					if (int_sequence[r] == X){
+						continue;
+					}
 					if (fres[r].pair < 0){
 						// Hosna: July 5th, 2007
 						// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
@@ -3711,6 +3860,10 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 					max_i_bp = get_bp(i,j);
 				}
 				for (r = max_i_bp+1; r < j ; r++){
+					//Mahyar and Kevin, Nov 21, 2017 
+					if (int_sequence[r] == X){
+						continue;
+					}
 					if (fres[r].pair < 0){
 						// Hosna: July 5th, 2007
 						// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
@@ -3877,6 +4030,10 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 				max_i_bp = get_bp(i,j);
 			}
 			for (r = max_i_bp+1; r < j; r++ ){
+				//mahyar and kevin  Nov 21, 2017 
+				if (int_sequence[r] == X){
+					continue;
+				}
 				if (fres[r].pair < 0){
 					tmp = get_VP(i,r) + get_WIP(r+1,j);
 					if (tmp < min){
@@ -3897,6 +4054,10 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 				min_Bp_j = get_Bp(i,j);
 			}
 			for (r = i+1; r < min_Bp_j; r++){
+				//mahyar and kevin  Nov 21, 2017 
+				if (int_sequence[r] == X){
+					continue;
+				}
 				if (fres[r].pair < 0){
 					tmp = get_WIP(i,r-1) + get_VP(r,j);
 					if (tmp < min){
@@ -3921,8 +4082,19 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 	//			max_i_bp = get_bp(i,j);
 	//		}
 			for (r = max_i_bp+1; r < j; r++ ){
+				//mahyar and kevin  Nov 21, 2017 
+				if (int_sequence[r] == X){
+					continue;
+				}
+				//Mahyar and Kevin, Nov 21, 2017 
+				int skip_X = 0;
+				int tmp = 0;
+				if(is_cross_model(r,j)){
+					skip_X = linker_length;
+					tmp = START_HYBRID_PENALTY;
+				}
 				if (fres[r].pair < 0 && this->is_empty_region(r+1,j)){
-					tmp = get_VP(i,r) + cp_penalty *(j-r); // check the (j-r) part
+					tmp += get_VP(i,r) + cp_penalty *(j-r-skip_X); // check the (j-r) part
 	//				if (debug){
 	//					printf("VPP(%d,%d) branch 3: VP(%d,%d) = %d, %d *(%d-%d)= %d ==> tmp = %d  and m3 = %d\n",i,j,i,r,get_VP(i,r),cp_penalty,j,r,cp_penalty *(j-r),tmp, m3);
 	//				}
@@ -3941,8 +4113,19 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 	//			min_Bp_j = get_Bp(i,j);
 	//		}
 			for (r = i+1; r < min_Bp_j; r++){
+				//mahyar and kevin  Nov 21, 2017 
+				if (int_sequence[r] == X){
+					continue;
+				}
 				if (fres[r].pair < 0 && this->is_empty_region(i,r-1)){
-					tmp = cp_penalty * (r-i) + get_VP(r,j);
+					//Mahyar and Kevin, Nov 21, 2017 
+					int skip_X = 0;
+					int tmp = 0;
+					if(is_cross_model(i,r)){
+						skip_X = linker_length;
+						tmp = START_HYBRID_PENALTY;
+					}
+					tmp += cp_penalty * (r-i-skip_X) + get_VP(r,j);
 	//				if (debug){
 	//					printf("VPP(%d,%d) branch 4: %d *(%d-%d) = %d, VP(%d,%d)= %d ==> tmp = %d  and m4 = %d\n",i,j,cp_penalty,r,i,cp_penalty * (r-i),r,j,get_VP(r,j),tmp, m4);
 	//				}
@@ -4023,7 +4206,7 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 			if (debug) {
 				printf ("\t(%d,%d) P_WI\n", i,j);
 			}
-			if (i >= j){
+			if ((i >= j) || (int_sequence[i] == X && int_sequence[j] == X)){
 				return;
 			}
 			int min = INF, tmp = INF, best_row = -1, best_t= -1;
@@ -4037,6 +4220,12 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 	//		{
 				int t;
 				for (t = i; t< j; t++){
+					
+					//Mahyar and Kevin, Nov 21, 2017  
+					if (int_sequence[t] == X){
+						continue;
+					}
+					
 					int wi_1 = get_WI(i,t);
 					int wi_2 = get_WI(t+1,j);
 					tmp = wi_1 + wi_2;
@@ -4082,6 +4271,29 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 	//				printf("P_WI: case 3: min = %d and best_row = %d \n",min,best_row);
 				}
 			}
+			//Mahyar and Kevin, Nov 22 2017 
+			int new_j = j;
+			if(int_sequence[new_j] == X){
+					new_j--;
+					while(int_sequence[new_j] == X){
+							new_j--;
+							best_row = 4;
+					}
+
+			}
+			
+			//added this to check if i is a X
+			//if it is, move i till it is the last X so the next iteration can handle it properly
+			int new_i = i;
+			
+			if(int_sequence[new_i] == X){
+					new_i++;
+					while(int_sequence[new_i] == X){
+							new_i++;
+							best_row = 4;
+					}
+			}
+			
 			switch (best_row)
 			{
 				case 1:
@@ -4119,6 +4331,14 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 						insert_node(i,j,P_WMB);
 					}
 					break;
+                case 4: //Mahyar and Kevin, Nov 22 2017 
+						// added this case to jump i or j when encounter X
+						insert_node(new_i,new_j,P_WI);
+						break;
+				default:
+						printf("i= %d j=%d\n",i,j);
+						fprintf(stderr, "ERROR backtrack P_WI has no best row\n");
+						exit(10);
 			}
 		}
 			break;
@@ -4218,10 +4438,18 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 
 				// case 4
 				if (is_weakly_closed(i+1,l-1) == 1 && is_empty_region(lp+1,j-1) == 1){
+					//Mahyar and Kevin, Nov 21, 2017 
+					//Regarding the case: ((.)........(.......)..XXXXX..)
+					int skip_X = 0;
+					int temp = 0;
+					if(is_cross_model(lp,j)){
+						skip_X = linker_length;
+						temp = START_HYBRID_PENALTY;
+					}
 					// Hosna: July 5th, 2007
 					// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
 					// in a multiloop that spans a band
-					tmp = get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + c_penalty * (j-lp+1) + ap_penalty + 2* bp_penalty;
+					tmp += get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + c_penalty * (j-lp+1-skip_X) + ap_penalty + 2* bp_penalty;
 					if (min > tmp){
 						min = tmp;
 						best_row = 4;
@@ -4234,10 +4462,18 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 
 				// case 5
 				if (is_empty_region(i+1,l-1) == 1 && is_weakly_closed(lp+1,j-1) == 1){
+					//Mahyar and Kevin, Nov 21, 2017 
+					//Regarding the case: (..XXXXX........(.......).......(.).)
+					int skip_X = 0;
+					int temp = 0;
+					if(is_cross_model(i,l)){
+						skip_X = linker_length;
+						temp = START_HYBRID_PENALTY;
+					}
 					// Hosna: July 5th, 2007
 					// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
 					// in a multiloop that spans a band
-					tmp = ap_penalty + 2* bp_penalty+ c_penalty * (l-i+1) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1);
+					tmp += ap_penalty + 2* bp_penalty+ c_penalty * (l-i+1-skip_X) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1);
 					if (min > tmp){
 						min = tmp;
 						best_row = 5;
@@ -4341,9 +4577,11 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 			if (debug) {
 				printf ("\t(%d,%d) P_WIP\n", i,j);
 			}
-			if (i == j){
+			//mahyar and kevin 24 Nov 2017 , changed from == to >=
+			if ((i >= j) ||(int_sequence[i] == X && int_sequence[j] == X)) {
 				return;
 			}
+		
 			int min = INF, tmp = INF, best_row = -1, best_t = INF;
 			//case 1
 			if (fres[i].pair < 0){
@@ -4403,6 +4641,30 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 	//				printf("P_WIP: case 5: min = %d and best_row = %d \n",min,best_row);
 				}
 			}
+
+			
+                        
+			//Mahyar and Kevin, Nov 22 2017 
+			int new_j = j;
+			if(int_sequence[new_j] == X){
+					new_j--;
+					while(int_sequence[new_j] == X){
+							new_j--;
+							best_row = 6;
+					}
+
+			}
+			//added this to check if i is a X
+			//if it is, move i till it is the last X so the next iteration can handle it properly
+			int new_i = i;
+			if(int_sequence[new_i] == X){
+					new_i++;
+					while(int_sequence[new_i] == X){
+							new_i++;
+							best_row = 6;
+					}
+			}
+			
 			switch(best_row)
 			{
 				case 1:
@@ -4456,6 +4718,14 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 						insert_node(i,j,P_WMB);
 					}
 					break;
+				case 6: //Mahyar and Kevin, Nov 22 2017 
+						//added this case to jump i or j when encounter X
+						insert_node(new_i,new_j,P_WIP);
+						break;
+				default:
+						printf("i= %d j=%d\n",i,j);
+						fprintf(stderr, "ERROR backtrack P_WIP has no best row\n");
+						exit(10);
 			}
 		}
 			break;
@@ -4468,6 +4738,7 @@ void pseudo_loop::back_track_emodel (char *structure, minimum_fold *f, seq_inter
 //AP
 void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, seq_interval *cur_interval, std::vector<energy_model> *energy_models)
 {
+	int debug = 0;
 	this->structure = structure;
 	this->f = f;
 	needs_computation = 0;
@@ -4491,6 +4762,11 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				int l, acc = INF;
 				int bp_j = fres[j].pair;
 				for (l = bp_j +1; l < j; l++){
+					//kevin and mahyar 23 Nov 2017 
+					if(int_sequence[l] == X){
+						continue;
+					}
+					
 					// Hosna: April 24, 2007
 					// correct case 2 such that a multi-pseudoknotted
 					// loop would not be treated as case 2
@@ -4576,6 +4852,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				// Hosna: July 5th, 2007:
 				// if we have bp(i)> j then we should not have come to the WMBP
 				for (l = i+1; l < j; l++){
+
+					//Mahyar, Nov 23, 2017  
+					if (int_sequence[l] == X){
+						continue;
+					}
+
 					// Hosna, April 9th, 2007
 					// checking the borders as they may be negative
 					//				if(fres[l].pair < 0 && get_bp(i,l) >= 0 && get_bp(i,l) < nb_nucleotides){
@@ -4615,6 +4897,11 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				int l, acc = INF;
 				int l3 = -1;
 				for (l = i+1; l<j ; l++)	{
+					//Mahyar, Nov 23, 2017  
+					if (int_sequence[l] == X){
+						continue;
+					}
+
 					// Hosna, April 6th, 2007
 					// whenever we use get_borders we have to check for the correct values
 					if (fres[l].arc > -1 && get_B(l,j) >= 0 && get_B(l,j) < nb_nucleotides && get_Bp(l,j) >= 0 && get_Bp(l,j)<nb_nucleotides){
@@ -4667,6 +4954,13 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			if(fres[j].pair < j){
 				int l, acc = INF;
 				for(l = i+1; l<j; l++){
+
+
+					//Mahyar, Nov 23, 2017  
+					if (int_sequence[l] == X){
+						continue;
+					}
+
 					// Hosna: April 18th, 2007
 					// l and j should be in the same arc
 					if (fres[l].pair < 0 && fres[l].arc > -1 && fres[j].arc > -1 && fres[l].arc == fres[j].arc){
@@ -4832,6 +5126,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				min_borders = get_Bp(i,j);
 			}
 			for (ip = i+1; ip < min_borders; ip++){
+
+				//Mahyar, Nov 23, 2017 
+				if (int_sequence[ip] == X){
+					continue;
+				}
+		
 				// Hosna: April 20, 2007
 				// i and ip and j and jp should be in the same arc
 				// it should also be the case that [i+1,ip-1] && [jp+1,j-1] are empty regions
@@ -4847,6 +5147,13 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 						max_borders = get_bp(i,j);
 					}
 					for (jp = max_borders+1 ; jp < j ; jp++){
+							
+						//Mahyar, Nov 23, 2017 
+						if (int_sequence[jp] == X){
+							continue;
+						}
+						
+
 						if (fres[jp].pair < 0 && can_pair(int_sequence[ip],int_sequence[jp]) && is_empty_region(jp+1,j-1)==1){
 							// Hosna: April 20, 2007
 							// i and ip and j and jp should be in the same arc
@@ -4880,6 +5187,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				min_Bp_j = get_Bp(i,j);
 			}
 			for (r = i+1; r < min_Bp_j ; r++){
+
+				//Mahyar, Nov 23, 2017 
+				if (int_sequence[r] == X){
+					continue;
+				}
+
 				if (fres[r].pair < 0){
 					// Hosna: July 5th, 2007
 					// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
@@ -4903,6 +5216,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				max_i_bp = get_bp(i,j);
 			}
 			for (r = max_i_bp+1; r < j ; r++){
+
+				//Mahyar, Nov 23, 2017 
+				if (int_sequence[r] == X){
+					continue;
+				}
+
 				if (fres[r].pair < 0){
 					// Hosna: July 5th, 2007
 					// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
@@ -5069,6 +5388,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				max_i_bp = get_bp(i,j);
 			}
 			for (r = max_i_bp+1; r < j; r++ ){
+				
+				//mahyar, Nov 23, 2017 
+				if (int_sequence[r] == X){
+					continue;
+				}
+				
 				if (fres[r].pair < 0){
 					tmp = get_VP(i,r) + get_WIP(r+1,j);
 					if (tmp < min){
@@ -5089,6 +5414,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 				min_Bp_j = get_Bp(i,j);
 			}
 			for (r = i+1; r < min_Bp_j; r++){
+ 
+				//mahyar and kevin  Nov 21, 2017 
+				if (int_sequence[r] == X){
+					continue;
+				}
+
 				if (fres[r].pair < 0){
 					tmp = get_WIP(i,r-1) + get_VP(r,j);
 					if (tmp < min){
@@ -5113,8 +5444,22 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			//			max_i_bp = get_bp(i,j);
 			//		}
 			for (r = max_i_bp+1; r < j; r++ ){
+
+
+				//Mahyar, Nov 23, 2017 
+				if (int_sequence[r] == X){
+					continue;
+				}
+				int skip_X = 0;
+				int tmp = 0;
+				if(is_cross_model(r,j)){
+					skip_X = linker_length;
+					tmp = START_HYBRID_PENALTY;
+				}
+
+
 				if (fres[r].pair < 0 && this->is_empty_region(r+1,j)){
-					tmp = get_VP(i,r) + cp_penalty *(j-r); // check the (j-r) part
+					tmp += get_VP(i,r) + cp_penalty *(j-r-skip_X); // check the (j-r) part
 					//				if (debug){
 					//					printf("VPP(%d,%d) branch 3: VP(%d,%d) = %d, %d *(%d-%d)= %d ==> tmp = %d  and m3 = %d\n",i,j,i,r,get_VP(i,r),cp_penalty,j,r,cp_penalty *(j-r),tmp, m3);
 					//				}
@@ -5133,8 +5478,26 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			//			min_Bp_j = get_Bp(i,j);
 			//		}
 			for (r = i+1; r < min_Bp_j; r++){
+
+				//mahyar and kevin  Nov 21, 2017 
+				if (int_sequence[r] == X){
+					continue;
+				}
+
 				if (fres[r].pair < 0 && this->is_empty_region(i,r-1)){
 					tmp = cp_penalty * (r-i) + get_VP(r,j);
+					
+
+					//Mahyar and Kevin, Nov 21, 2017 
+					int skip_X = 0;
+					int tmp = 0;
+					if(is_cross_model(i,r)){
+						skip_X = linker_length;
+						tmp = START_HYBRID_PENALTY;
+					}
+					tmp += cp_penalty * (r-i-skip_X) + get_VP(r,j);
+	
+
 					//				if (debug){
 					//					printf("VPP(%d,%d) branch 4: %d *(%d-%d) = %d, VP(%d,%d)= %d ==> tmp = %d  and m4 = %d\n",i,j,cp_penalty,r,i,cp_penalty * (r-i),r,j,get_VP(r,j),tmp, m4);
 					//				}
@@ -5215,7 +5578,7 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			if (debug) {
 				printf ("\t(%d,%d) P_WI\n", i,j);
 			}
-			if (i >= j){
+			if ((i >= j) || (int_sequence[i] == X && int_sequence[j] == X)){
 				return;
 			}
 			int min = INF, tmp = INF, best_row = -1, best_t= -1;
@@ -5229,6 +5592,12 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			//		{
 			int t;
 			for (t = i; t< j; t++){
+ 				
+				//Mahyar, Nov 23, 2017  
+				if (int_sequence[t] == X){
+					continue;
+				}
+
 				int wi_1 = get_WI(i,t);
 				int wi_2 = get_WI(t+1,j);
 				tmp = wi_1 + wi_2;
@@ -5276,6 +5645,35 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 					//				printf("P_WI: case 3: min = %d and best_row = %d \n",min,best_row);
 				}
 			}
+
+			//Mahyar and Kevin, Nov 23 2017 
+			int new_j = j;
+			
+			if(int_sequence[new_j] == X){
+				//printf("before newj %d\n",new_j);
+					new_j--;
+					while(int_sequence[new_j] == X){
+							new_j--;
+							best_row = 4;
+					}
+				//printf("after newj %d\n",new_j);
+
+			}
+			
+			//added this to check if i is a X
+			//if it is, move i till it is the last X so the next iteration can handle it properly
+			int new_i = i;
+			
+			if(int_sequence[new_i] == X){
+				//printf("before newi %d\n",new_i);
+					new_i++;
+					while(int_sequence[new_i] == X){
+							new_i++;
+							best_row = 4;
+					}
+				//printf("after newi %d\n",new_i);
+			}
+
 			switch (best_row)
 			{
 				case 1:
@@ -5313,6 +5711,14 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 						insert_node(i,j,P_WMB);
 					}
 					break;
+				case 4: //Mahyar and Kevin, Nov 23 2017 
+						// added this case to jump i or j when encounter X
+						insert_node(new_i,new_j,P_WI);
+						break;
+				default:
+						printf("i= %d j=%d\n",i,j);
+						fprintf(stderr, "ERROR backtrack P_WI has no best row\n");
+						exit(10);
 			}
 		}
 			break;
@@ -5412,10 +5818,23 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 
 					// case 4
 					if (is_weakly_closed(i+1,l-1) == 1 && is_empty_region(lp+1,j-1) == 1){
+
+						//Mahyar, Nov 23, 2017 
+						//Regarding the case: ((.)........(.......)..XXXXX..)
+						int skip_X = 0;
+						int temp = 0;
+						if(is_cross_model(lp,j)){
+							skip_X = linker_length;
+							temp = START_HYBRID_PENALTY;
+						}
+
 						// Hosna: July 5th, 2007
 						// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
 						// in a multiloop that spans a band
-						tmp = get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + c_penalty * (j-lp+1) + ap_penalty + 2* bp_penalty;
+//						tmp = get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + c_penalty * (j-lp+1) + ap_penalty + 2* bp_penalty;
+						
+						//Mahyar, Nov 23, 2017 
+						tmp += get_WIP(i+1,l-1) + get_BE(l,lp,ip,jp) + c_penalty * (j-lp+1-skip_X) + ap_penalty + 2* bp_penalty;
 						if (min > tmp){
 							min = tmp;
 							best_row = 4;
@@ -5428,10 +5847,23 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 
 					// case 5
 					if (is_empty_region(i+1,l-1) == 1 && is_weakly_closed(lp+1,j-1) == 1){
+
+						//Mahyar, Nov 23, 2017 
+						//Regarding the case: (..XXXXX........(.......).......(.).)
+						int skip_X = 0;
+						int temp = 0;
+						if(is_cross_model(i,l)){
+							skip_X = linker_length;
+							temp = START_HYBRID_PENALTY;
+						}
+
 						// Hosna: July 5th, 2007
 						// After meeting with Anne and Cristina --> ap should have 2* bp to consider the biggest and the one that crosses
 						// in a multiloop that spans a band
-						tmp = ap_penalty + 2* bp_penalty+ c_penalty * (l-i+1) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1);
+//						tmp = ap_penalty + 2* bp_penalty+ c_penalty * (l-i+1) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1);
+
+						//Mahyar, Nov 23, 2017 
+						tmp += ap_penalty + 2* bp_penalty+ c_penalty * (l-i+1-skip_X) + get_BE(l,lp,ip,jp) + get_WIP(lp+1,j-1);
 						if (min > tmp){
 							min = tmp;
 							best_row = 5;
@@ -5535,7 +5967,9 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 			if (debug) {
 				printf ("\t(%d,%d) P_WIP\n", i,j);
 			}
-			if (i == j){
+			
+			//mahyar and kevin 24 Nov 2017 , changed from == to >=
+			if ((i >= j) || (int_sequence[i] == X && int_sequence[j] == X)){
 				return;
 			}
 			int min = INF, tmp = INF, best_row = -1, best_t = INF;
@@ -5599,6 +6033,28 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 					//				printf("P_WIP: case 5: min = %d and best_row = %d \n",min,best_row);
 				}
 			}
+
+			//Mahyar and Kevin, Nov 22 2017 
+			int new_j = j;
+			if(int_sequence[new_j] == X){
+					new_j--;
+					while(int_sequence[new_j] == X){
+							new_j--;
+							best_row = 6;
+					}
+
+			}
+			//added this to check if i is a X
+			//if it is, move i till it is the last X so the next iteration can handle it properly
+			int new_i = i;
+			if(int_sequence[new_i] == X){
+					new_i++;
+					while(int_sequence[new_i] == X){
+							new_i++;
+							best_row = 6;
+					}
+			}
+
 			switch(best_row)
 			{
 				case 1:
@@ -5652,6 +6108,16 @@ void pseudo_loop::back_track_pkonly_emodel (char *structure, minimum_fold *f, se
 						insert_node(i,j,P_WMB);
 					}
 					break;
+
+				case 6: //Mahyar and Kevin, Nov 23 2017 
+						//added this case to jump i or j when encounter X
+						insert_node(new_i,new_j,P_WIP);
+						break;
+				default:
+						printf("i= %d j=%d\n",i,j);
+						fprintf(stderr, "ERROR backtrack P_WIP has no best row\n");
+						exit(10);
+	
 			}
 		}
 			break;

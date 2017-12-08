@@ -414,6 +414,7 @@ void s_partition_function::initialize_arrays ()
 PFTYPE s_partition_function::compute_partition_function ()
 // the recursions are taken from Ding and Lawrence, "A statistical sampling algorithm for RNA secondary structure prediction", NAR 2003
 {
+/*
     int i, j, ij;
     //for (j=TURN+1; j < seqlen; j++)
     for (j=1; j < seqlen; j++)
@@ -433,37 +434,37 @@ PFTYPE s_partition_function::compute_partition_function ()
                 compute_u1 (i,j);   // must be after s3!!
                 compute_s2 (i,j);
 
-                if (isinf(upm[ij]) || isnan(upm[ij]))
+                if (::isinf(upm[ij]) || ::isnan(upm[ij]))
                 {
                     fprintf (stderr, "UPM(%d,%d) = %Lg\n", i, j, upm[ij]);
                     exit(1);
                 }
-                if (isinf(up[ij])  || isnan(up[ij]))
+                if (::isinf(up[ij])  || ::isnan(up[ij]))
                 {
                     fprintf (stderr, "UP(%d,%d) = %Lg\n", i, j, up[ij]);
                     exit(1);
                 }
-                if (isinf(s1[ij])  || isnan(s1[ij]))
+                if (::isinf(s1[ij])  || ::isnan(s1[ij]))
                 {
                     fprintf (stderr, "S1(%d,%d) = %Lg\n", i, j, s1[ij]);
                     exit(1);
                 }
-                if (isinf(u[ij])   || isnan(u[ij]))
+                if (::isinf(u[ij])   || ::isnan(u[ij]))
                 {
                     fprintf (stderr, "U(%d,%d) = %Lg\n", i, j, u[ij]);
                     exit(1);
                 }
-                if (isinf(s3[ij])  || isnan(s3[ij]))
+                if (::isinf(s3[ij])  || ::isnan(s3[ij]))
                 {
                     fprintf (stderr, "S3(%d,%d) = %Lg\n", i, j, s3[ij]);
                     exit(1);
                 }
-                if (isinf(u1[ij])  || isnan(u1[ij]))
+                if (::isinf(u1[ij])  || ::isnan(u1[ij]))
                 {
                     fprintf (stderr, "U1(%d,%d) = %Lg\n", i, j, u1[ij]);
                     exit(1);
                 }
-                if (isinf(s2[ij])  || isnan(s2[ij]))
+                if (::isinf(s2[ij])  || ::isnan(s2[ij]))
                 {
                     fprintf (stderr, "S2(%d,%d) = %Lg\n", i, j, s2[ij]);
                     exit(1);
@@ -515,7 +516,9 @@ PFTYPE s_partition_function::compute_partition_function ()
         Z = u_ip_jp[firstlast] + u_ip_ju[firstlast] + u_iu_jp[firstlast] + u_iu_ju[firstlast];
     }
     return Z;
+*/
 }
+
 
 
 void s_partition_function::print_u()
@@ -2699,6 +2702,7 @@ int s_partition_function::verify_partition_function()
 //      compute_partition_function_exhaustively();
 // POST: returns 1 if there's error, 0 otherwise
 {
+/*
     //#define PREC 0.0000000001
     int i,j,ij;
     int error = 0;
@@ -2709,7 +2713,7 @@ int s_partition_function::verify_partition_function()
     }
     printf ("Checking partition function... ");
     // no idea why valgrind doesn't like this if, it says Z is not initialized
-    if (isnan(Z) || isnan(Zexhaustive))     error = 1;
+    if (::isnan(Z) || ::isnan(Zexhaustive))     error = 1;
     // actually check the ratio, not the difference
     // the difference depends on the scale of Z , so then one Z is large, the difference becomes large too, but it's good
     // example: Z = 270.721, Ze = 270.721, diff = -2.35534e-13, ratio = -8.70025e-16
@@ -2731,11 +2735,14 @@ int s_partition_function::verify_partition_function()
         error = 1;
     }
     return error;
+*/
 }
+ 
 
 
 void s_partition_function::verify_recurrences()
 {
+/*
     int i,j,ij;
     int error = 0;
 //     printf ("Checking u  .................. ");
@@ -2762,7 +2769,7 @@ void s_partition_function::verify_recurrences()
         for (j=i+1; j < seqlen; j++)
         {
             ij = index[i]+j-i;
-            if (isnan(up[ij]) || isnan(upexhaustive[ij]))
+            if (::isnan(up[ij]) || ::isnan(upexhaustive[ij]))
             {
 #ifdef DOUUBLEPARAMS
                 printf ("\tup[%d,%d] = %g, upex = %g, diff = %g\n", i,j,up[ij],upexhaustive[ij], up[ij]-upexhaustive[ij]);
@@ -2797,7 +2804,7 @@ void s_partition_function::verify_recurrences()
         for (j=i+1; j < seqlen; j++)
         {
             ij = index[i]+j-i;
-            if (isnan(p[ij]) || isnan(pexhaustive[ij]))
+            if (::isnan(p[ij]) || ::isnan(pexhaustive[ij]))
             {
                 printf ("\tp[%d,%d] = %g, pex = %g, diff = %g\n", i,j,p[ij],pexhaustive[ij], p[ij]-pexhaustive[ij]);
                 pfine = 0;
@@ -2834,7 +2841,7 @@ void s_partition_function::verify_recurrences()
                 unew = u[ij];
             else
                 unew = u_ip_jp[ij] + u_ip_ju[ij] + u_iu_jp[ij] + u_iu_ju[ij];
-            if (isnan(unew) || isnan(uexhaustive[ij]))
+            if (::isnan(unew) || ::isnan(uexhaustive[ij]))
             {
                 printf ("\tunew[%d,%d] = %g, u = %g, diff = %g\n", i,j,unew,uexhaustive[ij], unew-uexhaustive[ij]);
                 ufine = 0;
@@ -2857,26 +2864,26 @@ void s_partition_function::verify_recurrences()
     if (ufine)
         printf ("\t++++++++++++++++++++++\n");
 
-    /*
-    printf ("Checking s1 ................... ");
-    int s1fine = 1;
-    for (i=0; i < seqlen; i++)
-        for (j=i+1; j < seqlen; j++)
-        {
-            ij = index[i]+j-i;
-            //s3 should be the same as s3_jp + s3_ju
-            double s1new = s1_jp[ij] + s1_ju[ij];
-            if (s1[ij] - s1new > PREC || s1new - s1[ij] > PREC)
-            {
-                if (s1fine)
-                    printf ("\t----------------------\n");
-                printf ("\ts1new[%d,%d] = %g, s1 = %g, diff = %g\n", i,j,s1new,s1[ij], s1new-s1[ij]);
-                s1fine = 0;
-            }
-        }
-    if (s1fine)
-        printf ("\t++++++++++++++++++++++\n");
-    */
+    
+//    printf ("Checking s1 ................... ");
+//    int s1fine = 1;
+//    for (i=0; i < seqlen; i++)
+//        for (j=i+1; j < seqlen; j++)
+//        {
+//            ij = index[i]+j-i;
+//            //s3 should be the same as s3_jp + s3_ju
+//            double s1new = s1_jp[ij] + s1_ju[ij];
+//            if (s1[ij] - s1new > PREC || s1new - s1[ij] > PREC)
+//            {
+//                if (s1fine)
+//                    printf ("\t----------------------\n");
+//                printf ("\ts1new[%d,%d] = %g, s1 = %g, diff = %g\n", i,j,s1new,s1[ij], s1new-s1[ij]);
+//                s1fine = 0;
+//            }
+//        }
+//    if (s1fine)
+//        printf ("\t++++++++++++++++++++++\n");
+    
 
 //     printf ("Checking u1 ................... ");
 //     int u1fine = 1;
@@ -2919,7 +2926,7 @@ void s_partition_function::verify_recurrences()
 
 
     //if (error)  exit(1);
-
+*/
 }
 
 
@@ -5692,6 +5699,7 @@ void s_partition_function::compute_logZ_gradient ()
 int s_partition_function::correct_gradient ()
 // return 1 if it is correct, 0 otherwise
 {
+/*
     int index_param;
     int i, j, k, l, m, n, o, p;
     index_param = 0;
@@ -5702,7 +5710,7 @@ int s_partition_function::correct_gradient ()
     {
         diff = GlogZexhaustive[i] - GlogZ[i];
         if (diff < 0)     diff *= -1.0;
-        if (((GlogZexhaustive[i] != 0 || GlogZ[i] != 0 ) && diff > PREC ) || isnan(GlogZ[i]))
+        if (((GlogZexhaustive[i] != 0 || GlogZ[i] != 0 ) && diff > PREC ) || ::isnan(GlogZ[i]))
         {
 #ifdef DOUBLEPARAMS
             printf ("%4d %30s\texhaust=%10g\tsmart=%10g\tdiff=%g\n", i, string_params[i], GlogZexhaustive[i], GlogZ[i], diff);
@@ -5721,6 +5729,7 @@ int s_partition_function::correct_gradient ()
         }
     }
     return correct;
+*/
 }
 
 void s_partition_function::copy_gradient (PFTYPE *grad)
@@ -5747,19 +5756,20 @@ void s_partition_function::copy_gradient_exhaustively (PFTYPE *grad)
 int s_partition_function::correct_gradient_nan ()
 // return 1 if no derivative is nan
 {
+/*
     int i;
     int correct = 1;
     for (i=0; i < num_params; i++)
     {
-        if (isnan(GlogZ[i]))
+        if (::isnan(GlogZ[i]))
         {
             printf ("Glog[%d]=%g\n", i, GlogZ[i]);
             correct = 0;
         }
     }
     return correct;
+*/
 }
-
 
 
 void s_partition_function::print_gradient ()
