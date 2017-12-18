@@ -254,6 +254,13 @@ int main (int argc, char *argv[]) {
 				if(access(outputPath, F_OK) != -1) { //if file already exist
 					addTimestamp(&outputPath);
 				}
+				FILE* test_fp;
+				test_fp = fopen(outputPath,"w");
+				if(test_fp == NULL){
+					perror("Write to file error:");
+					exit(4);
+				}
+				
 				outputPathFound = true;
 				break;
 			case 'e':
