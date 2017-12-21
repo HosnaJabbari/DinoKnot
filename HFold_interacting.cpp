@@ -635,9 +635,9 @@ int validateModelType(char* type){
 double get_START_HYBRID_PENALTY(int type1, int type2){
 	if(type1 == type2){ //if both model are the same
 		if(type1 == RNA){ //if both are RNA
-			return 3.0;
+			return 22.96551130344778;
 		}else if(type1 == DNA){ //if both are DNA
-			return 4.4785825;
+			return 34.14979695798525;
 		}else if(type1 == PMO){
 			fprintf(stderr, "ERROR: model cannot be both PMO\n");
 			exit(1);
