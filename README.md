@@ -62,15 +62,50 @@ This can be useful if you are getting errors about your compiler not having C++1
             --r2 <restricted_structure2>
             --t1 <type_for_sequence1>
             --t2 <type_for_sequence2>
+            --pen <penalty of base pairs to interact>
+            --n <max_number of suboptimal structure> (default is hotspot_num * hotspot_num)
+            --o_dir </path/to/folder/to/contain/all/output/files>
             -i </path/to/file>
             -o </path/to/file>
+            --hotspot_num <max_number_of_restricted_structures> (default is 20)
+            --hotspot_only </path/to/file>
 
         Remarks:
             make sure the <arguments> are enclosed in "", for example --r1 "..().." instead of --r1 ..()..
             input file for -i must be .txt
+
             if -i is provided with just a file name without a path, it is assuming the file is in the diretory where the executable is called
+
             if -o is provided with just a file name without a path, the output file will be generated in the diretory where the executable is called
+
             if -o is provided with just a file name without a path, and if -i is provided, then the output file will be generated in the directory where the input file is located
+
+            --o_dir would generate a output file for each pair of restricted structure in ascending order of free energy, so output_0.txt would be the file with the minimum free energy that -o would write
+
+            --pen are mainly used when we try to tune the optimal penalty. It is currently set to 22.96551130344778 for RNA-RNA, 34.14979695798525 for DNA-DNA and 166.0 for other types of interaction. Change this at your own risk
+
+            -n, --hotspot_num and --r1 --r2 should not be used together
+            
+            --hotspot_only does not run the actual HFold_interacting main program. This tells the program to generate 
+            restricted structures and write to the provided file. Usually used for large sequences and need to split it 
+            up and run it independently with an outside script
+            example file when calling ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 RNA --hotspot_only ./hotspot_file.txt --hotspot_num 7
+            Seq1_hotspot_0: ____(((((_____)))))___________
+            Seq1_hotspot_1: ____((((______________))))____
+            Seq1_hotspot_2: ____((((_______))))___________
+            Seq1_hotspot_3: _______((((___________))))____
+            Seq1_hotspot_4: ____(((_________)))___________
+            -----
+            Seq2_hotspot_0: ______________________((((((________________________))))))__
+            Seq2_hotspot_1: ______________(((((_______________)))))_____________________
+            Seq2_hotspot_2: ______________________(((((__________________________)))))__
+            Seq2_hotspot_3: __________________((((((________________________))))))______
+            Seq2_hotspot_4: __________________________________(((((_____)))))___________
+            Seq2_hotspot_5: ____(((((_____)))))_________________________________________
+            Seq2_hotspot_6: _________________(((________)))_____________________________
+            Seq2_hotspot_7: __________________(((((__________________________)))))______
+
+
     
     Sequence requirements:
         containing only characters GCAUT
@@ -108,6 +143,8 @@ This can be useful if you are getting errors about your compiler not having C++1
     ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA
     ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA -o "outputfile.txt"
     ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA -o "/home/username/Desktop/some_folder/outputfile.txt"
+    ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 RNA --hotspot_only ./hotspot_file.txt --hotspot_num 7
+    ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 DNA  o_dir "/home/username/Desktop/some_folder"
 
     
 #### Exit code:
