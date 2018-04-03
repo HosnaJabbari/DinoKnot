@@ -132,6 +132,8 @@ int main (int argc, char *argv[]) {
 
 	START_HYBRID_PENALTY = -1;
 
+	int method_num = RUN_METHOD_ALL; //default value for method to run, which is run all method 1 to 4
+
 	//kevin: june 23 2017 https://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Option-Example.html
 	while (1){
 		static struct option long_options[] =
@@ -147,6 +149,7 @@ int main (int argc, char *argv[]) {
 				{"o_dir", required_argument, 0, 'j'},	//output every file to directory
 				{"hotspot_num", required_argument, 0, 'k'}, //max number of hotspot
 				{"hotspot_only", required_argument, 0, 'l'}, //only dump hotspots to file
+				{"method_num", required_argument, 0, 'm'}, //specify method number to run, default 0 which is all
 				{0, 0, 0, 0}
 			};
 		// getopt_long stores the option index here.
@@ -325,6 +328,13 @@ int main (int argc, char *argv[]) {
 				hotspot_only = true;
 				strcpy(hotspotDir, optarg);
 				break;
+			case 'm':
+				if(atoi(optarg) < 0 or atoi(optarg) > 4){
+					fprintf(stderr, "method number must be between 0 to 4\n");
+					errorFound = true;
+				}
+				method_num = atoi(optarg);
+				break;
 			default:
 				errorFound = true;
 				break;
@@ -499,7 +509,7 @@ int main (int argc, char *argv[]) {
 			strcat(restricted, hotspot_list2[j]->get_structure());
 
 			int method_used = -1;
-			energy = hfold_interacting_emodel(sequence, restricted, structure, &energy_models, method_used);
+			energy = hfold_interacting_emodel(sequence, restricted, structure, &energy_models, method_used, method_num);
 
 			result = new Result(sequence,restricted, structure,energy, method_used);
 			result_list.push_back(result);

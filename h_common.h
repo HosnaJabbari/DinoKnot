@@ -47,6 +47,12 @@
 // the original value of the matrices should be set to -INF and then be changed to their correct value
 #define MINUS_INF             -1600000      // a very small value (minus infinity)
 
+#define RUN_METHOD_ALL 0
+#define RUN_METHOD_1 1
+#define RUN_METHOD_2 2
+#define RUN_METHOD_3 3
+#define RUN_METHOD_4 4
+
 void detect_original_pairs_arcs(char *structure, int *p_table, int *arc_table);
 void detect_original_PKed_pairs(char *structure, int *p_table);
 double compute_h_sensitivity (char *ref_structure, char *pred_structure);
@@ -84,7 +90,7 @@ void detect_h_structure_features (char *structure, h_str_features *f);
 void print_emodel(energy_model *model);
 
 //kevin:
-double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models, int &method_used);
+double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models, int &method_used, int run_method);
 double method3_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models);
 void obtainRelaxedStems(char* G1, char* G2, char* Gresult); //---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
 int paired_structure(int i, int j, int *pair_index, int length); //---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------

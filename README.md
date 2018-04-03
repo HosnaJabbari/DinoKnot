@@ -69,6 +69,7 @@ This can be useful if you are getting errors about your compiler not having C++1
             -o </path/to/file>
             --hotspot_num <max_number_of_restricted_structures> (default is 20)
             --hotspot_only </path/to/file>
+            --method_num <run_method_number> (range from 0 to 4, default is 0 which runs all of them)
 
         Remarks:
             Required arguments: 
@@ -92,6 +93,8 @@ This can be useful if you are getting errors about your compiler not having C++1
 
             -n, --hotspot_num and --r1 --r2 should not be used together
             
+            --method_num forces the program to only run a specfic method. The details of each method can be found in the paper. We do not advise users to change this argument as it is mainly for internal usage. 
+
             --hotspot_only does not run the actual HFold_interacting main program. This tells the program to generate 
             restricted structures and write to the provided file. Usually used for large sequences and need to split it 
             up and run it independently with an outside script
@@ -152,7 +155,7 @@ This can be useful if you are getting errors about your compiler not having C++1
     ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA -o "/home/username/Desktop/some_folder/outputfile.txt"
     ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 RNA --hotspot_only ./hotspot_file.txt --hotspot_num 7
     ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 DNA  o_dir "/home/username/Desktop/some_folder"
-
+    ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA --method_num 2
     
 #### Exit code:
     0       success
