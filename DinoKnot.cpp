@@ -17,7 +17,7 @@
 
 // Hosna June 20th, 2007
 //#include "W_final.h"
-//#include "hfold_interacting.h"
+//#include "dinoknot.h"
 #include "hfold.h"
 
 //kevin 23 June 2017
@@ -31,7 +31,7 @@
 #include "Hotspot.h"
 #include "h_common.h"
 
-#include "hfold_interacting.h"
+#include "dinoknot.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -575,15 +575,15 @@ int main (int argc, char *argv[]) {
 }
 
 void printUsage(){
-	printf("\nUsage ./HFold_interacting_multimodel --s1 <sequence1> --r2 <restricted_structure1> --s1 <sequence_2> --r2 <restricted_structure2> --t1 <type_for_sequence1> --t2 <type_for_sequence1> [-o </path/to/file>]\n");
+	printf("\nUsage ./DinoKnot_multimodel --s1 <sequence1> --r2 <restricted_structure1> --s1 <sequence_2> --r2 <restricted_structure2> --t1 <type_for_sequence1> --t2 <type_for_sequence1> [-o </path/to/file>]\n");
 	printf("or\n");
 	printf("Usage ./HFold -i </path/to/file> --t1 <type_for_sequence1> --t2 <type_for_sequence1> [-o </path/to/file>]\n");
 	printf ("  Restricted structure symbols:\n");
 	printf ("    () restricted base pair\n");
 	printf ("    _ no restriction\n");
 	printf("Example:\n");
-	printf("./HFold_interacting_multimodel --s1 \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" --r1 \"(____________________________)\" --s2 \"GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC\" --r2 \"(__________________________________________________________)\" --t1 RNA --t2 DNA\n");
-	printf("./HFold_interacting_multimodel -i \"/home/username/Desktop/myinputfile.txt\" -o \"/home/username/Desktop/some_folder/outputfile.txt\"\n");
+	printf("./DinoKnot_multimodel --s1 \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" --r1 \"(____________________________)\" --s2 \"GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC\" --r2 \"(__________________________________________________________)\" --t1 RNA --t2 DNA\n");
+	printf("./DinoKnot_multimodel -i \"/home/username/Desktop/myinputfile.txt\" -o \"/home/username/Desktop/some_folder/outputfile.txt\"\n");
 	printf("Please read README for more details\n");
 
 }

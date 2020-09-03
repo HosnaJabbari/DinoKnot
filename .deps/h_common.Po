@@ -109,7 +109,7 @@ h_common.o: h_common.cpp /usr/include/stdc-predef.h /usr/include/stdio.h \
  pseudo_loop.h V_final.h \
  /home/hiufungk/Desktop/multimodel_interacting_sim_lib/include/s_energy_matrix.h \
  /home/hiufungk/Desktop/multimodel_interacting_sim_lib/include/s_min_folding.h \
- hfold.h hfold_interacting.h
+ hfold.h dinoknot.h
 
 /usr/include/stdc-predef.h:
 
@@ -413,4 +413,4 @@ V_final.h:
 
 hfold.h:
 
-hfold_interacting.h:
+dinoknot.h:

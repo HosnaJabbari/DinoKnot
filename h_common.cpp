@@ -19,7 +19,7 @@
 // Hosna, May 3rd, 2012
 //#include "hfold_pkonly.h"
 // Hosna, November 16, 2015
-#include "hfold_interacting.h"
+#include "dinoknot.h"
 
 //kevin
 #include <vector>

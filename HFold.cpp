@@ -19,7 +19,7 @@
 // Hosna June 20th, 2007
 //#include "W_final.h"
 #include "hfold.h"
-#include "hfold_interacting.h"
+#include "dinoknot.h"
 
 /*
 As requested, any blocks of changes have "//AP" near them.
