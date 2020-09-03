@@ -40,7 +40,7 @@ make install
 [Linux instructions source](https://geeksww.com/tutorials/operating_systems/linux/installation/downloading_compiling_and_installing_cmake_on_linux.php)
 
 #### Steps for installation   
-1. [Download the repository](https://github.com/HosnaJabbari/HFold.git) and extract the files onto your system.
+1. [Download the repository](https://github.com/HosnaJabbari/DinoKnot/archive/master.zip) and extract the files onto your system.
 2. From a command line in the root directory (where this README.md is) run
 ```
 cmake -H. -Bbuild
