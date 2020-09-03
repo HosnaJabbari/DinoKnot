@@ -1,4 +1,4 @@
-# HFold_interacting
+# DinoKnot
 
 #### Description:
 This software is still under development
@@ -55,7 +55,7 @@ This can be useful if you are getting errors about your compiler not having C++1
 
 #### How to use:
     Arguments:
-        HFold_interacting:
+        DinoKnot:
             --s1 <sequence1>
             --r1 <restricted_structure1>
             --s2 <sequence2>
@@ -95,10 +95,10 @@ This can be useful if you are getting errors about your compiler not having C++1
             
             --method_num forces the program to only run a specfic method. The details of each method can be found in the paper. We do not advise users to change this argument as it is mainly for internal usage. 
 
-            --hotspot_only does not run the actual HFold_interacting main program. This tells the program to generate 
+            --hotspot_only does not run the actual DinoKnot main program. This tells the program to generate 
             restricted structures and write to the provided file. Usually used for large sequences and need to split it 
             up and run it independently with an outside script
-            example file when calling ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 RNA --hotspot_only ./hotspot_file.txt --hotspot_num 7
+            example file when calling ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 RNA --hotspot_only ./hotspot_file.txt --hotspot_num 7
             Seq1_hotspot_0: ____(((((_____)))))___________
             Seq1_hotspot_1: ____((((______________))))____
             Seq1_hotspot_2: ____((((_______))))___________
@@ -146,16 +146,16 @@ This can be useful if you are getting errors about your compiler not having C++1
 
 #### Example:
     assume you are in the directory where the HFold executable is loacted
-    ./HFold_interacting_multimodel -i "/home/username/Desktop/myinputfile.txt" --t1 RNA --t2 DNA
-    ./HFold_interacting_multimodel -i "/home/username/Desktop/myinputfile.txt" --t1 RNA --t2 DNA -o "outputfile.txt"
-    ./HFold_interacting_multimodel -i "/home/username/Desktop/myinputfile.txt" --t1 RNA --t2 DNA -o "/home/username/Desktop/some_folder/outputfile.txt"
-    ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA
-    ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 DNA
-    ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA -o "outputfile.txt"
-    ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA -o "/home/username/Desktop/some_folder/outputfile.txt"
-    ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 RNA --hotspot_only ./hotspot_file.txt --hotspot_num 7
-    ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 DNA  o_dir "/home/username/Desktop/some_folder"
-    ./HFold_interacting_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA --method_num 2
+    ./DinoKnot_multimodel -i "/home/username/Desktop/myinputfile.txt" --t1 RNA --t2 DNA
+    ./DinoKnot_multimodel -i "/home/username/Desktop/myinputfile.txt" --t1 RNA --t2 DNA -o "outputfile.txt"
+    ./DinoKnot_multimodel -i "/home/username/Desktop/myinputfile.txt" --t1 RNA --t2 DNA -o "/home/username/Desktop/some_folder/outputfile.txt"
+    ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA
+    ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 DNA
+    ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA -o "outputfile.txt"
+    ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA -o "/home/username/Desktop/some_folder/outputfile.txt"
+    ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 RNA --hotspot_only ./hotspot_file.txt --hotspot_num 7
+    ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 DNA  o_dir "/home/username/Desktop/some_folder"
+    ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA --method_num 2
     
 #### Exit code:
     0       success
