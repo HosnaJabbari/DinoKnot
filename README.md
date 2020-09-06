@@ -145,7 +145,7 @@ This can be useful if you are getting errors about your compiler not having C++1
             (__________________________________________________________)
 
 #### Example:
-    assume you are in the directory where the HFold executable is loacted
+    assume you are in the directory where the HFold executable is located
     ./DinoKnot_multimodel -i "/home/username/Desktop/myinputfile.txt" --t1 RNA --t2 DNA
     ./DinoKnot_multimodel -i "/home/username/Desktop/myinputfile.txt" --t1 RNA --t2 DNA -o "outputfile.txt"
     ./DinoKnot_multimodel -i "/home/username/Desktop/myinputfile.txt" --t1 RNA --t2 DNA -o "/home/username/Desktop/some_folder/outputfile.txt"
