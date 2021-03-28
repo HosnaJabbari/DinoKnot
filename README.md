@@ -1,4 +1,5 @@
-# DinoKnot
+# DinoKnot![image](https://user-images.githubusercontent.com/28453708/112767965-65452f80-8fce-11eb-9b6d-19ed14ccdaa8.png)
+
 
 #### Description:
 This software is still under development
