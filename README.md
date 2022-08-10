@@ -89,7 +89,7 @@ This can be useful if you are getting errors about your compiler not having C++1
 
             --o_dir would generate a output file for each pair of restricted structure in ascending order of free energy, so output_0.txt would be the file with the minimum free energy that -o would write
 
-            --pen are mainly used when we try to tune the optimal penalty. It is currently set to 22.96551130344778 for RNA-RNA, 34.14979695798525 for DNA-DNA and 166.0 for other types of interaction. Change this at your own risk
+            --pen are mainly used when we try to tune the optimal penalty. It is currently set to 22.96551130344778 for RNA-RNA interactions (homo-dimers), 34.14979695798525 for DNA-DNA interactions (homo-dimers) and 166.0 for hybrid interactions (hetero-dimers). Change this at your own risk.
 
             -n, --hotspot_num and --r1 --r2 should not be used together
             
