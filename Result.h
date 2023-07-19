@@ -9,7 +9,7 @@
 class Result{
     public:
         //constructor
-        Result(char* sequence,char* restricted, char* final_structure, double final_energy, int method_chosen);
+        Result(char* sequence,char* restricted, char* final_structure, double final_energy);
         //destructor
         ~Result();
 
@@ -24,7 +24,6 @@ class Result{
         char* restricted;
         char* final_structure;
         double final_energy;
-        int method_chosen;
 };
 
 #endif

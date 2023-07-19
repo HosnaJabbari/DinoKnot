@@ -1,7 +1,7 @@
 #include "Result.h"
 
 //constructor
-Result::Result(char* sequence,char* restricted, char* final_structure, double final_energy, int method_chosen){
+Result::Result(char* sequence,char* restricted, char* final_structure, double final_energy){
     this->sequence = (char*) malloc(sizeof(char)*(strlen(sequence)+1));
     strcpy(this->sequence,sequence);
 
@@ -12,7 +12,6 @@ Result::Result(char* sequence,char* restricted, char* final_structure, double fi
     strcpy(this->final_structure,final_structure);
 
     this->final_energy = final_energy;
-    this->method_chosen = method_chosen;
 }
 
 //destructor
@@ -33,9 +32,6 @@ char* Result::get_final_structure(){
 }
 double Result::get_final_energy(){
     return this->final_energy;
-}
-int Result::get_method_chosen(){
-    return this->method_chosen;
 }
 
 

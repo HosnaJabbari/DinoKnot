@@ -90,7 +90,7 @@ void detect_h_structure_features (char *structure, h_str_features *f);
 void print_emodel(energy_model *model);
 
 //kevin:
-double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models, int &method_used, int run_method);
+double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> &energy_models);
 double method3_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models);
 void obtainRelaxedStems(char* G1, char* G2, char* Gresult); //---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
 int paired_structure(int i, int j, int *pair_index, int length); //---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
