@@ -4,7 +4,7 @@
 #include "h_struct.h"
 #include "common.h"
 
-#include "Result.h"
+#include "Result.hh"
 
 //Hosna: June 22, 2007
 

@@ -1,36 +1,23 @@
-// a simple driver for the HFold
+// Dinoknot files
 #include "dinoknot.hh"
 #include "cmdline.hh"
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <vector>
-#include <algorithm>
+#include "Result.hh"
 
-// include the simfold header files
+// Simfold files
 #include "simfold.h"
 #include "externs.h"
 #include "h_globals.h"
-#include "constants.h"
 #include "params.h"
-#include "common.h"
-
-#include "hfold.h"
-
-//kevin 23 June 2017
-#include "hfold_validation.h"
-#include "h_common.h"
-
-//kevin 26 Sept 2017
 #include "s_specific_functions.h"
 #include "Hotspot.h"
 #include "h_common.h"
 
-
-
-#include <sys/types.h>
+// Non user files
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <string>
+#include <vector>
 #include <sys/stat.h>
 
 
@@ -38,13 +25,6 @@
 #define KEVIN_DEBUG 1
 /*
 As requested, any blocks of changes have "//AP" near them.
-
-Throughout the program there will be multiple lines that look like the following:
-
-	for (auto &energy_model : *energy_models) {
-		energy_model.energy_value = H->compute_energy_restricted_emodel (i, j, fres, &energy_model);
-	}
-	min_en[0] = emodel_energy_function (i, j, energy_models);
 
 The for loop is used to go iterate through the energy model vector and use each energy model to
 perform a certain calculation, such as computing the energy for H. This value is stored inside the
@@ -86,11 +66,10 @@ void validateSequence(std::string sequence){
 		std::cout << "sequence1 or sequence2 is missing" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-
   // return false if any characters other than GCAUT -- future implement check based on type
   for(char c : sequence) {
     if (!(c == 'G' || c == 'C' || c == 'A' || c == 'U' || c == 'T')) {
-		std::cout << "Sequence contains character '%c' that is not G,C,A,U, or T." << std::endl;
+		std::cout << "Sequence contains character " << c << " that is not G,C,A,U, or T." << std::endl;
 		exit(EXIT_FAILURE);
     }
   }
@@ -101,29 +80,22 @@ bool exists (const std::string path) {
   return (stat (path.c_str(), &buffer) == 0); 
 }
 
-int existsDirectory(std::string path) {
-   struct stat statbuf;
-   if (stat(path.c_str(), &statbuf) != 0)
-       return 0;
-   return S_ISDIR(statbuf.st_mode);
-}
-
 //return code for model type if valid
 //return -1 if not valid
-int validateModelType(char* type){
-	if(strcmp(type, "RNA") == 0){
-		return RNA;
-	}
-	if(strcmp(type, "DNA") == 0){
-		return DNA;
-	}
-	//kevin 30 June 2017
-	//added PMO
-	if(strcmp(type, "PMO") == 0){
-		return PMO;
-	}
-	return -1;
-}
+// int validateModelType(char* type){
+// 	if(strcmp(type, "RNA") == 0){
+// 		return RNA;
+// 	}
+// 	if(strcmp(type, "DNA") == 0){
+// 		return DNA;
+// 	}
+// 	//kevin 30 June 2017
+// 	//added PMO
+// 	if(strcmp(type, "PMO") == 0){
+// 		return PMO;
+// 	}
+// 	return -1;
+// }
 
 double get_START_HYBRID_PENALTY(int type1, int type2){
 	if(type1 == type2){ //if both model are the same
@@ -136,9 +108,7 @@ double get_START_HYBRID_PENALTY(int type1, int type2){
 			exit(1);
 		}
 	}
-	
 	return 166.0; //when 2 different model old: 58.4511432
-	
 }
 
 int main (int argc, char *argv[]) {
@@ -165,7 +135,6 @@ int main (int argc, char *argv[]) {
 	std::string inputStructure2 = args_info.structure2_given ? structure_2 : "";
 	if(args_info.structure2_given) validateStructure(inputSequence2,inputStructure2);
 		
-
 	std::string outputDir = args_info.dir_given ? output_dir : "";
 	std::string outputFile = args_info.output_given ? output_file : "";
 	std::string hotspotDir = args_info.h_only_given ? hotspot_dir : "";
@@ -256,11 +225,11 @@ int main (int argc, char *argv[]) {
 			exit (EXIT_FAILURE);
     	}
 		for(int i =0; i < hotspot_list1.size(); i++){
-			out << "Seq1_hotspot_" << i << ": " << hotspot_list1[i].get_structure() << std::endl;
+			out << "Seq1_hotspot_" << i << ": " << hotspot_list1[i].get_structure() << "(" << hotspot_list1[i].get_energy() << ")" << std::endl;
 		}
 		out << "---------------" << std::endl;
 		for(int j = 0; j < hotspot_list2.size(); j++){
-			out << "Seq2_hotspot_" << j << ": " << hotspot_list2[j].get_structure() << std::endl;
+			out << "Seq2_hotspot_" << j << ": " << hotspot_list2[j].get_structure() << "(" << hotspot_list2[j].get_energy() << ")" << std::endl;
 		}
 		out.close();
 	}
@@ -298,7 +267,7 @@ int main (int argc, char *argv[]) {
 	int number_of_output = 1;
 	// //printf("number_of_suboptimal_structure: %d\n",number_of_suboptimal_structure);
 	if(number_of_suboptimal_structure != 1){
-		number_of_output = MIN(result_list.size(),number_of_suboptimal_structure);
+		number_of_output = std::min( (int) result_list.size(),number_of_suboptimal_structure);
 	}
 
 	//Mateo 7/19/2023
@@ -319,21 +288,21 @@ int main (int argc, char *argv[]) {
 		out.close();
 	}
 	else if(outputDir != ""){
-		if(exists(output_dir)){
-	// // 	for (int i=0; i < number_of_output; ++i) {
-	// // 		char* path_to_file = (char*)malloc(sizeof(int)*1000);
-	// // 		sprintf(path_to_file, "%s/output_%d", outputDir.c_str(), i);
-	// // 		//printf("path_to_file: %s\n",path_to_file);
-	// // 		FILE* fp = fopen(path_to_file,"w");
-	// // 		if (fp == NULL) {
-	// // 			perror("Write to directory file error:");
-	// // 			return false;
-	// // 		}
-	// // 		fprintf(fp,"Seq: %s\n",result_list[0]->get_sequence());
-	// // 		fprintf(fp,"Restricted_%d: %s\n",i, result_list[i]->get_restricted());
-	// // 		fprintf(fp,"Result_%d: %s \nEnergy_%d: %lf\n",i, result_list[i]->get_final_structure(),i,result_list[i]->get_final_energy());
-	// // 		free(path_to_file);
-	// // 		fclose(fp);
+		// Mateo 2023
+		if(exists(outputDir)){
+			if(outputDir[outputDir.length()] != '/') outputDir += '/';
+			for (int i=0; i < number_of_output; ++i) {
+				std::string path_to_file = outputDir + "output_" + std::to_string(i) + ".txt";
+				std::ofstream out(path_to_file);
+				out << "Seq:          " << seq << std::endl;
+				out << "Restricted_" << i << ": " << result_list[i].get_restricted() << std::endl;;
+				out << "Result_" << i << ":     " << result_list[i].get_final_structure() << " (" << result_list[i].get_final_energy() << ")" << std::endl;  
+				out.close();
+			}
+		}
+		else{
+			std::cout << "Not a valid output directory" << std::endl;
+			exit(EXIT_FAILURE);
 		}
 	} else{
 		// Mateo 2023

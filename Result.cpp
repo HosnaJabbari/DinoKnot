@@ -1,4 +1,4 @@
-#include "Result.h"
+#include "Result.hh"
 
 //constructor
 Result::Result(std::string sequence,std::string restricted, std::string final_structure, double final_energy){

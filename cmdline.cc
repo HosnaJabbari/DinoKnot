@@ -31,7 +31,7 @@ static char *package_name = 0;
 
 const char *args_info_purpose = "Minimum free energy folding of RNA-RNA, RNA-DNA and DNA-DNA interactions";
 
-const char *args_info_usage = "Usage: DinoKnot"  "[options] [sequence1] [structure1] [sequence2] [structure2] [type1] [type2]";
+const char *args_info_usage = "Usage: DinoKnot [sequence1] [sequence2] [options]";
 
 const char *args_info_versiontext = "";
 
@@ -47,7 +47,7 @@ const char *args_info_help[] = {
   "      --t1               type for sequence 1",
   "      --t2               type for sequence 2",
   "  -p, --pen              start_hybrid_penalty",
-  "  -i, --n                number of suboptimal structure",
+  "  -n, --opt              number of suboptimal structure",
   "  -o, --output-file      print output to file",
   "  -d, --dir              output every file to directory",
   "  -k, --hotspot-num      max number of hotspot",
@@ -328,7 +328,7 @@ int cmdline_parser_internal (int argc, char **argv, struct args_info *args_info,
         {"t1", 0, NULL, 0},	
         {"t2", 0, NULL, 0},	
         {"pen",required_argument, NULL, 'p'},  
-        {"n"  ,required_argument, NULL, 'i'},
+        {"opt"  ,required_argument, NULL, 'n'},
         {"output-file", required_argument, NULL, 'o'}, 	
         {"dir", required_argument, NULL, 'd'},	
         {"hotspot-num", required_argument, NULL, 'k'}, 
@@ -365,12 +365,12 @@ int cmdline_parser_internal (int argc, char **argv, struct args_info *args_info,
         
           break;
 
-          case 'i':	/* Specify number of suboptimals  */
+          case 'n':	/* Specify number of suboptimals  */
         
         
           if (update_arg( 0 , 
                0 , &(args_info->subopt_given),
-              &(local_args_info.subopt_given), optarg, 0, 0, ARG_NO,0, 0,"n", 'g',additional_error))
+              &(local_args_info.subopt_given), optarg, 0, 0, ARG_NO,0, 0,"opt", 'g',additional_error))
             goto failure;
 
             subopt = strtol(optarg,NULL,10);

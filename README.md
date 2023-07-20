@@ -53,125 +53,83 @@ cmake --build build
 ```   
 This can be useful if you are getting errors about your compiler not having C++11 features.
 
-#### How to use:
-    Arguments:
-        DinoKnot:
-            --s1 <sequence1>
-            --r1 <restricted_structure1>
-            --s2 <sequence2>
-            --r2 <restricted_structure2>
-            --t1 <type_for_sequence1>
-            --t2 <type_for_sequence2>
-            --pen <penalty of base pairs to interact>
-            --n <max_number of suboptimal structure> (default is hotspot_num * hotspot_num)
-            --o_dir </path/to/folder/to/contain/all/output/files>
-            -i </path/to/file>
-            -o </path/to/file>
-            --hotspot_num <max_number_of_restricted_structures> (default is 20)
-            --hotspot_only </path/to/file>
-            --method_num <run_method_number> (range from 0 to 4, default is 0 which runs all of them)
+Help
+========================================
 
-        Remarks:
-            Required arguments: 
-            1. --s1 <sequence1>, --s2 <sequence2>, --t1 <type_for_sequence1>, --t2 <type_for_sequence2>
-            or
-            2. -i </path/to/file>, --t1 <type_for_sequence1>, --t2 <type_for_sequence2>
-            
+```
+Usage: DinoKnot [sequence1] [sequence2] [options]
+```
 
-            make sure the <arguments> are enclosed in "", for example --r1 "..().." instead of --r1 ..()..
-            input file for -i must be .txt
+Read RNA and DNA sequences from cmdline; predict minimum\nfree energy and optimum structure
 
-            if -i is provided with just a file name without a path, it is assuming the file is in the diretory where the executable is called
+```
+     --s1                   Specify the first sequence
+     --r1                   Specify the pseuodoknot-free restricted structure for sequence 1 (Will not generate other hotspots)
+     --s2                   Specify the sequence that the first sequence is interacting with
+     --r2                   Specify the pseuodoknot-free restricted structure for sequence 2 (Will not generate other hotspots)
+     --t1                   Change the type for sequence 1 to DNA (default is RNA)
+     --t2                   Change the type for sequence 2 to DNA (default is RNA)
+ -p  --pen                  Specify the penalty for the interactions between the sequences
+ -n  --opt                  Specify the number of suboptimal structures to output (default is hotspot-num*hotspot-num)
+ -d  --dir                  Specify the directory for which each results will have a file
+ -o  --output-file          Specify the path to file to output the results to
+     --hotspot-num          Specify the max number of hotspots per sequence (default is 20)
+     --hotspot-only         Specify the path to file to output the hotspots to
+```
+```
+Remarks:
+    Required arguments: 
+    1. --s1 <sequence1>, --s2 <sequence2>
 
-            if -o is provided with just a file name without a path, the output file will be generated in the diretory where the executable is called
+    if -i is provided with just a file name without a path, it is assuming the file is in the diretory where the executable is called
 
-            if -o is provided with just a file name without a path, and if -i is provided, then the output file will be generated in the directory where the input file is located
+    if -o is provided with just a file name without a path, the output file will be generated in the diretory where the executable is called
 
-            --o_dir would generate a output file for each pair of restricted structure in ascending order of free energy, so output_0.txt would be the file with the minimum free energy that -o would write
+    --pen are mainly used when we try to tune the optimal penalty. It is currently set to 22.96551130344778 for RNA-RNA interactions (homo-dimers), 34.14979695798525 for DNA-DNA interactions (homo-dimers) and 166.0 for hybrid interactions (hetero-dimers). Change this at your own risk.
 
-            --pen are mainly used when we try to tune the optimal penalty. It is currently set to 22.96551130344778 for RNA-RNA interactions (homo-dimers), 34.14979695798525 for DNA-DNA interactions (homo-dimers) and 166.0 for hybrid interactions (hetero-dimers). Change this at your own risk.
-
-            -n, --hotspot_num and --r1 --r2 should not be used together
-            
-            --method_num forces the program to only run a specfic method. The details of each method can be found in the paper. We do not advise users to change this argument as it is mainly for internal usage. 
-
-            --hotspot_only does not run the actual DinoKnot main program. This tells the program to generate 
-            restricted structures and write to the provided file. Usually used for large sequences and need to split it 
-            up and run it independently with an outside script
-            example file when calling ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 RNA --hotspot_only ./hotspot_file.txt --hotspot_num 7
-            Seq1_hotspot_0: ____(((((_____)))))___________
-            Seq1_hotspot_1: ____((((______________))))____
-            Seq1_hotspot_2: ____((((_______))))___________
-            Seq1_hotspot_3: _______((((___________))))____
-            Seq1_hotspot_4: ____(((_________)))___________
-            -----
-            Seq2_hotspot_0: ______________________((((((________________________))))))__
-            Seq2_hotspot_1: ______________(((((_______________)))))_____________________
-            Seq2_hotspot_2: ______________________(((((__________________________)))))__
-            Seq2_hotspot_3: __________________((((((________________________))))))______
-            Seq2_hotspot_4: __________________________________(((((_____)))))___________
-            Seq2_hotspot_5: ____(((((_____)))))_________________________________________
-            Seq2_hotspot_6: _________________(((________)))_____________________________
-            Seq2_hotspot_7: __________________(((((__________________________)))))______
-
-
-    
     Sequence requirements:
-        containing only characters GCAUT
-
-    Structure requirements:
-        -pseudoknot free
-        -containing only characters ._(){}[]
-        Remarks:
-            Restricted structure symbols:
-                () restricted base pair
-                _ no restriction
-    
-    Type options:
-        DNA
-        RNA
-        PMO
+        containing only characters GCAUT  
 
     Input file requirements:
-            Line1: Sequence1
-            Line2: Structure1
-            Line3: Sequence2
-            Line4: Structure2
+        Line1: Sequence1
+        Line2: Structure1
+        Line3: Sequence2
+        Line4: Structure2
 
         sample:
             GCAACGAUGACAUACAUCGCUAGUCGACGC
             (____________________________)
             GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC
             (__________________________________________________________)
+```
 
 #### Example:
-    assume you are in the directory where the HFold executable is located
-    ./DinoKnot_multimodel -i "/home/username/Desktop/myinputfile.txt" --t1 RNA --t2 DNA
-    ./DinoKnot_multimodel -i "/home/username/Desktop/myinputfile.txt" --t1 RNA --t2 DNA -o "outputfile.txt"
-    ./DinoKnot_multimodel -i "/home/username/Desktop/myinputfile.txt" --t1 RNA --t2 DNA -o "/home/username/Desktop/some_folder/outputfile.txt"
-    ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA
-    ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 DNA
-    ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA -o "outputfile.txt"
-    ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA -o "/home/username/Desktop/some_folder/outputfile.txt"
-    ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 RNA --hotspot_only ./hotspot_file.txt --hotspot_num 7
-    ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --t1 RNA --t2 DNA  o_dir "/home/username/Desktop/some_folder"
-    ./DinoKnot_multimodel --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA --method_num 2
-    
-#### Exit code:
-    0       success
-    1	    invalid argument error 
-    3	    thread error
-    4       i/o error
-    5       pipe error
-    6       positive energy error
-    10      backtrack error
-    11      error when output structure from hfold/hfold_pkonly/simfold does not match restricted
-    
-    error code with special meaning: http://tldp.org/LDP/abs/html/exitcodes.html
-    2	    Misuse of shell builtins (according to Bash documentation)
-    126	    Command invoked cannot execute
-    127	    "command not found"
-    128	    Invalid argument to exit	
-    128+n	Fatal error signal "n"
-    130	    Script terminated by Control-C
-    255	    Exit status out of range (range is 0-255)
+    assume you are in the directory where the DinoKnot executable is located
+    ./DinoKnot -i "file.txt" --t2
+    ./DinoKnot -i "file.txt" --t2  -o "outputfile.txt"
+    ./DinoKnot -i "inputfile.txt" --t2 -o "outputfile.txt"
+    ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)"
+    ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "ACGATTGTGCATCAGCTGA" --t2
+    ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA -o "outputfile.txt"
+    ./DinoKnot --s1 GCAACGAUGACAUACAUCGCUAGUCGACGC --r1 (____________________________) --s2 GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC --r2 (__________________________________________________________) -o file.txt
+    ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --hotspot-only file.txt --hotspot-num 7
+    ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --dir /home/username/Desktop/some_folder
+
+```
+./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --hotspot-only file.txt --hotspot-num 7
+
+Seq1_hotspot_0: ____(((((_____)))))___________(-2.32)
+Seq1_hotspot_1: ____((((______________))))____(-1.4)
+Seq1_hotspot_2: ____((((_______))))___________(-1.11)
+Seq1_hotspot_3: _______((((___________))))____(-0.56)
+Seq1_hotspot_4: ____(((_________)))___________(-0.32)
+---------------
+Seq2_hotspot_0: ______________________((((((________________________))))))__(-5.1)
+Seq2_hotspot_1: ______________(((((_______________)))))_____________________(-2.65)
+Seq2_hotspot_2: ______________________(((((__________________________)))))__(-2.59)
+Seq2_hotspot_3: __________________((((((________________________))))))______(-2.46)
+Seq2_hotspot_4: __________________________________(((((_____)))))___________(-2.32)
+Seq2_hotspot_5: ____(((((_____)))))_________________________________________(-2.32)
+Seq2_hotspot_6: _________________(((________)))_____________________________(-2)
+
+```

@@ -1,7 +1,6 @@
 #ifndef HFOLD_INTERACTING_H_
 #define HFOLD_INTERACTING_H_
 
-#include "Result.h"
 #include <vector>
 
 
