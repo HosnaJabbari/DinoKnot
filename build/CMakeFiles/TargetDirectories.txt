@@ -1,7 +1,0 @@
-/home/mgray7/Hosna/DinoKnot/build/CMakeFiles/edit_cache.dir
-/home/mgray7/Hosna/DinoKnot/build/CMakeFiles/rebuild_cache.dir
-/home/mgray7/Hosna/DinoKnot/build/CMakeFiles/DinoKnot.dir
-/home/mgray7/Hosna/DinoKnot/build/simfold/CMakeFiles/rebuild_cache.dir
-/home/mgray7/Hosna/DinoKnot/build/simfold/CMakeFiles/edit_cache.dir
-/home/mgray7/Hosna/DinoKnot/build/simfold/CMakeFiles/simfold_exec.dir
-/home/mgray7/Hosna/DinoKnot/build/simfold/CMakeFiles/simfold.dir
