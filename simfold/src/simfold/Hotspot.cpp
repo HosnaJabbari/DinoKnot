@@ -1,46 +1,29 @@
 #include "Hotspot.h"
 
-//constructor
-Hotspot::Hotspot(int left_inner_index, int right_inner_index, int length){
-    assert(left_inner_index >= 0);
-    assert(right_inner_index >= left_inner_index);
-    this->left_inner_index = left_inner_index;
-    this->right_inner_index = right_inner_index;
-    this->left_outer_index = left_inner_index;
-    this->right_outer_index = right_inner_index;
-    this->length = length;
-    this->energy = 0.0; 
-    this->size = 1;
-    this->structure = (char*) malloc(sizeof(char) * (length+1));
-
-}
-
-//destructor
-Hotspot::~Hotspot(){
-    free(this->structure);
-}
-
 //getters
-int Hotspot::get_left_inner_index(){
+int Hotspot::get_left_inner_index() const{
     return this->left_inner_index;
 }
-int Hotspot::get_right_inner_index(){
+int Hotspot::get_right_inner_index() const{
     return this->right_inner_index;
 }
-int Hotspot::get_left_outer_index(){
+int Hotspot::get_left_outer_index() const{
     return this->left_outer_index;
 }
-int Hotspot::get_right_outer_index(){
+int Hotspot::get_right_outer_index() const{
     return this->right_outer_index;
 }
-double Hotspot::get_energy(){
+double Hotspot::get_energy() const{
     return this->energy;
 }
-int Hotspot::get_size(){
+int Hotspot::get_size() const{
     return this->size;
 }
+int Hotspot::get_length() const{
+    return this->length;
+}
 
-char* Hotspot::get_structure(){
+std::string Hotspot::get_structure() const{
     return this->structure;
 }
 
@@ -50,22 +33,19 @@ void Hotspot::set_energy(double energy){
 }
 
 void Hotspot::set_structure(){
-    memset(this->structure,'\0',this->length+1);
-    for(int i =0; i < this->length; i++){
-        if(i >= this->left_outer_index && i <= this->left_inner_index){
-            this->structure[i] = '(';
-        }else if(i <= this->right_outer_index && i >= this->right_inner_index){
-            this->structure[i] = ')';
+    for(int i =0; i < length; i++){
+        if(i >= left_outer_index && i <= left_inner_index){
+            structure[i] = '(';
+        }else if(i <= right_outer_index && i >= right_inner_index){
+            structure[i] = ')';
         }else{
-            this->structure[i] = '_';
+            structure[i] = '_';
         }
     }
-    this->structure[this->length] = '\0';
 }
 
 
-void Hotspot::set_structure(char* structure){
-    memset(this->structure,'\0',this->length+1);
+void Hotspot::set_structure(std::string structure){
     for(int i =0; i < this->length; i++){
         if(i >= this->left_outer_index && i <= this->left_inner_index){
             this->structure[i] = structure[i];
@@ -75,16 +55,14 @@ void Hotspot::set_structure(char* structure){
             this->structure[i] = structure[i];
         }
     }
-    this->structure[this->length] = '\0';
 }
 
 
 void Hotspot::set_default_structure(){
-    memset(this->structure,'\0',this->length);
+    // memset(this->structure,'\0',this->length);
     for(int i =0; i < this->length; i++){
         this->structure[i] = '_';
     }
-    this->structure[this->length] = '\0';
 }
 
 void Hotspot::move_left_outer_index(){

@@ -35,7 +35,6 @@ struct args_info
 {
   const char *help_help; /**< @brief Print help and exit help description.  */
   const char *version_help; /**< @brief Print version and exit help description.  */
-  const char *verbose_help; /**< @brief Turn on verbose output help description.  */
   const char *sequence1_help; /**< @brief Give the first sequence as input  */
   const char *structure1_help; /**< @brief Give a structure corresponding to the first sequence  */
   const char *sequence2_help; /**< @brief Give a second sequence as input */
@@ -51,7 +50,6 @@ struct args_info
   
   unsigned int help_given ;	/**< @brief Whether help was given.  */
   unsigned int version_given ;	/**< @brief Whether version was given.  */
-  unsigned int verbose_given ;	/**< @brief Whether verbose was given.  */
   unsigned int sequence1_given ;	/**< @brief Whether sequence 1 was given.  */
   unsigned int structure1_given ;	/**< @brief Whether structure 1 was given.  */
   unsigned int sequence2_given ;	/**< @brief Whether sequence 2 was given.  */

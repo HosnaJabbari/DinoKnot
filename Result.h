@@ -4,26 +4,35 @@
 #include <stdio.h>  
 #include <assert.h> 
 #include <stdlib.h>
-#include <string.h>
+#include <string>
 
 class Result{
     public:
         //constructor
-        Result(char* sequence,char* restricted, char* final_structure, double final_energy);
+        Result(std::string sequence,std::string restricted, std::string final_structure, double final_energy);
         //destructor
         ~Result();
 
         //getter
-        char* get_sequence();
-        char* get_restricted();
-        char* get_final_structure();
+        std::string get_sequence();
+        std::string get_restricted();
+        std::string get_final_structure();
         double get_final_energy();
-        int get_method_chosen();
+
+        struct Result_comp{
+		bool operator ()(Result &x, Result &y) const {
+			return x.get_final_energy() < y.get_final_energy();
+		}
+		} result_comp;
+
+        
     private:
-        char* sequence;
-        char* restricted;
-        char* final_structure;
+        std::string sequence;
+        std::string restricted;
+        std::string final_structure;
         double final_energy;
 };
+
+
 
 #endif

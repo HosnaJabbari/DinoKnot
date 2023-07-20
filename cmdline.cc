@@ -40,7 +40,6 @@ const char *args_info_description = "Read RNA and DNA sequences from cmdline; pr
 const char *args_info_help[] = {
   "  -h, --help             Print help and exit",
   "  -V, --version          Print version and exit",
-  "  -v, --verbose          Turn on verbose output",
   "      --s1               sequence 1",
   "      --r1               structure for sequence 1",
   "      --s2               sequence 2",
@@ -68,7 +67,6 @@ static void init_args_info(struct args_info *args_info)
 {
   args_info->help_help = args_info_help[0] ;
   args_info->version_help = args_info_help[1] ;
-  args_info->verbose_help = args_info_help[2] ;
   args_info->sequence1_help = args_info_help[3] ;
   args_info->structure1_help = args_info_help[4] ;
   args_info->sequence2_help = args_info_help[5] ;
@@ -86,7 +84,7 @@ static void init_args_info(struct args_info *args_info)
 void
 cmdline_parser_print_version (void)
 {
-  printf (" %s\n",(strlen(package_name) ? package_name : "sparsemfefold"));
+  printf (" %s\n",(strlen(package_name) ? package_name : "DinoKnot"));
 
   if (strlen(args_info_versiontext) > 0)
     printf("\n%s\n", args_info_versiontext);
@@ -124,7 +122,6 @@ static void clear_given (struct args_info *args_info)
 {
   args_info->help_given = 0 ;
   args_info->version_given = 0 ;
-  args_info->verbose_given = 0 ;
   args_info->sequence1_given = 0 ;
   args_info->structure1_given = 0 ;
   args_info->sequence2_given = 0 ;
@@ -324,7 +321,6 @@ int cmdline_parser_internal (int argc, char **argv, struct args_info *args_info,
       static struct option long_options[] = {
         { "help",	0, NULL, 'h' },
         { "version",	0, NULL, 'V' },
-        { "verbose",	0, NULL, 'v' },
         {"s1", required_argument, NULL, 0}, 	
         {"r1", required_argument, NULL, 0},	
         {"s2", required_argument, NULL, 0},	
@@ -335,12 +331,12 @@ int cmdline_parser_internal (int argc, char **argv, struct args_info *args_info,
         {"n"  ,required_argument, NULL, 'i'},
         {"output-file", required_argument, NULL, 'o'}, 	
         {"dir", required_argument, NULL, 'd'},	
-        {"hotspot_num", required_argument, NULL, 'k'}, 
-        {"hotspot_only", required_argument, NULL, 'l'},
+        {"hotspot-num", required_argument, NULL, 'k'}, 
+        {"hotspot-only", required_argument, NULL, 'l'},
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVvp:n:o:d:k:l:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVp:n:o:d:k:l:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -355,16 +351,6 @@ int cmdline_parser_internal (int argc, char **argv, struct args_info *args_info,
           cmdline_parser_print_version ();
           cmdline_parser_free (&local_args_info);
           exit (EXIT_SUCCESS);
-
-        case 'v':	/* Turn on verbose output.  */
-        
-        
-          if (update_arg( 0 , 
-               0 , &(args_info->verbose_given),
-              &(local_args_info.verbose_given), optarg, 0, 0, ARG_NO,0, 0,"verbose", 'v',additional_error))
-            goto failure;
-        
-          break;
 
         case 'p':	/* Specify hybrid penalty  */
         
@@ -421,7 +407,7 @@ int cmdline_parser_internal (int argc, char **argv, struct args_info *args_info,
         
           if (update_arg( 0 , 
                0 , &(args_info->h_num_given),
-              &(local_args_info.h_num_given), optarg, 0, 0, ARG_NO,0, 0,"hotspot_num", 'k',additional_error))
+              &(local_args_info.h_num_given), optarg, 0, 0, ARG_NO,0, 0,"hotspot-num", 'k',additional_error))
             goto failure;
 
             hotspot_num = strtol(optarg,NULL,10);
@@ -434,7 +420,7 @@ int cmdline_parser_internal (int argc, char **argv, struct args_info *args_info,
         
           if (update_arg( 0 , 
                0 , &(args_info->h_only_given),
-              &(local_args_info.h_only_given), optarg, 0, 0, ARG_NO,0, 0,"hotspot_only", 'l',additional_error))
+              &(local_args_info.h_only_given), optarg, 0, 0, ARG_NO,0, 0,"hotspot-only", 'l',additional_error))
             goto failure;
 
             hotspot_dir = optarg;
