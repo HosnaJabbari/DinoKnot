@@ -23,6 +23,8 @@ std::string output_dir;
 
 std::string output_file;
 
+std::string input_file;
+
 int hotspot_num;
 
 std::string hotspot_dir;
@@ -40,18 +42,19 @@ const char *args_info_description = "Read RNA and DNA sequences from cmdline; pr
 const char *args_info_help[] = {
   "  -h, --help             Print help and exit",
   "  -V, --version          Print version and exit",
-  "      --s1               sequence 1",
-  "      --r1               structure for sequence 1",
-  "      --s2               sequence 2",
-  "      --r2               structure for sequence 2",
-  "      --t1               type for sequence 1",
-  "      --t2               type for sequence 2",
-  "  -p, --pen              start_hybrid_penalty",
-  "  -n, --opt              number of suboptimal structure",
-  "  -o, --output-file      print output to file",
-  "  -d, --dir              output every file to directory",
-  "  -k, --hotspot-num      max number of hotspot",
-  "  -l, --hotspot-only     only dump hotspots to file", 
+  "      --s1               Specify the first sequence",
+  "      --r1               Specify the pseuodoknot-free restricted structure for sequence 1 (Will not generate other hotspots)",
+  "      --s2               Specify the second sequence that the first sequence is interacting with",
+  "      --r2               Specify the pseuodoknot-free restricted structure for sequence 2 (Will not generate other hotspots)",
+  "      --t1               Change the type for sequence 1 to DNA (default is RNA)",
+  "      --t2               Change the type for sequence 2 to DNA (default is RNA)",
+  "  -p, --pen              Specify the penalty for the interactions between the sequences",
+  "  -n, --opt              Specify the number of suboptimal structures to output (default is hotspot-num*hotspot-num)",
+  "  -i, --input-file       Specify the input file",
+  "  -o, --output-file      Specify the path to file to output the results to",
+  "  -d, --dir              Specify the directory for which each results will have a file",
+  "  -k, --hotspot-num      Specify the max number of hotspots per sequence (default is 20)",
+  "  -l, --hotspot-only     Specify the path to file to output the hotspots to", 
 };
 
 static void clear_given (struct args_info *args_info);
@@ -75,10 +78,11 @@ static void init_args_info(struct args_info *args_info)
   args_info->type2_help = args_info_help[8] ;
   args_info->pen_help = args_info_help[9] ;
   args_info->subopt_help = args_info_help[10] ;
-  args_info->output_help = args_info_help[11] ;
-  args_info->dir_help = args_info_help[12] ;
-  args_info->h_num_help = args_info_help[13] ;
-  args_info->h_only_help = args_info_help[14] ;
+  args_info->input_help = args_info_help[11] ;
+  args_info->output_help = args_info_help[12] ;
+  args_info->dir_help = args_info_help[13] ;
+  args_info->h_num_help = args_info_help[14] ;
+  args_info->h_only_help = args_info_help[15] ;
   
 }
 void
@@ -130,6 +134,7 @@ static void clear_given (struct args_info *args_info)
   args_info->type2_given = 0 ;
   args_info->pen_given = 0 ;
   args_info->subopt_given = 0 ;
+  args_info->input_given = 0 ;
   args_info->output_given = 0 ;
   args_info->dir_given = 0 ;
   args_info->h_num_given = 0 ;
@@ -329,6 +334,7 @@ int cmdline_parser_internal (int argc, char **argv, struct args_info *args_info,
         {"t2", 0, NULL, 0},	
         {"pen",required_argument, NULL, 'p'},  
         {"opt"  ,required_argument, NULL, 'n'},
+        {"input-file", required_argument, NULL, 'i'},
         {"output-file", required_argument, NULL, 'o'}, 	
         {"dir", required_argument, NULL, 'd'},	
         {"hotspot-num", required_argument, NULL, 'k'}, 
@@ -336,7 +342,7 @@ int cmdline_parser_internal (int argc, char **argv, struct args_info *args_info,
         { 0,  0, 0, 0 }
       };
 
-      c = getopt_long (argc, argv, "hVp:n:o:d:k:l:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVp:n:i:o:d:k:l:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -377,8 +383,20 @@ int cmdline_parser_internal (int argc, char **argv, struct args_info *args_info,
             
         
           break;
+          
+          case 'i':	/* Specify output file  */
+        
+        
+          if (update_arg( 0 , 
+               0 , &(args_info->input_given),
+              &(local_args_info.input_given), optarg, 0, 0, ARG_NO,0, 0,"input-file", 'i',additional_error))
+            goto failure;
 
-          case 'o':	/* Specify output directory  */
+            input_file = optarg;
+        
+          break;
+
+          case 'o':	/* Specify output file  */
         
         
           if (update_arg( 0 , 

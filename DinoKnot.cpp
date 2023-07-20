@@ -80,23 +80,6 @@ bool exists (const std::string path) {
   return (stat (path.c_str(), &buffer) == 0); 
 }
 
-//return code for model type if valid
-//return -1 if not valid
-// int validateModelType(char* type){
-// 	if(strcmp(type, "RNA") == 0){
-// 		return RNA;
-// 	}
-// 	if(strcmp(type, "DNA") == 0){
-// 		return DNA;
-// 	}
-// 	//kevin 30 June 2017
-// 	//added PMO
-// 	if(strcmp(type, "PMO") == 0){
-// 		return PMO;
-// 	}
-// 	return -1;
-// }
-
 double get_START_HYBRID_PENALTY(int type1, int type2){
 	if(type1 == type2){ //if both model are the same
 		if(type1 == RNA){ //if both are RNA
@@ -122,19 +105,33 @@ int main (int argc, char *argv[]) {
 
 	int model_1_Type = args_info.type1_given;
 	int model_2_Type = args_info.type2_given;
-	std::string inputSequence1 = args_info.sequence1_given ? sequence_1 : "";
+	std::string inputSequence1 = "";
+	std::string inputSequence2 = "";
+	std::string inputStructure1 = "";
+	std::string inputStructure2 = "";
+
+	std::string inputFile = args_info.input_given ? input_file : "";
+	if(exists(inputFile)){
+		std::ifstream in(inputFile);
+		getline(in,inputSequence1);
+		getline(in,inputStructure1);
+		getline(in,inputSequence2);
+		getline(in,inputStructure2);
+		in.close();
+	}
+
+	if(args_info.sequence1_given) inputSequence1 =  sequence_1;
+	if(args_info.sequence2_given) inputSequence2 =  sequence_2;
+	if(args_info.structure1_given) inputStructure1 = structure_1;
+	if(args_info.structure2_given) inputStructure2 = structure_2;
 	validateSequence(inputSequence1);
-	std::string inputSequence2 = args_info.sequence2_given ? sequence_2 : "";
 	validateSequence(inputSequence2);
+	if(inputStructure1 != "") validateStructure(inputSequence1,inputStructure1);
+	if(inputStructure2 != "") validateStructure(inputSequence2,inputStructure2);
 	
 	std::string seq = inputSequence1 + "XXXXX" + inputSequence2;
 
-	std::string inputStructure1 = args_info.structure1_given ? structure_1 : "";
-	if(args_info.structure1_given) validateStructure(inputSequence1,inputStructure1);
-		
-	std::string inputStructure2 = args_info.structure2_given ? structure_2 : "";
-	if(args_info.structure2_given) validateStructure(inputSequence2,inputStructure2);
-		
+				
 	std::string outputDir = args_info.dir_given ? output_dir : "";
 	std::string outputFile = args_info.output_given ? output_file : "";
 	std::string hotspotDir = args_info.h_only_given ? hotspot_dir : "";

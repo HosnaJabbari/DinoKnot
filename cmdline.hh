@@ -20,8 +20,11 @@ extern int subopt;
 // The output directory to print to
 extern std::string output_dir;
 
-// The output directory to print to
+// The output file to print to
 extern std::string output_file;
+
+// The input file to take from
+extern std::string input_file;
 
 // The file to print the hotspots to
 extern std::string hotspot_dir;
@@ -43,7 +46,8 @@ struct args_info
   const char *type2_help; /**< @brief Change type for sequence 2 to DNA (base is RNA) */
   const char *pen_help; /**< @brief Give a hybrid-penalty to replace the current one */
   const char *subopt_help; /**< @brief Give a number of suboptimals to print  */
-  const char *output_help; /**< @brief Give an output directory for the results  */
+  const char *input_help; /**< @brief Give an input file for the results  */
+  const char *output_help; /**< @brief Give an output file for the results  */
   const char *dir_help; /**< @brief Give an output directory for the results  */
   const char *h_num_help; /**< @brief Give a number for how many hotspots per sequence */
   const char *h_only_help; /**< @brief Give a file directory for outputting hotspots */
@@ -58,7 +62,8 @@ struct args_info
   unsigned int type2_given ; /** <@brief whether type 2 was given */
   unsigned int pen_given ;	/**< @brief Whether hybrid penalty was given.  */
   unsigned int subopt_given ;	/**< @brief Whether suboptimals was given.  */
-  unsigned int output_given ;	/**< @brief Whether output directory was given.  */
+  unsigned int input_given ;	/**< @brief Whether input file was given.  */
+  unsigned int output_given ;	/**< @brief Whether output file was given.  */
   unsigned int dir_given ;	/**< @brief Whether output directory was given.  */
   unsigned int h_num_given ;	/**< @brief Whether hotspot_num was given.  */
   unsigned int h_only_given ;	/**< @brief Whether hotspot_only was given.  */

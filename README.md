@@ -65,14 +65,15 @@ Read RNA and DNA sequences from cmdline; predict minimum\nfree energy and optimu
 ```
      --s1                   Specify the first sequence
      --r1                   Specify the pseuodoknot-free restricted structure for sequence 1 (Will not generate other hotspots)
-     --s2                   Specify the sequence that the first sequence is interacting with
+     --s2                   Specify the second sequence that the first sequence is interacting with
      --r2                   Specify the pseuodoknot-free restricted structure for sequence 2 (Will not generate other hotspots)
      --t1                   Change the type for sequence 1 to DNA (default is RNA)
      --t2                   Change the type for sequence 2 to DNA (default is RNA)
  -p  --pen                  Specify the penalty for the interactions between the sequences
  -n  --opt                  Specify the number of suboptimal structures to output (default is hotspot-num*hotspot-num)
- -d  --dir                  Specify the directory for which each results will have a file
+ -i  --input-file           Specify the input file
  -o  --output-file          Specify the path to file to output the results to
+ -d  --dir                  Specify the directory for which each results will have a file
      --hotspot-num          Specify the max number of hotspots per sequence (default is 20)
      --hotspot-only         Specify the path to file to output the hotspots to
 ```
