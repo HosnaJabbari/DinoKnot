@@ -116,6 +116,14 @@ Remarks:
     ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --dir /home/username/Desktop/some_folder
 
 ```
+./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)"
+
+Seq:          GCAACGAUGACAUACAUCGCUAGUCGACGCXXXXXGCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC
+Restricted_0: (____________________________).....(__________________________________________________________)
+Result_0:     ....(((((.....(((((...(((((([[.....]]..[[[[[.....]]]]]...))))))......))))).....)))))........... (-16.6)
+
+
+
 ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --hotspot-only file.txt --hotspot-num 7
 
 Seq1_hotspot_0: ____(((((_____)))))___________(-2.32)
