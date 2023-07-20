@@ -80,6 +80,39 @@ bool exists (const std::string path) {
   return (stat (path.c_str(), &buffer) == 0); 
 }
 
+void get_input(std::string file, std::string &sequence1, std::string &sequence2, std::string &structure1, std::string &structure2 ){
+	if(!exists(file)){
+		std::cout << "Input file does not exist" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	// Partial IUPAC notation
+	std::string bases = "ACGTUWSMKRY";
+	std::string s = "._()";
+	std::ifstream in(file.c_str());
+	bool secondseq = false;
+	bool secondstruct = false;
+	std::string str;
+	while(getline(in,str)){
+		if(bases.find(str[0])+1){
+			if(secondseq) sequence2 = str;
+			else {
+				sequence1 = str; 
+				secondseq = true;
+			}
+		}
+		if(s.find(str[0])+1){
+			
+			if(secondstruct) structure2 = str;
+			else {
+				structure1 = str; 
+				secondstruct = true;
+			}
+		}
+	}
+
+	in.close();
+}
+
 double get_START_HYBRID_PENALTY(int type1, int type2){
 	if(type1 == type2){ //if both model are the same
 		if(type1 == RNA){ //if both are RNA
@@ -111,14 +144,8 @@ int main (int argc, char *argv[]) {
 	std::string inputStructure2 = "";
 
 	std::string inputFile = args_info.input_given ? input_file : "";
-	if(exists(inputFile)){
-		std::ifstream in(inputFile);
-		getline(in,inputSequence1);
-		getline(in,inputStructure1);
-		getline(in,inputSequence2);
-		getline(in,inputStructure2);
-		in.close();
-	}
+	if(args_info.input_given) get_input(inputFile,inputSequence1,inputSequence2,inputStructure1,inputStructure2);
+	std::cout << inputSequence1 << "\n" << inputSequence2 << "\n" << inputStructure1 << "\n" << inputStructure2 << std::endl;
 
 	if(args_info.sequence1_given) inputSequence1 =  sequence_1;
 	if(args_info.sequence2_given) inputSequence2 =  sequence_2;

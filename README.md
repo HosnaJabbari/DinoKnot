@@ -90,18 +90,6 @@ Remarks:
 
     Sequence requirements:
         containing only characters GCAUT  
-
-    Input file requirements:
-        Line1: Sequence1
-        Line2: Structure1
-        Line3: Sequence2
-        Line4: Structure2
-
-        sample:
-            GCAACGAUGACAUACAUCGCUAGUCGACGC
-            (____________________________)
-            GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC
-            (__________________________________________________________)
 ```
 
 #### Example:
