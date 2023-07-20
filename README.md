@@ -67,8 +67,8 @@ Read RNA and DNA sequences from cmdline; predict minimum\nfree energy and optimu
      --r1                   Specify the pseuodoknot-free restricted structure for sequence 1 (Will not generate other hotspots)
      --s2                   Specify the second sequence that the first sequence is interacting with
      --r2                   Specify the pseuodoknot-free restricted structure for sequence 2 (Will not generate other hotspots)
-     --t1                   Change the type for sequence 1 to DNA (default is RNA)
-     --t2                   Change the type for sequence 2 to DNA (default is RNA)
+     --t1                   Change the type for sequence 1 to 1 (DNA) or 2 (PMO) (default is RNA)
+     --t2                   Change the type for sequence 2 to 1 (DNA) or 2 (PMO) (default is RNA)
  -p  --pen                  Specify the penalty for the interactions between the sequences
  -n  --opt                  Specify the number of suboptimal structures to output (default is hotspot-num*hotspot-num)
  -i  --input-file           Specify the input file
@@ -81,6 +81,8 @@ Read RNA and DNA sequences from cmdline; predict minimum\nfree energy and optimu
 Remarks:
     Required arguments: 
     1. --s1 <sequence1>, --s2 <sequence2>
+    or
+    2. -i </path/to/file>
 
     if -i is provided with just a file name without a path, it is assuming the file is in the diretory where the executable is called
 
@@ -94,12 +96,12 @@ Remarks:
 
 #### Example:
     assume you are in the directory where the DinoKnot executable is located
-    ./DinoKnot -i "file.txt" --t2
-    ./DinoKnot -i "file.txt" --t2  -o "outputfile.txt"
-    ./DinoKnot -i "inputfile.txt" --t2 -o "outputfile.txt"
+    ./DinoKnot -i "file.txt" --t2 1
+    ./DinoKnot -i "file.txt" --t2 2  -o "outputfile.txt"
+    ./DinoKnot -i "inputfile.txt" --t2 1 -o "outputfile.txt"
     ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)"
-    ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "ACGATTGTGCATCAGCTGA" --t2
-    ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t1 RNA --t2 DNA -o "outputfile.txt"
+    ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "ACGATTGTGCATCAGCTGA" --t2 2
+    ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t2 2 -o "outputfile.txt"
     ./DinoKnot --s1 GCAACGAUGACAUACAUCGCUAGUCGACGC --r1 (____________________________) --s2 GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC --r2 (__________________________________________________________) -o file.txt
     ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --hotspot-only file.txt --hotspot-num 7
     ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --dir /home/username/Desktop/some_folder
@@ -130,3 +132,6 @@ Seq2_hotspot_5: ____(((((_____)))))_________________________________________(-2.
 Seq2_hotspot_6: _________________(((________)))_____________________________(-2)
 
 ```
+#### Reporting errors:
+For any errors when using DinoKnot, report errors to mateo2@ualberta.ca
+Thank you

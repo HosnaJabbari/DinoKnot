@@ -11,6 +11,10 @@ extern std::string structure_1;
 // The restricted structure for sequence 2
 extern std::string structure_2;
 
+// Types for sequence 1 and 2
+extern int type_1;
+extern int type_2;
+
 // User set hybrid penalty
 extern double hybrid_pen;
 

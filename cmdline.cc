@@ -15,6 +15,10 @@ std::string structure_1;
 // The restricted structure
 std::string structure_2;
 
+int type_1 = 0;
+
+int type_2 = 0;
+
 double hybrid_pen;
 
 int subopt;
@@ -46,8 +50,8 @@ const char *args_info_help[] = {
   "      --r1               Specify the pseuodoknot-free restricted structure for sequence 1 (Will not generate other hotspots)",
   "      --s2               Specify the second sequence that the first sequence is interacting with",
   "      --r2               Specify the pseuodoknot-free restricted structure for sequence 2 (Will not generate other hotspots)",
-  "      --t1               Change the type for sequence 1 to DNA (default is RNA)",
-  "      --t2               Change the type for sequence 2 to DNA (default is RNA)",
+  "      --t1               Change the type for sequence 1 to 1 (DNA) or 2 (PMO) (default is RNA)",
+  "      --t2               Change the type for sequence 2 to 1 (DNA) or 2 (PMO) (default is RNA)",
   "  -p, --pen              Specify the penalty for the interactions between the sequences",
   "  -n, --opt              Specify the number of suboptimal structures to output (default is hotspot-num*hotspot-num)",
   "  -i, --input-file       Specify the input file",
@@ -330,8 +334,8 @@ int cmdline_parser_internal (int argc, char **argv, struct args_info *args_info,
         {"r1", required_argument, NULL, 0},	
         {"s2", required_argument, NULL, 0},	
         {"r2", required_argument, NULL, 0},	
-        {"t1", 0, NULL, 0},	
-        {"t2", 0, NULL, 0},	
+        {"t1", required_argument, NULL, 0},	
+        {"t2", required_argument, NULL, 0},	
         {"pen",required_argument, NULL, 'p'},  
         {"opt"  ,required_argument, NULL, 'n'},
         {"input-file", required_argument, NULL, 'i'},
@@ -503,6 +507,8 @@ int cmdline_parser_internal (int argc, char **argv, struct args_info *args_info,
                 0 , &(args_info->type1_given),
                 &(local_args_info.type1_given), optarg, 0, 0, ARG_NO,0, 0,"t1", '-',additional_error))
               goto failure;
+
+              type_1 = strtol(optarg,NULL,10);
           
           }
           /* Specify type 2  */
@@ -513,6 +519,8 @@ int cmdline_parser_internal (int argc, char **argv, struct args_info *args_info,
                 0 , &(args_info->type2_given),
                 &(local_args_info.type2_given), optarg, 0, 0, ARG_NO,0, 0,"t2", '-',additional_error))
               goto failure;
+
+              type_2 = strtol(optarg,NULL,10);
           
           }
           

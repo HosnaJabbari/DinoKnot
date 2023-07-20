@@ -136,8 +136,8 @@ int main (int argc, char *argv[]) {
 	exit(1);
 	}
 
-	int model_1_Type = args_info.type1_given;
-	int model_2_Type = args_info.type2_given;
+	int model_1_Type = type_1 <= 2 ? type_1 : 0;
+	int model_2_Type = type_2 <= 2 ? type_2 : 0;
 	std::string inputSequence1 = "";
 	std::string inputSequence2 = "";
 	std::string inputStructure1 = "";
@@ -145,7 +145,6 @@ int main (int argc, char *argv[]) {
 
 	std::string inputFile = args_info.input_given ? input_file : "";
 	if(args_info.input_given) get_input(inputFile,inputSequence1,inputSequence2,inputStructure1,inputStructure2);
-	std::cout << inputSequence1 << "\n" << inputSequence2 << "\n" << inputStructure1 << "\n" << inputStructure2 << std::endl;
 
 	if(args_info.sequence1_given) inputSequence1 =  sequence_1;
 	if(args_info.sequence2_given) inputSequence2 =  sequence_2;
@@ -256,86 +255,90 @@ int main (int argc, char *argv[]) {
 			out << "Seq2_hotspot_" << j << ": " << hotspot_list2[j].get_structure() << "(" << hotspot_list2[j].get_energy() << ")" << std::endl;
 		}
 		out.close();
+
+		destruct_energy_model(&model_1);
+		destruct_energy_model(&model_2);
 	}
+	else {
 
-	std::vector<Result> result_list;
-	
-	int length = seq.length();
-	char sequence[length+1];
-	strcpy(sequence,seq.c_str());
-	for(int i =0; i < hotspot_list1.size(); i++){
-		for(int j = 0; j < hotspot_list2.size(); j++){
-			
-			char structure[length+1];
-			char restricted[length+1];
-
-			std::string struc = hotspot_list1[i].get_structure() + "....." + hotspot_list2[j].get_structure();
-			strcpy(restricted, struc.c_str());
-			
-
-			double energy = hfold_interacting_emodel(sequence, restricted, structure, energy_models);
-			
-			std::string res(restricted);
-			std::string final(structure);
-			Result result(seq,res,final,energy);
-			result_list.push_back(result);
-		}
-	}
-	Result::Result_comp result_comp;
-	std::sort(result_list.begin(), result_list.end(),result_comp );
-
-	destruct_energy_model(&model_1);
-	destruct_energy_model(&model_2);
-
-	//kevin 5 oct 2017
-	int number_of_output = 1;
-	// //printf("number_of_suboptimal_structure: %d\n",number_of_suboptimal_structure);
-	if(number_of_suboptimal_structure != 1){
-		number_of_output = std::min( (int) result_list.size(),number_of_suboptimal_structure);
-	}
-
-	//Mateo 7/19/2023
-	//output to file
-	if(outputFile != ""){
-		std::ofstream out(output_file);
-		if(!exists(output_file)){
-			std::cout << "file is not valid" << std::endl;
-			exit(EXIT_FAILURE);
-		}
-
-		out << "Seq:          " << seq << std::endl;
-		for (int i=0; i < number_of_output; i++) {
-			out << "Restricted_" << i << ": " << result_list[i].get_restricted() << std::endl;;
-			out << "Result_" << i << ":     " << result_list[i].get_final_structure() << " (" << result_list[i].get_final_energy() << ")" << std::endl;
+		std::vector<Result> result_list;
 		
-		}
-		out.close();
-	}
-	else if(outputDir != ""){
-		// Mateo 2023
-		if(exists(outputDir)){
-			if(outputDir[outputDir.length()] != '/') outputDir += '/';
-			for (int i=0; i < number_of_output; ++i) {
-				std::string path_to_file = outputDir + "output_" + std::to_string(i) + ".txt";
-				std::ofstream out(path_to_file);
-				out << "Seq:          " << seq << std::endl;
-				out << "Restricted_" << i << ": " << result_list[i].get_restricted() << std::endl;;
-				out << "Result_" << i << ":     " << result_list[i].get_final_structure() << " (" << result_list[i].get_final_energy() << ")" << std::endl;  
-				out.close();
+		int length = seq.length();
+		char sequence[length+1];
+		strcpy(sequence,seq.c_str());
+		for(int i =0; i < hotspot_list1.size(); i++){
+			for(int j = 0; j < hotspot_list2.size(); j++){
+				
+				char structure[length+1];
+				char restricted[length+1];
+
+				std::string struc = hotspot_list1[i].get_structure() + "....." + hotspot_list2[j].get_structure();
+				strcpy(restricted, struc.c_str());
+				
+
+				double energy = hfold_interacting_emodel(sequence, restricted, structure, energy_models);
+				
+				std::string res(restricted);
+				std::string final(structure);
+				Result result(seq,res,final,energy);
+				result_list.push_back(result);
 			}
 		}
-		else{
-			std::cout << "Not a valid output directory" << std::endl;
-			exit(EXIT_FAILURE);
+		Result::Result_comp result_comp;
+		std::sort(result_list.begin(), result_list.end(),result_comp );
+
+		destruct_energy_model(&model_1);
+		destruct_energy_model(&model_2);
+
+		//kevin 5 oct 2017
+		int number_of_output = 1;
+		// //printf("number_of_suboptimal_structure: %d\n",number_of_suboptimal_structure);
+		if(number_of_suboptimal_structure != 1){
+			number_of_output = std::min( (int) result_list.size(),number_of_suboptimal_structure);
 		}
-	} else{
-		// Mateo 2023
-		std::cout << "Seq:          " << seq << std::endl;
-		for (int i=0; i < number_of_output; i++) {
-			std::cout << "Restricted_" << i << ": " << result_list[i].get_restricted() << std::endl;;
-			std::cout << "Result_" << i << ":     " << result_list[i].get_final_structure() << " (" << result_list[i].get_final_energy() << ")" << std::endl;
+
+		//Mateo 7/19/2023
+		//output to file
+		if(outputFile != ""){
+			std::ofstream out(output_file);
+			if(!exists(output_file)){
+				std::cout << "file is not valid" << std::endl;
+				exit(EXIT_FAILURE);
+			}
+
+			out << "Seq:          " << seq << std::endl;
+			for (int i=0; i < number_of_output; i++) {
+				out << "Restricted_" << i << ": " << result_list[i].get_restricted() << std::endl;;
+				out << "Result_" << i << ":     " << result_list[i].get_final_structure() << " (" << result_list[i].get_final_energy() << ")" << std::endl;
+			
+			}
+			out.close();
+		}
+		else if(outputDir != ""){
+			// Mateo 2023
+			if(exists(outputDir)){
+				if(outputDir[outputDir.length()] != '/') outputDir += '/';
+				for (int i=0; i < number_of_output; ++i) {
+					std::string path_to_file = outputDir + "output_" + std::to_string(i) + ".txt";
+					std::ofstream out(path_to_file);
+					out << "Seq:          " << seq << std::endl;
+					out << "Restricted_" << i << ": " << result_list[i].get_restricted() << std::endl;;
+					out << "Result_" << i << ":     " << result_list[i].get_final_structure() << " (" << result_list[i].get_final_energy() << ")" << std::endl;  
+					out.close();
+				}
+			}
+			else{
+				std::cout << "Not a valid output directory" << std::endl;
+				exit(EXIT_FAILURE);
+			}
+		} else{
+			// Mateo 2023
+			std::cout << "Seq:          " << seq << std::endl;
+			for (int i=0; i < number_of_output; i++) {
+				std::cout << "Restricted_" << i << ": " << result_list[i].get_restricted() << std::endl;;
+				std::cout << "Result_" << i << ":     " << result_list[i].get_final_structure() << " (" << result_list[i].get_final_energy() << ")" << std::endl;
+			}
 		}
 	}
-
 	return 0;
 }
