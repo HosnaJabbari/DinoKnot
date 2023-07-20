@@ -19,7 +19,7 @@
 // Hosna, May 3rd, 2012
 //#include "hfold_pkonly.h"
 // Hosna, November 16, 2015
-#include "dinoknot.hh"
+#include "dinoknot.h"
 
 //kevin
 #include <vector>
@@ -1103,12 +1103,8 @@ double method2_emodel(char *sequence, char *restricted, char *structure, std::ve
 	}else{
 		char G_prime[strlen(structure)+1];
 		remove_structure_intersection(structure,restricted, G_prime);
-		G_prime[linker_pos] = '.';
-		G_prime[linker_pos+1] = '.';
-		G_prime[linker_pos+2] = '.';
-		G_prime[linker_pos+3] = '.';
-		G_prime[linker_pos+4] = '.';
 		energy = method1_emodel(sequence, G_prime, structure, energy_models);
+
     	delete hfold_pk_min_fold;
 		return energy;
 	}
@@ -1130,7 +1126,6 @@ double method3_emodel(char *sequence, char *restricted, char *structure, std::ve
 	char G_updated[length+1];
 	G_updated[length] = '\0';
 	obtainRelaxedStems(restricted ,simfold_structure, G_updated);
-	
 	//^Gupdated G_updated<- ObtainRelaxedStems(G restricted,G' simfold_structure)
 	//printf("G_updated: %s\n",G_updated);
 	energy = method2_emodel(sequence, G_updated, structure, energy_models);
@@ -1209,13 +1204,13 @@ double method4_emodel(char *sequence, char *restricted, char *structure, std::ve
 		}
 		//^Gupdated <- Gupdated U G'kupdated
 	}
-		
-	if (strcmp(G_updated,restricted) == 0) {
-		//printf("method4 g_updated = restricted return INF\n");
-		return INF;
-	}	
 
-	return method2_emodel(sequence, G_updated, structure, energy_models);
+        if (strcmp(G_updated,restricted) == 0) {
+            //printf("method4 g_updated = restricted return INF\n");
+            return INF;
+        }
+	
+        return method2_emodel(sequence, G_updated, structure, energy_models);
 }
 
 //---------------------------------------this function is suppose to be the same as the one in Hfold_iterative, if any changes are made, please change that one too--------------------
@@ -1241,50 +1236,64 @@ void remove_structure_intersection(char* G1, char* G0, char* G_p){
 
 //kevin 18 July
 //july 24: changed hfold, hfold_pkonly to a method; changed replaced final_structure with method1-4_structure
-double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> &energy_models){
+double hfold_interacting_emodel(char *sequence, char *restricted, char *structure, std::vector<energy_model> *energy_models, int &method_used, int run_method){
 
 	//printf("input restricted: %s\n",restricted);
-	
+
 	double energy = 0;
 	double min_energy = INF;
 	char method1_structure[strlen(sequence)+1];
 	char method2_structure[strlen(sequence)+1];
 	char method3_structure[strlen(sequence)+1];
 	char method4_structure[strlen(sequence)+1];
+	printf("run method: %d\n", run_method);
+	if(run_method == RUN_METHOD_ALL || run_method == RUN_METHOD_1){
 	
-	min_energy = method1_emodel(sequence,restricted,method1_structure,&energy_models);
-	strcpy(structure,method1_structure);
+		min_energy = method1_emodel(sequence,restricted,method1_structure,energy_models);
+		method_used = 1;
+		strcpy(structure,method1_structure);
 
-	
-
-	energy = method2_emodel(sequence,restricted,method2_structure,&energy_models);
-
-	if(energy < min_energy){
-		min_energy = energy;
-		strcpy(structure,method2_structure);
+		printf("method1: %s %lf\n",method1_structure,min_energy);
 	}
 
-	energy = method3_emodel(sequence,restricted,method3_structure,&energy_models);
-	if(energy < min_energy){
-		min_energy = energy;
-		strcpy(structure,method3_structure);
-	}
-	
+	if(run_method == RUN_METHOD_ALL || run_method == RUN_METHOD_2){
+		energy = method2_emodel(sequence,restricted,method2_structure,energy_models);
 
-	energy = method4_emodel(sequence,restricted,method4_structure,&energy_models);
-	if(energy < min_energy){
-		min_energy = energy;
-		strcpy(structure,method4_structure);
+		printf("method2: %s %lf\n",method2_structure,energy);
+		if(energy < min_energy){
+			method_used = 2;
+			min_energy = energy;
+			strcpy(structure,method2_structure);
+		}
 	}
 
-	if(min_energy > 0){
-		fprintf(stderr, "ERROR: energy > 0\n");
-		fprintf(stderr, "SEQ: %s\n",sequence);
-		fprintf(stderr, "Structure: %s\n",structure);
-		exit(6);
+	if(run_method == RUN_METHOD_ALL || run_method == RUN_METHOD_3){
+		energy = method3_emodel(sequence,restricted,method3_structure,energy_models);
+		printf("method3: %s %lf\n",method3_structure,energy);
+		if(energy < min_energy){
+			method_used = 3;
+			min_energy = energy;
+			strcpy(structure,method3_structure);
+		}
 	}
-	
-	// printf("structure:  %s\n\n",structure);
+
+	if(run_method == RUN_METHOD_ALL || run_method == RUN_METHOD_4){
+		energy = method4_emodel(sequence,restricted,method4_structure,energy_models);
+		printf("method4: %s %lf\n",method4_structure,energy);
+		if(energy < min_energy){
+			method_used = 4;
+			min_energy = energy;
+			strcpy(structure,method4_structure);
+		}
+
+		if(min_energy > 0){
+			fprintf(stderr, "ERROR: energy > 0\n");
+			fprintf(stderr, "SEQ: %s\n",sequence);
+			fprintf(stderr, "Structure: %s\n",structure);
+			exit(6);
+		}
+	}
+	//printf("structure:  %s\n\n",structure);
 
 	return min_energy;
 }

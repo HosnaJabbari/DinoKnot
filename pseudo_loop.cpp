@@ -520,7 +520,7 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 
 		// Hosna April 9th, 2007
 		// need to check the borders as they may be negative
-		if(fres[i].arc > -1 && fres[j].arc < fres[i].arc && get_Bp(i,j) >= 0 && get_Bp(i,j)< nb_nucleotides && get_B(i,j) >= 0 && get_B(i,j) < nb_nucleotides && get_bp(i,j) < 0){
+		if(fres[i].arc > -1 && fres[j].arc == -1 && get_Bp(i,j) >= 0 && get_Bp(i,j)< nb_nucleotides && get_B(i,j) >= 0 && get_B(i,j) < nb_nucleotides){
 			int Bp_i = get_Bp(i,j);
 			int B_i = get_B(i,j);
 			int WI_ipus1_BPminus = get_WI(i+1,Bp_i - 1) ;
@@ -536,7 +536,7 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 
 		// Hosna April 9th, 2007
 		// checking the borders as they may be negative
-		if (fres[i].arc < fres[j].arc && fres[j].arc > -1 && get_b(i,j)>= 0 && get_b(i,j) < nb_nucleotides && get_bp(i,j) >= 0 && get_bp(i,j) < nb_nucleotides && get_Bp(i,j) < 0){
+		if (fres[i].arc == -1 && fres[j].arc > -1 && get_b(i,j)>= 0 && get_b(i,j) < nb_nucleotides && get_bp(i,j) >= 0 && get_bp(i,j) < nb_nucleotides){
 			int b_i = get_b(i,j);
 			int bp_i = get_bp(i,j);
 			int WI_i_plus_b_minus = get_WI(i+1,b_i - 1);
@@ -657,7 +657,7 @@ void pseudo_loop::compute_VP_emodel(int i, int j, h_str_features *fres, std::vec
 		}
 		for (r = i+1; r < min_Bp_j ; r++){
 			//Mahyar and Kevin, Nov 16, 2017  
-			if (int_sequence[r] == X){
+			if (int_sequence[jp] == X){
 				continue;
 			}
 			if (fres[r].pair < 0){
@@ -798,7 +798,7 @@ void pseudo_loop::compute_VP(int i, int j, h_str_features *fres){
 
 		// Hosna April 9th, 2007
 		// need to check the borders as they may be negative
-		if(fres[i].arc > -1 && fres[j].arc < fres[i].arc && get_Bp(i,j) >= 0 && get_Bp(i,j)< nb_nucleotides && get_B(i,j) >= 0 && get_B(i,j) < nb_nucleotides && get_bp(i,j) < 0){
+		if(fres[i].arc > -1 && fres[j].arc == -1 && get_Bp(i,j) >= 0 && get_Bp(i,j)< nb_nucleotides && get_B(i,j) >= 0 && get_B(i,j) < nb_nucleotides){
 			int Bp_i = get_Bp(i,j);
 			int B_i = get_B(i,j);
 			int WI_ipus1_BPminus = get_WI(i+1,Bp_i - 1) ;
@@ -814,7 +814,7 @@ void pseudo_loop::compute_VP(int i, int j, h_str_features *fres){
 
 		// Hosna April 9th, 2007
 		// checking the borders as they may be negative
-		if (fres[i].arc < fres[j].arc && fres[j].arc > -1 && get_b(i,j)>= 0 && get_b(i,j) < nb_nucleotides && get_bp(i,j) >= 0 && get_bp(i,j) < nb_nucleotides && get_Bp(i,j) < 0){
+		if (fres[i].arc == -1 && fres[j].arc > -1 && get_b(i,j)>= 0 && get_b(i,j) < nb_nucleotides && get_bp(i,j) >= 0 && get_bp(i,j) < nb_nucleotides){
 			int b_i = get_b(i,j);
 			int bp_i = get_bp(i,j);
 			int WI_i_plus_b_minus = get_WI(i+1,b_i - 1);
