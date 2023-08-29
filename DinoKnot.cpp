@@ -163,7 +163,7 @@ int main (int argc, char *argv[]) {
 	std::string hotspotDir = args_info.h_only_given ? hotspot_dir : "";
 
 	int max_hotspot = args_info.h_num_given ? hotspot_num : 20;
-	int number_of_suboptimal_structure = args_info.subopt_given ? subopt : 1;
+	int number_of_suboptimal_structure = args_info.subopt_given ? subopt : 400;
 
 	bool hotspot_only = args_info.h_only_given;
 
