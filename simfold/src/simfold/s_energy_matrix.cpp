@@ -594,7 +594,8 @@ void s_energy_matrix::compute_hotspot_energy (int i, int j, int is_stack)
         energy = S->compute_energy (i, j);
         //printf("stack: %d\n",energy);
     }else{
-        energy = H->compute_energy (i, j);
+        energy = 0;
+        // energy = H->compute_energy (i, j);
         //printf("hairpin: %d\n",energy);
     }
         
