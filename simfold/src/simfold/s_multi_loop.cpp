@@ -638,7 +638,7 @@ void s_multi_loop::compute_energy_WM_restricted_emodel (int j, str_features *fre
                 
                 //Aug 14 2017 kevin and Mahyar
                 //modiefied the formula such that we only add dangle_bot,dangle_top when i,j,i+1,j-1 are not X to avoid seg fault
-                if(sequence[j-1] != X && sequence[i+1] != X && sequence[i]){
+                if(sequence[j-1] != X && sequence[i+1] != X && sequence[i] != X){
                     tmp += model->dangle_bot [sequence[j-1]]
 		                            	[sequence[i+1]]
 		                            	[sequence[i]];
