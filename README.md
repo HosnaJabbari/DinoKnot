@@ -96,18 +96,18 @@ Remarks:
 
 #### Example:
     assume you are in the directory where the DinoKnot executable is located
-    ./DinoKnot -i "file.txt" --t2 1
-    ./DinoKnot -i "file.txt" --t2 2  -o "outputfile.txt"
-    ./DinoKnot -i "inputfile.txt" --t2 1 -o "outputfile.txt"
-    ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)"
-    ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "ACGATTGTGCATCAGCTGA" --t2 2
-    ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t2 2 -o "outputfile.txt"
-    ./DinoKnot --s1 GCAACGAUGACAUACAUCGCUAGUCGACGC --r1 (____________________________) --s2 GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC --r2 (__________________________________________________________) -o file.txt
-    ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --hotspot-only file.txt --hotspot-num 7
-    ./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --dir /home/username/Desktop/some_folder
+    ./build/DinoKnot -i "file.txt" --t2 1
+    ./build/DinoKnot -i "file.txt" --t2 2  -o "outputfile.txt"
+    ./build/DinoKnot -i "inputfile.txt" --t2 1 -o "outputfile.txt"
+    ./build/DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)"
+    ./build/DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "ACGATTGTGCATCAGCTGA" --t2 2
+    ./build/DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)" --t2 2 -o "outputfile.txt"
+    ./build/DinoKnot --s1 GCAACGAUGACAUACAUCGCUAGUCGACGC --r1 (____________________________) --s2 GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC --r2 (__________________________________________________________) -o file.txt
+    ./build/DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --hotspot-only file.txt --hotspot-num 7
+    ./build/DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --dir /home/username/Desktop/some_folder
 
 ```
-./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)"
+./build/DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --r1 "(____________________________)" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --r2 "(__________________________________________________________)"
 
 Seq:          GCAACGAUGACAUACAUCGCUAGUCGACGCXXXXXGCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC
 Restricted_0: (____________________________).....(__________________________________________________________)
@@ -115,7 +115,7 @@ Result_0:     ....(((((.....(((((...(((((([[.....]]..[[[[[.....]]]]]...))))))...
 
 
 
-./DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --hotspot-only file.txt --hotspot-num 7
+./build/DinoKnot --s1 "GCAACGAUGACAUACAUCGCUAGUCGACGC" --s2 "GCAACGAUGACAUACAUCGCUAGUCGACGCGCAACGAUGACAUACAUCGCUAGUCGACGC" --hotspot-only file.txt --hotspot-num 7
 
 Seq1_hotspot_0: ____(((((_____)))))___________(-2.32)
 Seq1_hotspot_1: ____((((______________))))____(-1.4)

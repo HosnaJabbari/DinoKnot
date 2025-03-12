@@ -35,7 +35,7 @@
 #include "s_hairpin_loop.h"
 #include "s_stacked_pair.h"
 
-#include "../pseudo_loop.h"
+#include "../src/pseudo_loop.h"
 
 s_energy_matrix::s_energy_matrix (int *seq, int length)
 // The constructor
