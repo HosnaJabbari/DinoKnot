@@ -22,7 +22,8 @@ set(DinoKnot_multimodel_SOURCE
     src/hfold_validation.cpp
     src/DinoKnot.cpp
     src/Result.cpp
-    src/cmdline.cc
+    src/cmdline.cpp
+    src/param_path.cpp
 )
 
 # pass SIMFOLD_HOME to binary
