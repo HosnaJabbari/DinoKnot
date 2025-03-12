@@ -11,6 +11,7 @@
 #include "s_specific_functions.h"
 #include "Hotspot.h"
 #include "h_common.h"
+#include "param_path.h"
 
 // Non user files
 #include <iostream>
@@ -178,14 +179,14 @@ int main (int argc, char *argv[]) {
 
 	energy_model model_1;
 	init_energy_model(&model_1); // Initializes the data structures in the energy model.
-	model_1.config_file = SIMFOLD_HOME "/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
+	model_1.config_file = getParamPath("multirnafold.conf"); // configuration file, the path should be relative to the location of this executable
 	model_1.dna_or_rna = model_1_Type; // what to fold: RNA or DNA
 	model_1.temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
 	energy_models.push_back(model_1);
 
 	energy_model model_2;
 	init_energy_model(&model_2); // Initializes the data structures in the energy model.
-	model_2.config_file = SIMFOLD_HOME "/params/multirnafold.conf"; // configuration file, the path should be relative to the location of this executable
+	model_2.config_file = getParamPath("multirnafold.conf"); // configuration file, the path should be relative to the location of this executable
 	model_2.dna_or_rna = model_2_Type; // what to fold: RNA or DNA
 	model_2.temperature = 37.0; // temperature: any integer or real number between 0 and 100 Celsius
 	energy_models.push_back(model_2);
@@ -194,24 +195,24 @@ int main (int argc, char *argv[]) {
 	for (auto &energy_model : energy_models) {
 		// Hosna, July 18, 2012
 		// initialize the thermodynamic parameters
-		init_data_emodel (argv[0], energy_model.config_file.c_str(), energy_model.dna_or_rna, energy_model.temperature, &energy_model);
+		init_data_emodel(argv[0], energy_model.config_file.c_str(), energy_model.dna_or_rna, energy_model.temperature, &energy_model);
 
 		// In simfold we have the following for RNA && temp=37
-		fill_data_structures_with_new_parameters_emodel (SIMFOLD_HOME "/params/turner_parameters_fm363_constrdangles.txt", &energy_model);
+		fill_data_structures_with_new_parameters_emodel(getParamPath("turner_parameters_fm363_constrdangles.txt"), &energy_model);
 
 		// Hosna, July 25, 2012
-		fill_data_structures_with_new_parameters_emodel (SIMFOLD_HOME "/params/parameters_DP09.txt", &energy_model);
+		fill_data_structures_with_new_parameters_emodel(getParamPath("parameters_DP09.txt"), &energy_model);
 	}
 
 	//set up for RNA so we can use this for building hotspot
 	if(!args_info.structure1_given || !args_info.structure2_given){
 		char config_file[200];
-		strcpy (config_file, SIMFOLD_HOME "/params/multirnafold.conf");
+		strcpy (config_file, getParamPath("multirnafold.conf"));
 		int dna_or_rna = RNA;
 		double temperature = 37.0;
 		init_data ("./HFold", config_file, dna_or_rna, temperature);
-		fill_data_structures_with_new_parameters ( SIMFOLD_HOME "/params/turner_parameters_fm363_constrdangles.txt");
-		fill_data_structures_with_new_parameters ( SIMFOLD_HOME "/params/parameters_DP09.txt");
+		fill_data_structures_with_new_parameters(getParamPath("turner_parameters_fm363_constrdangles.txt"));
+		fill_data_structures_with_new_parameters(getParamPath("parameters_DP09.txt"));
 	}
 
 	std::vector<Hotspot> hotspot_list1;
