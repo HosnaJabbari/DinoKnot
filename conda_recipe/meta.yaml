@@ -25,9 +25,27 @@ requirements:
 
 about:
   home: https://github.com/HosnaJabbari/DinoKnot
-  summary: "DinoKnot summary"
+  summary: "RNA-RNA interaction prediction using a hierarchical folding approach."
   description: |
-    DinoKnot description
+     DinoKnot is a computational tool for predicting RNA-RNA and DNA-RNA interactions, 
+     incorporating pseudoknots using a relaxed Hierarchical Folding approach. The algorithm 
+     identifies minimum free energy (MFE) structures for two interacting nucleotide sequences, 
+     enabling the study of RNA structure and hybridization.
+
+      The software is implemented in C++ and requires a C++11-compatible compiler and 
+      CMake (≥3.1) for installation. It is compatible with Linux and macOS and provides a 
+      command-line interface for flexible RNA and DNA structure predictions.
+
+      ### Features:
+      - Predicts RNA-RNA and DNA-RNA interactions with pseudoknots.
+      - Supports pseudoknot-free and constrained structure predictions.
+      - Allows user-defined penalty tuning for interaction scoring.
+      - Provides hotspot analysis for identifying potential interaction sites.
+      - Command-line interface for flexible input handling.
+
+      For installation, usage instructions, and additional details, visit:
+      https://github.com/HosnaJabbari/DinoKnot
+
   dev_url: https://github.com/HosnaJabbari/DinoKnot
 
 extra:
